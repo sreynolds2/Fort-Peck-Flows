@@ -12,7 +12,8 @@
 ## FUNCTION TO CREATE THE LESLIE MATRIX 
 ## AND GIVE ASSOCIATED DEMOGRAPHIC OUTPUTS:
 ### 6. demog_output
-### 7. parameter sensitivities...
+### 7. param_sens_elas
+### 8. top_vals
 
 
 
@@ -189,8 +190,8 @@ demog_output<- function(age1plus_id=NULL,
     return(print("Survival ID not found."))
   }
   ## PULL AGE-1+ DEMOGRAPHIC INPUTS AND FURTHER ERROR HANDLING
-  inputs<- code$age1plus[[age1plus_id]]
-  if(length(inputs$sexratio)!=maxage & length(inputs$sexratio)!=1)
+  inputs<- codes$age1plus[[age1plus_id]]
+  if(length(inputs$sexratio)!=inputs$maxage & length(inputs$sexratio)!=1)
   {
     return(print("The sex ratio must be a either a constant value or a 
                  vector of length maxage."))
@@ -217,14 +218,14 @@ demog_output<- function(age1plus_id=NULL,
   }
   
   ## PULL DRIFT DATA AND SURVIVAL VALUES
-  drift_data<- code$drift
+  drift_data<- codes$drift
   drift_data<- subset(drift_data, id==drift_id)
-  survival_data<- code$survival
+  survival_data<- codes$survival
   survival_data<- subset(survival_data, id==survival_id)
   
   # BUILD EGG TO AGE-1 SURVIVAL
-  names(drift_data)[which(names(drift_data)==id)]<- "drift_id"
-  names(survival_data)[which(names(survival_data)==id)]<- "survival_id"
+  names(drift_data)[which(names(drift_data)=="id")]<- "drift_id"
+  names(survival_data)[which(names(survival_data)=="id")]<- "survival_id"
   dat<- merge(drift_data, survival_data)
   rm(drift_data, survival_data)
   dat$phi0<- dat$p_retained*dat$phi0_MR + 

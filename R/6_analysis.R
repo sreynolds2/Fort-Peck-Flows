@@ -1,4 +1,20 @@
 
+source("./R/1_global.r")
+source("./R/2_functions.r")
+source("./R/3_load-and-clean.r")
+
+codes<-readRDS("./dat/scenario_codes.rds")
+
+out<- demog_output(1,1,1,codes)
+
+
+
+
+# ids_age1<- 1:length(codes$age1plus)
+# ids_drift<- unique(codes$drift$id)
+# ids_surv<- unique(codes$survival$id)
+
+
 # inputs<-list()
 # inputs$maxage<- 60
 # inputs$sexratio<- 0.5 
