@@ -48,10 +48,12 @@ new_surv_ids<-
 
 
 # ANALYZE NEW SCENARIO COMBINATIONS
-codes<-readRDS("./dat/scenario_codes.rds")
+codes<- readRDS("./dat/scenario_codes.rds")
 ids_age1<- 1:length(codes$age1plus)
 ids_drift<- unique(codes$drift$id)
 ids_surv<- unique(codes$survival$id)
+rec<- readRDS("./output/analysis_records.rds")
+analyzed_ids<-rec$id[which(rec$demographic==TRUE)]
 
 invisible(
   lapply(ids_age1, function(i)
@@ -60,8 +62,11 @@ invisible(
     {
       lapply(ids_surv, function(k)
       {
-        out<- demog_output(i,j,k,codes)
-        rm(out)
+        if(all(analyzed_ids != paste0(i, "-", j, "-", k)))
+        {
+          out<- demog_output(i,j,k,codes)
+          rm(out)
+        }
       })
     })
   })
