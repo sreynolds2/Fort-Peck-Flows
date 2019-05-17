@@ -294,20 +294,99 @@ demog_output<- function(age1plus_id=NULL,
  
 
 
+# 8.
 param_sens_elas<- function(demog_output=NULL,
                            params=c("sexratio", "phi", "psi", "eta", 
                                     "fec", "phi0", "phi0_MR", "phi0_LS", 
-                                    "p_retained"))
+                                    "p_retained"),
+                           codes=NULL)
 {
-  # SENSITIVITY MATRIX
-  sens<- out$sensitivities
-  # ELASTICITY MATRIX
-  elas<- out$elasticities
-  if(sexratio %in% params)
+  # STORE OUTPUTS IN A LIST, INCLUDING PREVIOUS ANALYSES
+  out<- list(sens=demog_output$param_sensitivities, 
+             elas=demog_output$param_elasticities)
+  
+  # ELIMINATE ANY PREVIOUSLY RAN ANALYSES
+  params<- setdiff(params, names(demog_output))
+  
+  if(length(params)!=0)
   {
- 
+    # PARAMETER VALUES
+    age1plus_id<- as.numeric(strsplit(demog_output$id, "-")[[1]][1])
+    age1dat<- codes$age1plus[[age1plus_id]]
+    sexratio<- age1dat$sexratio
+    psi<- age1dat$psi
+    eta<- age1dat$eta
+    fec<- age1dat$fec
+    drift_id<- as.numeric(strsplit(demog_output$id, "-")[[1]][2])
+    p_retained<- codes$drift[which(codes$drift$id==drift_id),]$p_retained
+    survival_id<- as.numeric(strsplit(demog_output$id, "-")[[1]][3])
+    phi0dat<- codes$survival[which(codes$survival$id==survival_id),]
+    phi0_MR<- phi0dat$phi0_MR
+    phi0_LS<- phi0dat$phi0_LS
+    phi0<- p_retained*phi0_MR + (1-p_retained)*phi0_MR*phi0_LS 
+    rm(age1plus_id, age1dat, drift_id, survival_id, phi0dat)
+    # SENSITIVITY MATRIX
+    sens<- demog_output$sensitivities
+    # ELASTICITY MATRIX
+    elas<- demog_output$elasticities
     
-
+    # PARAMETER SENSITIVITIES & ELASTICITIES
+    if("sexratio" %in% params)
+    {
+      out$sens$sr<- sens[1,]*psi*eta*fec*phi0
+      out$sens$sr_total<- sum(out$sens$sr)
+      # out$elas$sr<- sum(elas[1,]*psi*eta*fec*phi0)
+    }
+    if("phi" %in% params)
+    {
+      out$sens$phi<-rep(0, nrow(sens)-1)
+      for(i in 1:length(out$sens$phi))
+      {
+        out$sens$phi[i]<-sens[i+1,i]
+      }
+      out$sens$phi2plus<-sum(out$sens$phi[2:length(out$sens$phi)])
+    }
+    if("psi" %in% params)
+    {
+      out$sens$psi<- sens[1,]*sexratio*eta*fec*phi0
+      # out$elas$psi<- elas[1,]*sexratio*eta*fec*phi0
+    }
+    if("eta" %in% params)
+    {
+      out$sens$eta<- sens[1,]*sexratio*psi*fec*phi0
+      # out$elas$eta<- elas[1,]*sexratio*psi*fec*phi0
+    }
+    if("fec" %in% params)
+    {
+      out$sens$fec<- sens[1,]*sexratio*psi*eta*phi0
+      # out$elas$fec<- elas[1,]*sexratio*psi*eta*phi0
+    }
+    if("phi0" %in% params)
+    {
+      out$sens$phi0<- sens[1,]*sexratio*psi*eta*fec
+      out$sens$phi0_total<- sum(out$sens$phi0)
+    }
+    if("phi0_MR" %in% params)
+    {
+      out$sens$phi0_MR<- sens[1,]*sexratio*psi*eta*fec*(p_retained+(1-p_retained)*phi0_LS)
+      out$sens$phi0_MR_total<- sum(out$sens$phi0_MR)
+    }
+    if("phi0_LS" %in% params)
+    {
+      out$sens$phi0_LS<- sens[1,]*sexratio*psi*eta*fec*(1-p_retained)*phi0_MR
+      out$sens$phi0_LS_total<- sum(out$sens$phi0_LS)
+    }
+    if("p_retained" %in% params)
+    {
+      out$sens$p_retained<- sens[1,]*sexratio*psi*eta*fec*phi0_MR*(1-phi0_LS)
+      out$sens$p_retained_total<- sum(out$sens$p_retained)
+    }
+    # SAVE RESULTS TO THE DEMOGRAPHIC FILE
+    demog_output$param_sensitivities<- out$sens
+    demog_output$elas_sensitivities<- out$elas
+    saveRDS(demog_output, 
+            paste0("./output/Eigen_Analysis_", demog_output$id, ".rds"))
   }
+  return(out)
 }
                                     

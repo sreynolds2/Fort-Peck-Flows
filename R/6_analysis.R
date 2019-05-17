@@ -18,11 +18,14 @@ source("./R/3_load-and-clean.r")
 #       lapply(ids_surv, function(k)
 #       {
 #         out<- demog_output(i,j,k,codes)
-#         rm(out)
+#         out2<- param_sens_elas(demog_output=out,
+#                                codes=codes)
+#         rm(out, out2)
 #       })
 #     })
 #   })
 # )
+
 
 # ADD NEW SCENARIOS TO ANALYZE
 ## AGE-1+ DEMOGRAPHIC INPUT SCENARIOS
@@ -65,7 +68,8 @@ invisible(
         if(all(analyzed_ids != paste0(i, "-", j, "-", k)))
         {
           out<- demog_output(i,j,k,codes)
-          rm(out)
+          out2<- param_sens_elas(demog_output=out, codes=codes)
+          rm(out, out2)
         }
       })
     })
