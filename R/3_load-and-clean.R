@@ -1,5 +1,5 @@
 
-fullrun<- FALSE
+if(!exists("fullrun")){fullrun<- FALSE}
 
 if(!fullrun)
 {

@@ -62,7 +62,7 @@ source("./R/3_load-and-clean.r") # LOAD AND CLEAN CURRENT ON 5/16/19...
 # WILL UPDATE CODE WHEN LOAD-AND-CLEAN UPDATED
 drift<- dat
 drift$id<- 1:nrow(drift)
-rm(dat)
+rm(dat, fullrun)
 
 # AGE-0 SURIVIVAL CODES
 survival<- data.frame(phi0_MR=c(0.00001, 0.00005, 0.0001, 0.0005, 0.001),
@@ -74,4 +74,15 @@ codes<-list(age1plus=age1plus, drift=drift, survival=survival)
 rm(age1plus, drift, survival)
 saveRDS(codes, "./dat/scenario_codes.rds")
 rm(codes)
+
+# CREATE ANALYZED FILE
+analyzed<- data.frame(demographic=FALSE, 
+                      parameter_specific=FALSE,
+                      id="1-1-1")
+saveRDS(analyzed, "./output/analysis_records.rds")
+rm(analyzed)
+
+
+
+
 

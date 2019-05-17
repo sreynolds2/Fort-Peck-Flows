@@ -8,12 +8,13 @@
 ### 3. find_survival_id
 ## FUNCTIONS TO CREATE NEW SCENARIOS:
 ### 4. new_age1plus_scenario
-### 5. new_survival_scenario
+### 5. new_drift_scenario
+### 6. new_survival_scenario
 ## FUNCTION TO CREATE THE LESLIE MATRIX 
 ## AND GIVE ASSOCIATED DEMOGRAPHIC OUTPUTS:
-### 6. demog_output
-### 7. param_sens_elas
-### 8. top_vals
+### 7. demog_output
+### 8. param_sens_elas
+### 9. 
 
 
 
@@ -140,6 +141,34 @@ new_age1plus_scenario<- function(maxage=NULL,
 
 
 # 5.
+new_drift_scenario<- function(drift_dat=NULL)
+{
+  ## PULL PREVIOUS DATA SCENARIOS
+  codes<- readRDS("./dat/scenario_codes.rds")
+  ## OBTAIN NEW DRIFT DATA ONLY 
+  ## (ADD OLD DRIFT DATA TO MOST DRIFT DATA AND REMOVE DUPLICATES)
+  new<- rbind(dat, codes$drift[,names(dat)])
+  indx<- which(duplicated(new))
+  indx<- c(indx, which(duplicated(new, fromLast = TRUE)))
+  if(length(indx>0)){new<- new[-indx,]}
+  if(nrow(new)==0)
+  {
+    return(print("No new drift scenarios are available to add."))
+  }
+  ## ADD A UNIQUE ID TO THE NEW DATA
+  M<- max(codes$drift$id)
+  new$id<- (M+1):(M+nrow(new))
+  ## ADD NEW DATA TO CODES FILE
+  codes$drift<- rbind(codes$drift, new)
+  codes$drift<- codes$drift[order(codes$drift$id),]
+  ## SAVE THE NEW DATA
+  saveRDS(codes, "./dat/scenario_codes.rds")
+  ## RETURN NEW DRIFT SCENARIO IDS
+  return(new$ids)
+}
+
+
+# 6.
 new_survival_scenario<- function(phi0_MR=NULL,
                                  phi0_LS=NULL)
 {
@@ -163,7 +192,7 @@ new_survival_scenario<- function(phi0_MR=NULL,
 
 
 
-# 6.
+# 7.
 # UTILIZE AN AGE-1+ DEMOGRAPHIC SCENARIO, A DRIFT SCENARIO, AND A 
 # SURVIVAL SCENARIO COMBINATION
 demog_output<- function(age1plus_id=NULL,
@@ -244,9 +273,41 @@ demog_output<- function(age1plus_id=NULL,
   ea<- eigen.analysis(A)
   ## ADD MATRIX A
   ea$A<- A
-  ## ADD ID
+  ## ADD ID AND SAVE
   ea$id<- paste0(age1plus_id, "-", drift_id, "-", survival_id)
   saveRDS(ea, paste0("./output/Eigen_Analysis_", ea$id, ".rds"))
+  ## UPDATE ANALYSIS RECORDS AND SAVE
+  rec<- readRDS("./output/analysis_records.rds")
+  if(any(rec$id==ea$id))
+  {
+    rec$demographic[which(rec$id==ea$id)]<- TRUE
+  }
+  if(all(rec$id!=ea$id))
+  {
+    rec<- rbind(rec, data.frame(demographic=TRUE,
+                                parameter_specific=FALSE,
+                                id=ea$id))
+  }
+  saveRDS(rec, "./output/analysis_records.rds")
   return(ea)
 }
-  
+ 
+
+
+param_sens_elas<- function(demog_output=NULL,
+                           params=c("sexratio", "phi", "psi", "eta", 
+                                    "fec", "phi0", "phi0_MR", "phi0_LS", 
+                                    "p_retained"))
+{
+  # SENSITIVITY MATRIX
+  sens<- out$sensitivities
+  # ELASTICITY MATRIX
+  elas<- out$elasticities
+  if(sexratio %in% params)
+  {
+ 
+    
+
+  }
+}
+                                    
