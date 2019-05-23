@@ -18,6 +18,63 @@
 
 
 
+#0.
+regions_of_hope<- function(maxage=NULL,
+                           sexratio=NULL,
+                           phi=NULL,
+                           # spnProb=NULL,
+                           # eggs=NULL,
+                           birthR=NULL,
+                           phi0=NULL
+                           )
+{
+  # BUILD LESLIE MATRIX
+  A<-matrix(0,maxage,maxage)
+  ## SURVIVAL RATES
+  A[cbind(2:maxage,1:(maxage-1))]<- phi
+  ## FECUNDITIES
+  if(length(birthR)==1){birthV<- c(rep(0,8), rep(birthR, maxage-8))}
+  if(length(birthR)==maxage){birthV<- birthR}
+  A[1,] <- sexratio*birthV*phi0
+  # A[1,] <- sexratio*spnProb*eggs*phi0
+  
+  # EIGENANALYSIS 
+  ea<- eigen.analysis(A)
+  ea$A<- A
+  ea$birth_rate<- round(sum(birthV*ea$stable.age)/sum(ea$stable.age[9:maxage]))
+  # ea$birth_rate<- sum(spnProb*eggs*ea$stable.age)
+  
+  # PARAMETER SENSITIVITIES
+  sens<- ea$sensitivities 
+  ea$sensitivities<- list()
+  ea$sensitivities$entries<- sens
+  ea$sensitivities$phi<- rep(0, maxage-1)
+  for(i in 1:(maxage-1))
+  {
+    ea$sensitivities$phi[i]<- sens[i+1,i]
+  }
+  ea$sensitivities$birthR<- sens[1,]*sexratio*phi0
+  ea$sensitivities$phi0<- sum(sens[1,]*sexratio*birthR)
+  ea$sensitivities$sexratio<- sum(sens[1,]*birthR*phi0)
+  rm(sens)
+  phi0_id<- phi0*1000
+  if(length(birthR)==1)
+  {
+    bR_id<- birthR/100
+    saveRDS(ea, paste0("./output/Regions_of_Hope/phi0_", phi0_id,
+                       "_birthR_", bR_id, ".rds"))
+  }
+  if(length(birthR)==maxage)
+  {
+    bR_id<- round(ea$birth_rate/100)
+    saveRDS(ea, paste0("./output/Regions_of_Hope/phi0_", phi0_id,
+                       "_birthR_Variety_", bR_id, ".rds"))
+  }
+  out<- data.frame(age0_survival=phi0, birth_rate=ea$birth_rate, 
+                   lambda=ea$lambda1, phi0_id=phi0_id, input_bR_id=bR_id)
+  return(out)
+}
+
 
 #1. 
 find_age1plus_id<- function(maxage=NULL,
