@@ -44,22 +44,32 @@ contour(x=x,y=y,z=z,
         ylab="",
         main="",cex.main=1.5,cex.lab=1.3,
         tck=0.03, mgp=c(2,0.5,0))
+dat2<- readRDS("./output/p_retained_boundaries.rds")
 col.l <- colorRampPalette(c('black', 'red', 'white', 'blue', 'black'))(200)
 levelplot(lambda~birth_rate+age0_survival,tmp, col.regions=col.l,
           at=seq(0.75, 1.25, 0.01),  
           panel=function(...){panel.levelplot(...); 
             panel.axis("bottom",  half = FALSE,labels=F) 
             panel.axis("left",  half = FALSE,labels=F) 
+            grid.lines(dat2[dat2$p_retained==1,]$birth_rate, 
+                        dat2[dat2$p_retained==1,]$phi0_MR, 
+                        default.units="native", 
+                       gp=gpar(col="gray", lwd=2))
           }, scales = list(tck = c(-1,-1)),
           xlab="Fertilized Eggs per Mature Female per Year", 
           ylab="Age-0 Survival")
+
 
 tmp2<- subset(tbl, input_bR_id<=150 & phi0_id<=0.1)
 levelplot(lambda~birth_rate+age0_survival,tmp2, col.regions=col.l,
           at=seq(0.8, 1.2, 0.01),     
           panel=function(...){panel.levelplot(...); 
             panel.axis("bottom",  half = FALSE,labels=F) 
-            panel.axis("left",  half = FALSE,labels=F) 
+            panel.axis("left",  half = FALSE,labels=F)
+            grid.lines(dat2[dat2$p_retained==1,]$birth_rate, 
+                       dat2[dat2$p_retained==1,]$phi0_MR, 
+                       default.units="native",
+                       gp=gpar(col="gray", lwd=2))
           }, scales = list(tck = c(-1,-1)),
           xlab="Fertilized Eggs per Mature Female per Year", 
           ylab="Age-0 Survival")

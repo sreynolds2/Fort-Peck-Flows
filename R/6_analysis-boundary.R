@@ -151,7 +151,8 @@ lapply(unique(dat$p_retained), function(pr)
 dat_cut<- subset(dat, phi0_MR<=0.0001 & birth_rate<=15000)
 plot(dat_cut[dat_cut$p_retained==1,]$birth_rate, 
      dat_cut[dat_cut$p_retained==1,]$phi0_MR, 
-     type="l", xlab="",  ylab="", ylim=c(0, 0.0001),
+     type="l", xlab="", #xlim=c(550,14600),
+     ylab="", ylim=c(0,0.0001),#ylim=c(0.0000039, 0.0001),
      tck=0.02, mgp=c(2,0.5,0))
 mtext("Fertilized Eggs per Mature Female per Year", 1, outer=TRUE, font=2)
 mtext("Missouri River Age-0 Survival", 2, outer=TRUE, las=0, padj=1, font=2)
@@ -161,9 +162,11 @@ lapply(unique(dat_cut$p_retained), function(pr)
   points(tmp$birth_rate, tmp$phi0_MR, type="l")
 })
 
-# pr<-0.715
-# tmp<- subset(dat_cut, p_retained==pr)
-# points(tmp$birth_rate, tmp$phi0_MR, type="l", col="red")
+points(10000, 0.00007, pch=19, col="red")
+pr<-0.319
+tmp<- subset(dat_cut, p_retained==pr)
+points(tmp$birth_rate, tmp$phi0_MR, type="l", col="blue", lwd=3)
+
 
 min_retained<- function(bR=NULL,
                         MR_phi0=NULL,
