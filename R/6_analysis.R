@@ -69,7 +69,7 @@ invisible(
         {
           out<- demog_output(i,j,k,codes)
           out2<- param_sens_elas(demog_output=out, codes=codes)
-          rm(out, out2)
+          rm(out)
         }
       })
     })
@@ -77,4 +77,9 @@ invisible(
 )
 
 
-
+rec<- readRDS("./output/analysis_records.rds")
+rec<- subset(rec, parameter_specific==FALSE)
+lapply(1:nrow(rec), function(x)
+{
+  
+})

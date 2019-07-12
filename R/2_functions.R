@@ -2,6 +2,8 @@
 # THIS FILE CONTAINS THE FUNCTIONS USED IN THE FT. PECK FLOWS ANALYSIS
 # BASED ON AGE-1+ DEMOGRAPHIC INPUTS, DRIFT-DEVELOPMENT DYNAMICS, AND 
 # AGE-0 MISSOURI RIVER AND LAKE SAK SURVIVAL
+## ANY REGIONS OF HOPE?
+### 0. regions_of_hope
 ## FUNCTIONS TO FIND: 
 ### 1. find_age1plus_id
 ### 2. find_drift_id
@@ -57,6 +59,16 @@ regions_of_hope<- function(maxage=NULL,
   ea$sensitivities$phi0<- sum(sens[1,]*sexratio*birthR)
   ea$sensitivities$sexratio<- sum(sens[1,]*birthR*phi0)
   rm(sens)
+  # PARAMETER ELASATICITIES
+  elas<- ea$elasticities
+  ea$elasticities<- list()
+  ea$elasticities$entries<- elas
+  rm(elas)
+  ea$elasticities$phi<- ea$sensitivities$phi*phi/ea$lambda1
+  ea$elasticities$birthR<- ea$sensitivities$birthR*birthR/ea$lambda1
+  ea$elasticities$phi0<- ea$sensitivities$phi0*phi0/ea$lambda1
+  ea$elasticities$sexratio<- ea$sensitivities$sexratio*sexratio/ea$lambda1
+  # LABEL AND SAVE
   phi0_id<- phi0*1000
   if(length(birthR)==1)
   {
@@ -361,9 +373,14 @@ param_sens_elas<- function(demog_output=NULL,
   # STORE OUTPUTS IN A LIST, INCLUDING PREVIOUS ANALYSES
   out<- list(sens=demog_output$param_sensitivities, 
              elas=demog_output$param_elasticities)
+  if(any(names(out$sens)=="sr"))
+  {
+    names(out$sens)[[which(names(out$sens)=="sr")]]<- "sexratio"
+  }
+  params2<- intersect(names(out$sens), names(out$elas))
   
   # ELIMINATE ANY PREVIOUSLY RAN ANALYSES
-  params<- setdiff(params, names(demog_output))
+  params<- setdiff(params, params2)
   
   if(length(params)!=0)
   {
@@ -380,19 +397,24 @@ param_sens_elas<- function(demog_output=NULL,
     phi0dat<- codes$survival[which(codes$survival$id==survival_id),]
     phi0_MR<- phi0dat$phi0_MR
     phi0_LS<- phi0dat$phi0_LS
-    phi0<- p_retained*phi0_MR + (1-p_retained)*phi0_MR*phi0_LS 
+    phi0<- p_retained*phi0_MR + (1-p_retained)*phi0_MR*phi0_LS
+    if(length(unique(age1dat$phi[2:length(age1dat$phi)]))==1)
+    {
+      phi2plus<- age1dat$phi[2]
+    }
     rm(age1plus_id, age1dat, drift_id, survival_id, phi0dat)
     # SENSITIVITY MATRIX
     sens<- demog_output$sensitivities
     # ELASTICITY MATRIX
-    elas<- demog_output$elasticities
+    # elas<- demog_output$elasticities
     
     # PARAMETER SENSITIVITIES & ELASTICITIES
     if("sexratio" %in% params)
     {
-      out$sens$sr<- sens[1,]*psi*eta*fec*phi0
-      out$sens$sr_total<- sum(out$sens$sr)
-      # out$elas$sr<- sum(elas[1,]*psi*eta*fec*phi0)
+      out$sens$sexratio<- sens[1,]*psi*eta*fec*phi0
+      out$sens$sexratio_total<- sum(out$sens$sexratio)
+      out$elas$sexratio<- out$sens$sexratio*sexratio/demog_output$lambda1
+      out$elas$sexratio_total<- out$sens$sexratio_total*sexratio/demog_output$lambda1
     }
     if("phi" %in% params)
     {
@@ -401,48 +423,75 @@ param_sens_elas<- function(demog_output=NULL,
       {
         out$sens$phi[i]<-sens[i+1,i]
       }
-      out$sens$phi2plus<-sum(out$sens$phi[2:length(out$sens$phi)])
+      vals<- cbind(2:nrow(demog_output$A), 1:(ncol(demog_output$A)-1))
+      out$elas$phi<- out$sens$phi*demog_output$A[vals]/demog_output$lambda1 
+      if(exists("phi2plus"))
+      {
+        out$sens$phi2plus<-sum(out$sens$phi[2:length(out$sens$phi)])
+        out$elas$phi2plus<- out$sens$phi2plus*phi2plus/demog_output$lambda1
+      }
     }
     if("psi" %in% params)
     {
       out$sens$psi<- sens[1,]*sexratio*eta*fec*phi0
-      # out$elas$psi<- elas[1,]*sexratio*eta*fec*phi0
+      out$elas$psi<- out$sens$psi*psi/demog_output$lambda1
     }
     if("eta" %in% params)
     {
       out$sens$eta<- sens[1,]*sexratio*psi*fec*phi0
-      # out$elas$eta<- elas[1,]*sexratio*psi*fec*phi0
+      out$elas$eta<- out$sens$eta*eta/demog_output$lambda1
     }
     if("fec" %in% params)
     {
       out$sens$fec<- sens[1,]*sexratio*psi*eta*phi0
-      # out$elas$fec<- elas[1,]*sexratio*psi*eta*phi0
+      out$elas$fec<- out$sens$fec*fec/demog_output$lambda1
     }
     if("phi0" %in% params)
     {
       out$sens$phi0<- sens[1,]*sexratio*psi*eta*fec
       out$sens$phi0_total<- sum(out$sens$phi0)
+      out$elas$phi0<- out$sens$phi0*phi0/demog_output$lambda1
+      out$elas$phi0_total<- out$sens$phi0_total*phi0/demog_output$lambda1
     }
     if("phi0_MR" %in% params)
     {
       out$sens$phi0_MR<- sens[1,]*sexratio*psi*eta*fec*(p_retained+(1-p_retained)*phi0_LS)
       out$sens$phi0_MR_total<- sum(out$sens$phi0_MR)
+      out$elas$phi0_MR<- out$sens$phi0_MR*phi0_MR/demog_output$lambda1
+      out$elas$phi0_MR_total<- out$sens$phi0_MR_total*phi0_MR/demog_output$lambda1
     }
     if("phi0_LS" %in% params)
     {
       out$sens$phi0_LS<- sens[1,]*sexratio*psi*eta*fec*(1-p_retained)*phi0_MR
       out$sens$phi0_LS_total<- sum(out$sens$phi0_LS)
+      out$elas$phi0_LS<- out$sens$phi0_LS*phi0_LS/demog_output$lambda1
+      out$elas$phi0_LS_total<- out$sens$phi0_LS_total*phi0_LS/demog_output$lambda1
     }
     if("p_retained" %in% params)
     {
       out$sens$p_retained<- sens[1,]*sexratio*psi*eta*fec*phi0_MR*(1-phi0_LS)
       out$sens$p_retained_total<- sum(out$sens$p_retained)
+      out$elas$p_retained<- out$sens$p_retained*p_retained/demog_output$lambda1
+      out$elas$p_retained_total<- out$sens$p_retained_total*p_retained/demog_output$lambda1
     }
     # SAVE RESULTS TO THE DEMOGRAPHIC FILE
     demog_output$param_sensitivities<- out$sens
     demog_output$elas_sensitivities<- out$elas
     saveRDS(demog_output, 
             paste0("./output/Eigen_Analysis_", demog_output$id, ".rds"))
+    ## UPDATE ANALYSIS RECORDS AND SAVE
+    rec<- readRDS("./output/analysis_records.rds")
+    if(any(rec$id==demog_output$id))
+    {
+      rec$parameter_specific[which(rec$id==demog_output$id)]<- TRUE
+    }
+    if(all(rec$id!=demog_output$id))
+    {
+      rec<- rbind(rec, data.frame(demographic=TRUE,
+                                  parameter_specific=TRUE,
+                                  id=demog_output$id))
+    }
+    saveRDS(rec, "./output/analysis_records.rds")
   }
   return(out)
 }
