@@ -123,13 +123,35 @@ wireframe(pts4, ylab="phi0", xlab="degrees C",
 any(pts$velocity<0.5)
 pts2<-pts[which(pts$temperature %in% c(14,16,18,20,22,24)),]
 ###############################################################
-v <- ggplot(pts2, aes(temperature, phi0_MR, z = velocity))
-v + geom_contour(binwidth=0.01)
-install.packages("rayshader")
+#install.packages("rayshader")
 library(rayshader)
-p <- v + geom_contour(binwidth=0.01)
-plot_gg(p, width = 5, height = 5, multicore = TRUE, scale = 250, 
-        zoom = 0.7, theta = 10, phi = 30, windowsize = c(800, 800))
+p<- ggplot(pts2)+
+  geom_tile(aes(temperature,phi0_MR,fill=velocity))+
+  geom_contour(aes(temperature,phi0_MR,z=velocity),binwidth = 0.01)
+plot_gg(p, width = 5, height = 5, scale = 250, 
+        theta = 10, phi = 30, windowsize = c(800, 800))
+p<- ggplot(pts2)+
+  geom_raster(aes(x=temperature, y=phi0_MR, fill = velocity)) +
+  geom_contour(aes(temperature,phi0_MR,z=velocity),binwidth = 0.01, 
+               colour = "white")
+plot_gg(p, width = 5, height = 5, scale = 500, 
+        theta = 10, phi = 30, windowsize = c(800, 800))
+phivec <- 20 + 70 * 1/(1 + exp(seq(-5, 10, length.out = 180)))
+phivecfull <- c(phivec, rev(phivec))
+thetavec <- 90 * sin(seq(0,359,length.out = 360) * pi/180) #+270
+zoomvec <- 0.5 + 0.5 * 1/(1 + exp(seq(-5, 10, length.out = 180)))
+zoomvecfull <- c(zoomvec, rev(zoomvec))
+
+for(i in 1:360) {
+  render_camera(theta = thetavec[i],phi = phivecfull[i],zoom = zoomvecfull[i])
+  render_snapshot(paste0("output/animation/frame", i, ".png"))
+}
+
+#Run this command in the command line using ffmpeg to stitch together a video:
+#ffmpeg -framerate 60 -i frame%d.png -vcodec libx264 raymovie.mp4
+
+#And run this command to convert the video to post to the web:
+#ffmpeg -i raymovie.mp4 -pix_fmt yuv420p -profile:v baseline -level 3 -vf scale=-2:-2 rayweb.mp4
 ###############################################################
 persp(seq(14, 24, 2), seq(0.00005, 0.0001, 0.000005), z=pts4,
       phi = 15, theta =-45,
