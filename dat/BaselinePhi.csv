@@ -1,0 +1,16 @@
+﻿Parameter,Description,Baseline Value,Source
+$phi_1$,age-1 survival,0.64,Rotella et al. 2017
+$phi_2$,age-2 survival,0.69,Rotella et al. 2017
+$phi_3$,age-3 survival,0.72,Rotella et al. 2017
+$phi_4$,age-4 survival,0.76,Rotella et al. 2017
+$phi_5$,age-5 survival,0.79,Rotella et al. 2017
+$phi_6$,age-6 survival,0.82,Rotella et al. 2017
+$phi_7$,age-7 survival,0.84,Rotella et al. 2017
+$phi_8$,age-8 survival,0.86,Rotella et al. 2017
+$phi_9$,age-9 survival,0.88,Rotella et al. 2017
+$phi_{10}$,age-10 survival,0.895,extrapolation
+$phi_{11}$,age-11 survival,0.91,extrapolation
+$phi_{12}$,age-12 survival,0.92,extrapolation
+$phi_{13}$,age-13 survival,0.93,extrapolation
+$phi_{14}$,age-14 survival,0.935,extrapolation
+$phi_{15+}$,age-15+ survival,0.94,Klungle & Baxter 2004 & Jaeger et al. 2009
