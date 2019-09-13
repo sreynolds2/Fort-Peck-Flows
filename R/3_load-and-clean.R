@@ -1,54 +1,116 @@
 
-if(!exists("fullrun")){fullrun<- FALSE}
+source("./R/0_default-parameters.r")
 
-if(!fullrun)
-{
-  dat<- readRDS("./dat/drift_data.rds")
-}
-
-if(fullrun)
-{
-  chan<-odbcConnectExcel2007("./dat/UMORdrift_forPopModel_v1.xlsx")
-  saklevels<-sqlFetch(chan,"SakLevels")
-  names(saklevels)[3]<-"Lake_Sak_Upper_RM"
-  scen<-sqlFetch(chan,"0pt5mps")
-  dat<-scen
-  scen<-sqlFetch(chan,"0pt7mps")
-  dat<-rbind(dat,scen)
-  scen<-sqlFetch(chan,"0pt9mps")
-  dat<-rbind(dat,scen)
-  odbcClose(chan)
-  rm(chan,scen)
+# # CLEAN FILES RUNS OUT OF MEMORY...
+#   alt_files<- list.files("./dat", "_Summary.xlsx")
+#   # USE ORIGINAL ALT1 UNTIL CLARIFY DATA ABOUT 75 DATA
+#   alt_files<- setdiff(alt_files, "Alt1_Summary.xlsx")
+#   # CLEAN DATA FILES (REMOVE LOADED NAs)
+#   invisible(lapply(1:length(alt_files), function(x)
+#   {
+#     dat<- read.xlsx(paste0("./dat/", alt_files[x]), "Outputs")
+#     NA_rows<-which(sapply(1:nrow(dat), function(x){all(is.na(dat[x,]))}))
+#     if(length(NA_rows)>0){dat<- dat[-NA_rows, ]}
+#     NA_cols<- which(sapply(1:ncol(dat), function(x){all(is.na(dat[2:nrow(dat),x]))}))
+#     if(length(NA_cols)>0){dat<- dat[,-NA_cols]}
+#     write.csv(dat, paste0("./dat/", strsplit(alt_files[x], ".xlsx")[[1]][1],
+#                           "_Cleaned.csv"), row.names=FALSE)
+#   }))
+#   SA_files<- list.files("./dat", "_Ret_SA.xlsx")
+#   invisible(lapply(1:length(SA_files), function(x)
+#   {
+#      SA_dat<- read.xlsx(paste0("./dat/", SA_files[x]), "Retention",
+#                         endRow = 3)
+#      SA_dat<-SA_dat[,1:10]
+#      write.csv(SA_dat, paste0("./dat/", strsplit(SA_files[x], ".xlsx")[[1]][1],
+#                               "_Cleaned.csv"), row.names=FALSE)
+#    }))
   
-  scenarios<- expand.grid(U_mps=unique(dat$U_mps),
-                          temp_C=unique(dat$temp_C),
-                          Lake_Sak_Upper_RM=unique(saklevels$Lake_Sak_Upper_RM))
-  
-  scenarios$p_retained<-sapply(1:nrow(scenarios), function(i)
+    
+if(full_run)
+{
+  alt_files<- list.files("./dat", "_Summary_Cleaned.csv")
+  dat<- lapply(1:length(alt_files), function(x)
   {
-    tmp<-subset(dat,
-                U_mps==scenarios$U_mps[i] & 
-                  temp_C==scenarios$temp_C[i])
-    interp<-approxfun(tmp$RM, tmp$Percentile, 
-                      method="linear", yleft=1, yright=0)
-    out<-interp(scenarios$Lake_Sak_Upper_RM[i])
-    return(round(out,3))
-  })
-  scenarios$p_conserv<-sapply(1:nrow(scenarios), function(i)
-  {
-    tmp<-subset(dat, 
-                U_mps==scenarios$U_mps[i] & 
-                  temp_C==scenarios$temp_C[i] &
-                  RM>=scenarios$Lake_Sak_Upper_RM[i])
-    out<-ifelse(nrow(tmp)>0, tmp[which.min(tmp$RM),"Percentile"], 0)
+    alt_dat<- read.csv(paste0("./dat/", alt_files[x]))
+    p_ret<- sapply(seq(3,ncol(alt_dat),3), function(i)
+    {
+      indx<- min(which(as.numeric(as.character(alt_dat[2:nrow(alt_dat),i]))>200))
+      tmp<- alt_dat[indx:(indx+1),i:(i+1)]
+      weights<- abs(as.numeric(as.character(tmp[,1]))-200)
+      weights<- weights/sum(weights)
+      out<- weights[1]*as.numeric(as.character(tmp[2,2]))+
+        weights[2]*as.numeric(as.character(tmp[1,2]))
+      return(out) 
+    })
+    names1<-names(alt_dat[,seq(2,ncol(alt_dat),3)])
+    if(!grepl("NA", alt_files[x]))
+    {
+      if(any(grepl("NA", names1))){names1<-names1[-grep("NA", names1)]}
+    }
+    if(grepl("NA", alt_files[x]))
+    {
+      names1<- gsub("NA", "NoAct", names1)
+      names1[5]<- "NoAct_11_LF" #CORRECT FIX???
+    }
+    tmp<- strsplit(names1, "_")
+    alt<- sapply(tmp, "[[", 1)
+    yr<- sapply(tmp, "[[", 2)
+    temp<- sapply(tmp, "[[", 3)
+    out<- data.frame(scenario=alt, year=yr, temperature_flow=temp,
+                     p_retained=p_ret)
     return(out)
   })
+  dat<-do.call(rbind, dat)
   
-  scenarios<-merge(scenarios, saklevels, by="Lake_Sak_Upper_RM")
-  scenarios$spawn_rkm<- 1761*1.609
-  scenarios<-scenarios[,c(2,3,6,7,1,8,4,5)]
-  rm(dat, saklevels)
-  saveRDS(scenarios, "./dat/drift_data.rds")
-  dat<-scenarios
-  rm(scenarios)
+  SA_files<- list.files("./dat", "_Ret_SA_Cleaned.csv")
+  SA<- lapply(1:length(SA_files), function(x)
+  {
+    SA_dat<- read.csv(paste0("./dat/", SA_files[x]))
+    tmp<- strsplit(SA_files[x], "_")[[1]]
+    alt<- rep(tmp[1], 9)
+    yr<- rep(as.numeric(tmp[2]), 9)
+    temp<- c("LF", "MF", "HF", "L", "M", "H", "LP", "MP", "HP")
+    sday<- rep(as.Date(SA_dat[2,1]),9)
+    pret<- sapply(2:10, function(y){as.numeric(as.character(SA_dat[2,y]))})
+    out<- data.frame(scenario=alt, year=yr, temperature_flow=temp,
+                     p_retained=pret, spawn_date=sday)
+    return(out)
+  })
+  SA<-do.call(rbind, SA)
+  
+  dat<-rbind.fill(dat, SA)
+  dat$id<-1:nrow(dat)
+  write.csv(dat, "./dat/scenario_retention_data.csv", row.names = FALSE)
 }
+
+dat<- read.csv("./dat/scenario_retention_data.csv")
+
+
+
+
+# if(full_run)
+# {
+#   alt1<- read.xlsx("./dat/Alt1_CTU_Ret_Summary.xlsx", "Outputs")
+#   all(is.na(alt1[,(ncol(alt1)-3):ncol(alt1)]))
+#   alt1<-alt1[,1:(ncol(alt1)-4)]
+#   all(is.na(alt1[(nrow(alt1)-2):nrow(alt1),]))
+#   alt1<-alt1[1:(nrow(alt1)-3),]
+#   names1<-names(alt1[,seq(2,ncol(alt1),3)])
+#   p_ret<- sapply(seq(3,ncol(alt1),3), function(i)
+#   {
+#     indx<- min(which(as.numeric(as.character(alt1[2:nrow(alt1),i]))>200))
+#     tmp<- alt1[indx:(indx+1),i:(i+1)]
+#     weights<- abs(as.numeric(as.character(tmp[,1]))-200)
+#     weights<- weights/sum(weights)
+#     out<- weights[1]*as.numeric(as.character(tmp[2,2]))+
+#       weights[2]*as.numeric(as.character(tmp[1,2]))
+#     return(out) 
+#   })
+#   dat<- data.frame(scenario=names1, p_retained=p_ret)
+#   dat$id<-1:nrow(dat)
+#   rm(alt1, names1, p_ret)
+#   write.csv(dat, "./dat/scenario_retention_data.csv", row.names = FALSE)
+# }
+# 
+# dat<- read.csv("./dat/scenario_retention_data.csv")
