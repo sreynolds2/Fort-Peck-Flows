@@ -3,19 +3,19 @@ source("./R/0_default-parameters.r")
 
 # # CLEAN FILES RUNS OUT OF MEMORY...
 #   alt_files<- list.files("./dat", "_Summary.xlsx")
-#   # USE ORIGINAL ALT1 UNTIL CLARIFY DATA ABOUT 75 DATA
-#   alt_files<- setdiff(alt_files, "Alt1_Summary.xlsx")
+#   # EXCLUDE OLD FILE
+#   alt_files<- setdiff(alt_files, "Alt1_CTU_Ret_Summary.xlsx")
 #   # CLEAN DATA FILES (REMOVE LOADED NAs)
-#   invisible(lapply(1:length(alt_files), function(x)
-#   {
-#     dat<- read.xlsx(paste0("./dat/", alt_files[x]), "Outputs")
-#     NA_rows<-which(sapply(1:nrow(dat), function(x){all(is.na(dat[x,]))}))
-#     if(length(NA_rows)>0){dat<- dat[-NA_rows, ]}
-#     NA_cols<- which(sapply(1:ncol(dat), function(x){all(is.na(dat[2:nrow(dat),x]))}))
-#     if(length(NA_cols)>0){dat<- dat[,-NA_cols]}
-#     write.csv(dat, paste0("./dat/", strsplit(alt_files[x], ".xlsx")[[1]][1],
-#                           "_Cleaned.csv"), row.names=FALSE)
-#   }))
+  # invisible(lapply(1:length(alt_files), function(x)
+  # {
+  #   dat<- read.xlsx(paste0("./dat/", alt_files[x]), "Outputs")
+  #   NA_rows<-which(sapply(1:nrow(dat), function(x){all(is.na(dat[x,]))}))
+  #   if(length(NA_rows)>0){dat<- dat[-NA_rows, ]}
+  #   NA_cols<- which(sapply(1:ncol(dat), function(x){all(is.na(dat[2:nrow(dat),x]))}))
+  #   if(length(NA_cols)>0){dat<- dat[,-NA_cols]}
+  #   write.csv(dat, paste0("./dat/", strsplit(alt_files[x], ".xlsx")[[1]][1],
+  #                         "_Cleaned.csv"), row.names=FALSE)
+  # }))
 #   SA_files<- list.files("./dat", "_Ret_SA.xlsx")
 #   invisible(lapply(1:length(SA_files), function(x)
 #   {
@@ -30,6 +30,8 @@ source("./R/0_default-parameters.r")
 if(full_run)
 {
   alt_files<- list.files("./dat", "_Summary_Cleaned.csv")
+  # EXCLUDE OLD FILE
+  alt_files<- setdiff(alt_files, "Alt1_CTU_Ret_Summary_Cleaned.csv")
   dat<- lapply(1:length(alt_files), function(x)
   {
     alt_dat<- read.csv(paste0("./dat/", alt_files[x]))

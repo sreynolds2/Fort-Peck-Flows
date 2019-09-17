@@ -125,6 +125,7 @@ pts2<-pts[which(pts$temperature %in% c(14,16,18,20,22,24)),]
 ###############################################################
 #install.packages("rayshader")
 library(rayshader)
+library(ggplot2)
 p<- ggplot(pts2)+
   geom_tile(aes(temperature,phi0_MR,fill=velocity))+
   geom_contour(aes(temperature,phi0_MR,z=velocity),binwidth = 0.01)
