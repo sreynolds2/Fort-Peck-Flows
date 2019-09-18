@@ -32,6 +32,7 @@ if(full_run)
   alt_files<- list.files("./dat", "_Summary_Cleaned.csv")
   # EXCLUDE OLD FILE
   alt_files<- setdiff(alt_files, "Alt1_CTU_Ret_Summary_Cleaned.csv")
+  alt_files<- setdiff(alt_files, "Alt2b_Summary_Cleaned.csv")
   dat<- lapply(1:length(alt_files), function(x)
   {
     alt_dat<- read.csv(paste0("./dat/", alt_files[x]))

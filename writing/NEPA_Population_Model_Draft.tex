@@ -7,6 +7,12 @@
 \usepackage{longtable}
 \usepackage{titlesec}
 
+%\usepackage{tikz, MnSymbol}
+%\usetikzlibrary{arrows,shapes,positioning}
+%\usepackage{float}
+%\usepackage{pstricks}
+%\usepackage{setspace}
+
 \usepackage[margin=2.4cm]{geometry}
 \setlength{\parindent}{0cm}
 
@@ -24,22 +30,36 @@
 
 \begin{document}
 {\Large {\bf Summary}}\\
-This report describes population model analyses done in support of the evaluation of management actions for pallid sturgeon on the Upper Missouri River, from Fort Peck Dam to Lake Sakakawea, using a population projection matrix.  The particular management actions of focus were alternative flow release protocols from Fort Peck Dam.  Seven alternative scenarios were considered:  No action, Alternative 1, Alternative 1a, Alternative 1b, Alternative 2, Alternative 2a, and Alternative 2b.  Additionally, potential effects of temperature and turbidity manipulations are explored.   Alternative scenarios were compared in terms of their ability to be fully implemented throughout the period of record, maximum discharge, estimated effects on drifting free-embryo retention, and predicted long-term growth rate.  Sensitivity and elasticity analyses were also conducted to demonstrate the effects of parameter values, including uncertainties in age-0 survival and probability of spawning in the Missouri River, on long-term population growth rate.  Limitations and uncertainties in the modeling, including caveats on the use of these models to estimate historical conditions and the availability of information to build a population model, are discussed.  Important future directions for the population model, such as incorporating fish passage at Intake in the Yellowstone, are also introduced.  
+This report describes population model analyses done in support of the evaluation of management actions for pallid sturgeon on the Upper Missouri River, from Fort Peck Dam to Lake Sakakawea, using a deterministic population projection matrix.  The particular management actions of focus were alternative flow release protocols from Fort Peck Dam.  Seven alternative scenarios were considered:  No action, Alternative 1, Alternative 1a, Alternative 1b, Alternative 2, Alternative 2a, and Alternative 2b.  Additionally, potential effects of temperature are explored.   Alternative scenarios were compared in terms of their ability to be fully implemented throughout the period of record (1930-2012), estimated effects on drifting free-embryo retention, and associated long-term growth rates.  Sensitivity and elasticity analyses were conducted to evaluate the effects of parameter values, including uncertainties in age-0 survival and probability of spawning in the Missouri River, on long-term population growth rate. Limitations and uncertainties in the modeling, including the availability of information to parameterize the population model, are discussed.  Important future directions for the population model, such as incorporating fish passage at Intake in the Yellowstone, are also introduced.  
 
 \begin{section}{Introduction}
 \end{section}
 
 \begin{section}{Methods}
 \begin{subsection}{Modeling Framework \& Spatial Extent}
-Seven alternative management scenarios at Fort Peck Dam were considered.   Details of the management scenarios:  No action, Alternative 1, Alternative 1a, Alternative 1b, Alternative 2, Alternative 2a, and Alternative 2b, are described in \textit{REFERENCE HERE}.  For each alternative, long-term population growth rate ($\lambda$) was estimated for the population of pallid sturgeon residing within the Upper Missouri River from Fort Peck Dam to Garrison Dam, including the Yellowstone River up to the Intake Diversion Dam (Figure 1).  The modeling framework used to calculate long-term population growth relied upon several submodels, including hydrological models, a spawning probability model, a drift-dispersion model, a free-embryo development model, and a pallid sturgeon demographic population model (Figure 2).  
+Seven alternative management scenarios at Fort Peck Dam were considered.   Details of the management scenarios:  No action, Alternative 1, Alternative 1a, Alternative 1b, Alternative 2, Alternative 2a, and Alternative 2b, are described in \textit{REFERENCE HERE}.  Alternative management scenarios were only analyzed during years in which they met alternative-specific flow criteria.  Flow criteria was two-fold: (1) environmental conditions needed to be such that the given alternative hydrograph could be produced (e.g., enough water available for release), and (2) discharge needed to reach a magnitude greater than 20kcfs in order to produce a sufficient spawning cue. For each alternative management scenario and year combination that met flow criteria, long-term population growth rate ($\lambda$) was estimated for the population of pallid sturgeon residing within the Upper Missouri River from Fort Peck Dam to Garrison Dam, including the Yellowstone River up to the Intake Diversion Dam (Figure 1).  The modeling framework used to calculate long-term population growth relied upon several submodels, including hydrological modeling in HEC-ResSim, a spawning model, HEC-RAS drift-dispersion modelling coupled with a free-embryo development model, and a pallid sturgeon demographic population model (Figure 2).  
 
 \begin{subsubsection}{Hydrology, Drift, Development, \& Probability of Retention}
-%Hydrological data were generated using the Hydrologic Engineering Centers Reservoir Simulation (HEC-ResSim) software implemented for the Missouri River reach between Fort Peck Dam and Lake Sakakawea. HEC-ResSim uses historical basin runoff data and specified rule sets defining reservoir operations to project reservoir inflows, outflows, and pool elevations as well as flows at additional points along the river. All hydrological runs used for this analysis used historical runoff from the period of record of 1930--2015. Reservoir operations were modeled for each alternative scenario assuming the same operation rules were in effect for all years.   Metrics (what are these, temporal and spatial scales) were calculated from daily ResSim output for use in the spawning and free-embryo drift-dispersion models.  The probability of free-embryo retention within the free-flowing Missouri River was computed by integrating a free-embryo developement model into HEC-RAS simulations, assuming spawning occurs just below Fort Peck dam.
-Hydrological data were generated using the Hydrologic Engineering Centers Reservoir Simulation (HEC-ResSim) software implemented for the Missouri River reach between Fort Peck Dam and Lake Sakakawea (see \textit{REFERENCE} for further HEC-ResSim modeling details).  All hydrological runs used for this analysis used historical runoff from the period of record of 1930--\textit{2017}.  Reservoir operations were modeled for each alternative scenario assuming the same operation rules were in effect for all years.   For each scenario and year on record, HEC-ResSim outputs were used to compute the probability a reproductively-ready female spawns in the Missouri River (rather than spawning in the Yellowstone River or reabsorbing her eggs) and the probability that a free-embryo develops to settlement prior to reaching the unfavorable conditions of Lake Sakakawea (retention probability). The probability of free-embryo retention within the free-flowing Missouri River was computed by integrating a temperature dependent free-embryo development model into HEC-RAS drift simulations, assuming spawning occurs just below Fort Peck dam.  The details of this modeling are described in \textit{REFERENCE HERE}.  
+Hydrological data were generated using the Hydrologic Engineering Centers Reservoir Simulation (HEC-ResSim) software implemented for the Missouri River reach between Fort Peck Dam and Lake Sakakawea (see \textit{REFERENCE} for further HEC-ResSim modeling details).  All hydrological runs used for this analysis used historical runoff from the period of record of 1930--2012.  Reservoir operations were modeled for each alternative scenario assuming the same operation rules were in effect for all years.    For each alternative management scenario and year combination that met flow criteria, the probability that a free-embryo develops to settlement prior to reaching the unfavorable conditions of Lake Sakakawea (retention probability) was estimated. The probability of free-embryo retention within the free-flowing Missouri River was computed by integrating a temperature dependent free-embryo development model into HEC-RAS drift simulations, assuming spawning occurs just below Fort Peck dam.  The details of the modeling are described in \textit{REFERENCE HERE}.  Outputs from this modelling provided summary information about development and retention over time, from which the retention probability could be estimated as detailed below.\\
+
+The ``Outputs'' spreadsheet from each of seven HEC-RAS summary workbooks\footnote{e.g., Alt1\_Summary.xlsx}, one for each alternative, were loaded into R.  These spreadsheets contained summary information for each year the given alternative scenario produced the desired hydrograph with a spawning cue discharge greater than 20kcfs, i.e. met flow criteria.  The summary information included the amount of cumulative thermal units (CTUs) expected to be absorbed by the free-embryos and the percentage of free-embryos retained in the free-flowing Missouri River at 3 hours intervals.  A threshold value of 200 CTUs was assumed to indicate transition from drift to settlement (Braaten et al. 2012).  An R script identified the time interval during which the threshold CTU value was surpassed and estimated the retention probability from the given data.  The probability of retention for the year and alternative scenario under consideration, was computed by interpolation, using the CTU and retention data from the endpoints of the identified interval:
+\begin{equation}
+p_{ret}=\frac{(CTU(t_2)-200)R(t_1)+(200-CTU(t_1))R(t_2)}{CTU(t_2)-CTU(t_1)},
+\end{equation}  
+where\\
+\hspace*{0.5cm}$p_{ret}$ is the retention probability for the year and alternative scenario under consideration,\\
+\hspace*{0.5cm}$CTU(t)$ is the estimated cumulative thermal units absorbed by a drifting free-embryo at\\
+\hspace*{1.5cm}time $t$,\\
+\hspace*{0.5cm}$R(t)$ is the estimated percentage of free-embryos that have been retained in the free-flowing\\
+\hspace*{1.5cm}Missouri River at time $t$,\\
+\hspace*{0.5cm}$t_1$ is the discrete HEC-RAS time in hours of drift that is associated with the largest CTU\\ 
+\hspace*{1.5cm}value that is less than or equal to 200 CTUs, and\\
+\hspace*{0.5cm}$t_2$ is the discrete HEC-RAS time in hours of drift that is associated with the smallest CTU\\
+\hspace*{1.5cm}value that is greater than 200 (3 hours after $t_1$).\\
 \end{subsubsection}
 
 \begin{subsubsection}{Hydrology and Spawning Probability}
-The factors effecting the probability a reproductively-ready female spawns within the Missouri River are largely uncertain.  Limited data has shown \textit{FILL IN THIS SECTION}.\\
+The probability a reproductively-ready female spawns within the Missouri River as opposed to spawning within the Yellowstone River or not spawning (atresia)---henceforth referred to as ``Missouri River spawning probability'' or occasionally, simply as ``spawning probability''---was determined by a spawning model.  While there are hypotheses on what factors effect spawning probability, the functional relationship is largely uncertain.  Limited data has shown \textit{FILL IN THIS SECTION}.\\
  
 As a first approach, the probability a reproductively-ready female spawns in the Missouri River ($\gamma$) was modeled in terms of discharge and temperature as a multi-variate step function:
 \begin{equation}
@@ -51,9 +71,9 @@ As a first approach, the probability a reproductively-ready female spawns in the
 \end{equation}
 where\\
 
-\hspace*{0.5cm}$Q$ is the \textit{maximum} discharge \textit{during April--May} in cfs,\\
+\hspace*{0.5cm}$Q$ is the \textit{maximum} discharge \textit{during April--May} in kcfs,\\
 \hspace*{0.5cm}$Q^{*}$ is the threshold discharge needed to attract and retain spawners up the Missouri River\\ 
-\hspace*{1.5cm}to the vicinity of Fort Peck Dam (in cfs),\\
+\hspace*{1.5cm}to the vicinity of Fort Peck Dam (in kcfs),\\
 \hspace*{0.5cm}$T$ is the maximum temperature reached below Fort Peck Dam during \textit{the end of May--\\
 \hspace*{1.5cm}beginning of July} in $^{\circ}$C,\\
 \hspace*{0.5cm}$T^{*}$ is the threshold temperature required for spawning (in $^{\circ}$C),\\
@@ -62,7 +82,7 @@ where\\
 \hspace*{0.5cm}$\gamma_{low}$ is the probability that a reproductively-ready female will spawn in the Missouri River\\
 \hspace*{1.5cm}below Fort Peck Dam given unfavorable conditions.\\
 
-Baseline values for $Q^{*}$, $T^{*}$, $\gamma_{high}$, and $\gamma_{low}$ were based on observed cases of female spawning migrations up the Missouri River above the confluence with the Yellowstone (Table 1).  Outputs from HEC-ResSim provide values for $Q$ and $T$, allowing $\gamma$ to be computed for each alternative scenario under any given year on record.   
+Baseline values for $Q^{*}$, $T^{*}$, $\gamma_{high}$, and $\gamma_{low}$ were based on observed cases of female spawning migrations up the Missouri River above the confluence with the Yellowstone (Fuller \& Haddix 2013), as well as other spawning data related to temperature (DeLonay et al. 2016) (Table 1).  Outputs from HEC-ResSim provide values for $Q$.\footnote{Craig is this accurate?}  Since alternative management scenarios were only analyzed in HEC-RAS for years in which they could be implemented and the spawning cue discharge exceeded $Q*=20kcfs$, $\gamma=\gamma_{high}$ for the management scenario and year combinations that met flow criteria given $T>T*$.  As a first approach, temperature was assumed to exceed its threshold criteria of $T*=16^{\circ}C$ during each year a management scenario met flow criteria.\footnote{Craig, I wasn't sure how best to assess this criteria given the temperature data available.  I have lots of questions on this I'm hoping we can discuss.  I'll put a few at the end in hopes of sparking some ideas, while I'm away.}   
 \end{subsubsection} 
 
 \begin{subsubsection}{Demographic Population Model}
@@ -91,12 +111,14 @@ The age-specific fertility values are functions of the probability of free-embry
 The baseline maximum age of a female pallid sturgeon was taken to be 60 years old.  Bratten et al. (2015) estimated the ages of 11 deceased natural-origin pallid sturgeon from the Upper Missouri River.  They determined longevity to be at least 50 years, with individual estimates ranging from 37-59 years old.\\
 
 \paragraph{Age-Specific Survivals}
-Age-specific survivals were estimated for pallid sturgeon ages 1 through 9 years old utilizing data from Rotella et al.'s Upper Basin Pallid Sturgeon Survival Estimation Project 2017 Update.  Only data for fingerlings released in RPMA 2 in the Missouri River with an ``IV status'' and ``fin curl status'' of zero were analyzed.  Fingerlings, released into the river at about 3 months old, were chosen with the expectation that having 9 months to acclimate to river conditions would allow for a better estimate of natural age-1 to age-2 survival than yearlings released into the river much closer to their first birthday.  For each cohort meeting the specified criteria, population estimates across each interval time period available were used to calculate daily survival as
+Age-specific survivals were estimated for pallid sturgeon ages 1 through 9 years old utilizing data from Rotella et al. (2017).  Only data for fingerlings released in RPMA 2 in the Missouri River with an ``IV status'' and ``fin curl status'' of zero were analyzed.  Fingerlings, released into the river at about 3 months old, were chosen with the expectation that having 9 months to acclimate to river conditions would allow for a better estimate of natural age-1 to age-2 survival than yearlings released into the river much closer to their first birthday.\\  
+
+Data tables in Rotella et al. (2017) were provided for each cohort of fingerlings released into the Missouri River and contained information on the estimated number of fish at the start and end of several consecutive interval after release.  Interval periods were not necessarily equal in length, but start and end dates were provided in the tables.  Therefore, for each healthy cohort of fingerlings released, we calculated daily survivals from the data provided in the tables as
 \begin{equation}
 \mbox{Interval Daily Survial}=\left(\frac{N \mbox{ at Interval End}}{N \mbox{ at Interval Start}}\right)^{1/\mbox{{\scriptsize Days in Interval}}}.
 \end{equation}
 
-Cohort-specific interval daily survivals were then used to compute cohort-specific survivals from age-class to age-class, assuming all fish were born on June 1st.  The weighted average of cohort-specific annual survivals was used as an estimated for the age-specific annual survivals:
+We then used cohort-specific interval daily survivals to compute cohort-specific survivals from age-class to age-class, assuming all fish were born on June 1st.  The weighted average of cohort-specific annual survivals was used as an estimated for the age-specific annual survivals:
 \begin{equation}
 \phi_i=\frac{\displaystyle\sum_{c \hspace{1pt} \in \hspace{1pt} C} \phi_{i,c}N_{i,c}}{\displaystyle\sum_{c \hspace{1pt} \in \hspace{1pt} C} N_{i,c}},
 \end{equation} 
@@ -124,11 +146,12 @@ F_i=\psi_i\gamma E_ir\phi_{0}p_{ret},
 \end{equation}
 where\\
 \hspace*{0.5cm}$\psi_i$ is the proportion of age-$i$ females that are reproductively ready to spawn,\\
-\hspace*{0.5cm}$\gamma$ is the fraction of reproductively ready females that spawn in the Missouri River,\\
+\hspace*{0.5cm}$\gamma$ is the fraction of reproductively-ready females that spawn in the Missouri River, often\\
+\hspace*{1.5cm}referred to as ``Missouri River spawning probability'' or ``spawning probability'',\\
 \hspace*{0.5cm}$E_i$ is the number of eggs per spawning age-$i$ female,\\ 
 \hspace*{0.5cm}$r$ is the sex ratio (fraction of the eggs that are female),\\
 \hspace*{0.5cm}$\phi_{0}$ is the survival from egg to age-1 given retention within the free-flowing Missouri\\
-\hspace*{1.5cm}River, and\\
+\hspace*{1.5cm}River, often referred to simply as ``age-0 survival'', and\\
 \hspace*{0.5cm}$p_{ret}$ is the probability a drifting free-embryo is retained in the free-flowing Missouri River.\\
 
 Only age-0 survival is considered for those fish retained in the free-flowing Missouri River ($\phi_{0}$) because it is assumed that survival in the anoxic conditions of Lake Sakakawea is zero.   For the baseline analysis estimating current conditions, it is assumed that retention probability is 1 in 1,000 and spawning in the Missouri River occurs about once every 100 years (Table 1).   In general, both the retention probability ($p_{ret}$) and the probability a reproductively-ready female spawns within the Missouri River ($\gamma$) are assumed to be directly effected by temperature and flow.  Therefore, they vary with environmental conditions, as well as choice of management action.   For the Fort Peck Flows analyses, $p_{ret}$ and $\gamma$ are estimated as outputs of the drift-development and spawning models, respectively, given the particular management alternative scenario and hydrology.  The remaining parameter values ($r$, $\phi_0$, $\psi_i$, and $E_i$) are fixed among scenarios, and described in detail below.\\ 
@@ -143,7 +166,7 @@ Missouri River age-0 survival is highly uncertain.  We set baseline Missouri Riv
 \begin{equation}
 \phi_0=0.000075.
 \end{equation}
-We further examine the sensitivity and robustness of model outcomes to changes in $\phi_0$.   Additionally, Missouri River age-0 survival likely varies with turbidity, and is an area of future consideration for linking management actions to population outcomes.\\
+We further examine the sensitivity of model outcomes to changes in $\phi_0$.   Additionally, Missouri River age-0 survival likely varies with turbidity, and is an area of future consideration for linking management actions to population outcomes.\\
 
 The probability a female is reproductively ready to spawn ($\psi_i$) and the expected number of eggs released per spawning female ($E_i$) are age-specific quantities.  Their baseline values were determined using multiple steps, as described first for $\psi_i$ and then for $E_i$ below.\\ 
 
@@ -170,16 +193,16 @@ where\\
 \hspace*{0.5cm}$a_{max}$ is the maximum age of a female fish.\\
 
 
-The maturation age of female pallid sturgeon has not been well studied and is an area of further informational need (Delonay et al. 2016).  Age of maturation could also vary by region of the river (George et al. 2012) with observations from the Upper Missouri River suggesting that female pallid sturgeon mature much later than those in the Lower Missouri and Mississippi Rivers (Molly Webb, personal communication).  What published data is available, involves only a handful of fish that are primarily from the Lower Missouri and Mississippi Rivers.   These females were estimated to have matured between the ages of 8 and 20 years old (Keenlyne \& Jenkins 1993, George et al. 2012).  Aging of the fish was typically performed by pectoral fin ray analysis, a method that can suffer from low accuracy and precision (Hurley et  al. 2004). 
+The maturation age of female pallid sturgeon has not been well studied and is an area of further informational need (DeLonay et al. 2016).  Age of maturation could also vary by region of the river (George et al. 2012) with observations from the Upper Missouri River suggesting that female pallid sturgeon mature later than those in the Lower Missouri and Mississippi Rivers (Molly Webb, USFWS, personal communication).  The available published data involves only a handful of fish primarily from the Lower Missouri and Mississippi Rivers.   These females were estimated to have matured between the ages of 8 and 20 years old (Keenlyne \& Jenkins 1993, George et al. 2012).  Aging of the fish was typically performed by pectoral fin ray analysis, a method that can suffer from low accuracy and precision (Hurley et  al. 2004). 
 
 
-We used a logistic cumulative distribution model to roughly describe maturation of females as they age:
+We used a logistic cumulative distribution model to describe maturation of females with age:
 \begin{equation}
-F(a)=\frac{1}{1+e^{-k(a-a_h)}}
+M(a)=\frac{1}{1+e^{-k(a-a_h)}}
 \label{cdf}
 \end{equation}  
 where\\
-\hspace*{0.5cm}$F(a)$ is the proportion of age-$a$ females that have reached maturity,\\
+\hspace*{0.5cm}$M(a)$ is the proportion of age-$a$ females that have reached maturity,\\
 \hspace*{0.5cm}$a_h$ is the age at which half of all females are mature,\\ 
 \hspace*{0.5cm}$k$ is a scaling parameter that controls the variance of the distribution, and\\
 \hspace*{0.5cm}$a$ is age.\\
@@ -188,9 +211,9 @@ To account for later maturation ages in Upper River females, we assumed that 50\
 \begin{equation}
 m_i = \begin{cases}
 0, & \hspace{1cm} i=1, 2, \dots, a_m-1\\
-F(i), & \hspace{1cm} i=a_m\\
-F(i)-F(i-1), & \hspace{1cm} i=a_m+1, a_m+2, \ldots, a_M-1\\
-1-F(i-1), & \hspace{1cm} a=a_M\\
+M(i), & \hspace{1cm} i=a_m\\
+M(i)-M(i-1), & \hspace{1cm} i=a_m+1, a_m+2, \ldots, a_M-1\\
+1-M(i-1), & \hspace{1cm} a=a_M\\
 0, & \hspace{1cm} i=a_M+1, a_M+2, \ldots, a_{max}
 \end{cases},
 \label{mi}
@@ -198,15 +221,15 @@ F(i)-F(i-1), & \hspace{1cm} i=a_m+1, a_m+2, \ldots, a_M-1\\
 where\\
 \hspace*{0.5cm}$a_m$ is the minimum age at which a female matures,\\
 \hspace*{0.5cm}$a_M$ is the maximum age at which a female matures, and\\ 
-\hspace*{0.5cm}$F$ is the cumulative distribution described in (\ref{cdf}).\\ 
+\hspace*{0.5cm}$M$ is the cumulative distribution described in (\ref{cdf}).\\ 
 
 
-The spawning period of female pallid sturgeon is likely 2-5 years (Delonay et al. 2016), although it has been estimated to be as great as 10 years in past studies using spawning bands (Dryer \& Sandvol 1993, Keenlyne \& Jenkins 1993).  Fuller et al. (2007) and DeLonay et al. (2016) assessed the reproductive readiness of a combined total of  28 female pallid sturgeon.  Their combined data shows that all 28 females had a reproductive period greater than 1 year ($p_1=0$).  Additionally, 8 females had a confirmed spawning period of 2 years with 13 others confirmed as having a spawning period greater than 2 years ($p_2=8/21$).  Of the 13 females whose spawning period was greater than 2 years, only the fates of 5 were known beyond this point: 3 females had a confirmed spawning period of 3 years and 2 females had a confirmed spawning period that was greater than 3 years ($p_3=(13/21)(3/5)$).  Under the following additional assumptions:
+The spawning period (i.e., the number of years that pass between two consecutive spawning events) of female pallid sturgeon is likely 2-5 years (Delonay et al. 2016), although it has been estimated to be as great as 10 years in past studies using spawning bands (Dryer \& Sandvol 1993, Keenlyne \& Jenkins 1993).\footnote{Assuming no atresia, spawning period and the reproductive-readiness period are equivalent.  Moreover, studies of spawning period often include assessments of reproductive-readiness but do not necessarily confirm spawning.  Therefore, estimates of spawning period also reflect estimates of the number of years that pass between a female being reproductively-ready to spawn.  While admitting it not to be entirely accurate, we occasionally use the terms ``spawning period'' and ``reproductive-readiness period'' (or ``reproductive period'' for short) interchangeably.}  Fuller et al. (2007) and DeLonay et al. (2016) assessed the reproductive-readiness of  28 female pallid sturgeon.  Their data shows that all 28 females had a reproductive period greater than 1 year ($p_1=0$).  Additionally, 8 females had a confirmed spawning period of 2 years with 13 others confirmed as having a spawning period greater than 2 years ($p_2=8/21$).  Of the 13 females whose spawning period was greater than 2 years, only the fates of 5 were known beyond this point: 3 females had a confirmed spawning period of 3 years and 2 females had a confirmed spawning period that was greater than 3 years ($p_3=(13/21)(3/5)$).  Under the following additional assumptions:
 \begin{enumerate}
 \item the maximum reproductively ready period of a female is 5 years, and
 \item a female is approximately twice as likely to have a reproductively ready period of 4 years as she is 5 years,
 \end{enumerate}
-the probabilities from the confirmed data lead to the following distribution for female reproductive readiness:  
+the probabilities from the confirmed data lead to the following distribution for female reproductive-readiness period:  
 \begin{equation}
 p_t = \begin{cases}
 0, & \hspace{1cm} t=1\\
@@ -221,7 +244,7 @@ p_t = \begin{cases}
 
 With this baseline distribution a female is expected to be reproductively ready, on average, every 2.95 years.\\  
 
-This first approach at generating a probability distribution for years between reproductive readiness was generated from a small data set and must be treated with some caution.  While much information could be learned from the combined data of Fuller et al. (2007) and DeLonay et al. (2016), the exact reproductive readiness period was unknown for 17 of the 28 females.  Additionally, our model leads to the inherent assumption, that the amount of time that passes between being reproductively ready is independent of whether a reproductively ready female spawns or reabsorbs her eggs.  If this assumption is far from reality and we expect a large number of females to be reabsorbing their eggs, then it may be important to modify the how age-specific fertilities are computed.\\
+This first approach at generating a probability distribution for years between reproductive readiness was generated from a small data set and must be treated with some caution.  While much information could be learned from the combined data of Fuller et al. (2007) and DeLonay et al. (2016), the exact reproductive readiness period was unknown for 17 of the 28 females.  Additionally, our model leads to the inherent assumption, that the amount of time that passes between being reproductively ready is independent of whether a reproductively ready female spawns or reabsorbs her eggs.  If we expect a large number of females to be reabsorbing their eggs, then it may be important to modify how age-specific fertilities are computed.\\
 
 The baseline parameterization for the age-specific probability that a female is reproductively ready to spawn was computed from equations (\ref{psii})--(\ref{pt}) with $a_h=15$, $k=1$, $a_m=8$, and $a_M=21$.  No females are reproductively ready until age 8, at which point a very small fraction of the population matures.  The fraction of females that are reproductively-ready to spawn increases between ages 8 and 21, sharply at first and then more slowly, leveling out to approximately a third of all age-22+ females being ready to spawn during any given year (Figure 5).\\
 
@@ -272,7 +295,7 @@ is a normalization of length (based on the mean and standard deviation of the le
 \end{equation}
 were obtained by fitting the model to 25 data points from 24 Upper River female pallid sturgeon. \\ 
 
-In the last step, the arithmetic mean value was taken over all fecundity values generated for a given age, resulting in a number of eggs released per spawning female that increases, nearly linearly, with age (Figure 6).
+In the last step, the arithmetic mean value was taken over all fecundity values generated for a given age, resulting in a number of eggs released per spawning female that increases with age (Figure 6).
 
 
 \end{subsubsection}
@@ -280,26 +303,8 @@ In the last step, the arithmetic mean value was taken over all fecundity values 
 \end{subsection}
 
 \begin{subsection}{Population Model Analyses}
-
-\begin{subsubsection}{Computing Retention Probabilities from HEC-RAS Summaries}
-The ``Outputs'' spreadsheet from each of seven HEC-RAS summary workbooks\footnote{e.g., Alt1\_Summary.xlsx}, one for each alternative, were loaded into R.  These spreadsheets contained summary information for each year the given alternative scenario produced a hydrograph with a discharge greater than 20kcfs.  The summary information included the amount of cumulative thermal units (CTUs) expected to be absorbed by the free-embryos and the percentage of free-embryos retained in the free-flowing Missouri River at 3 hours intervals.  A threshold value of 200 CTUs (Braaten et al. 2012) was assumed to indicate transition from drift to settlement.  An R script identified the time interval during which the threshold CTU value was surpassed and estimated the retention probability from the given data.  The probability of retention for the year and alternative scenario under consideration, was computed by interpolation, using the CTU and retention data from the endpoints of the identified interval:
-\begin{equation}
-p_{ret}=\frac{(CTU(t_2)-200)R(t_1)+(200-CTU(t_1))R(t_2)}{CTU(t_2)-CTU(t_1)},
-\end{equation}  
-where\\
-\hspace*{0.5cm}$p_{ret}$ is the retention probability for the year and alternative scenario under consideration,\\
-\hspace*{0.5cm}$CTU(t)$ is the estimated cumulative thermal units absorbed by a drifting free-embryo at\\
-\hspace*{1.5cm}time $t$,\\
-\hspace*{0.5cm}$R(t)$ is the estimated percentage of free-embryos that have been retained in the free-flowing\\
-\hspace*{1.5cm}Missouri River at time $t$,\\
-\hspace*{0.5cm}$t_1$ is the discrete HEC-RAS time in days of drift that is associated with the largest CTU\\ 
-\hspace*{1.5cm}value that is less than or equal to 200 CTUs, and\\
-\hspace*{0.5cm}$t_2$ is the discrete HEC-RAS time in days of drift that is associated with the smallest CTU\\
-\hspace*{1.5cm}value that is greater than 200 (3 hours after $t_1$).\\
-\end{subsubsection}
-
 \begin{subsubsection}{Long-Term Population Growth Rate}
-Model parameter baseline values (Table 1) were first used to compute a baseline long-term growth rate.  Additionally, long-term growth rates were computed for each year a particular alternative Fort Peck flow scenario could be implemented and produce a spawning cue greater than 20kcfs.  Retention probability ($p_{ret}$) varied by year-scenario combination and was set to the values computed from the HEC-RAS outputs using the process described above.  As each of these years were expected to cue spawning, the probability that a reproductively-ready female would spawn in the Missouri River ($\gamma$) was increased from its baseline value of 0.01 to 0.5.  At its simplest, this formulation assumes half of the females spawn in the Missouri River while the other half spawn in the Yellowstone River (no atresia).
+Model parameter baseline values (Table 1) were first used to compute a baseline long-term growth rate.  Additionally, long-term growth rates were computed for each year a particular alternative Fort Peck flow scenario could be implemented and produce a spawning cue greater than 20kcfs.  Retention probability ($p_{ret}$) varied by scenario-year combination and was set to the values computed from the HEC-RAS outputs using the process described in Section 2.1.1.  As each of these years were expected to cue spawning, the probability that a reproductively-ready female would spawn in the Missouri River ($\gamma$) was increased from its baseline value of 0.01 to $\gamma_{high}=0.5$.  At its simplest, this formulation assumes half of the reproductively-ready females spawn in the Missouri River while the other half spawn in the Yellowstone River (given no atresia).
 \end{subsubsection}
 
 \begin{subsubsection}{Sensitivity and Elasticity Analyses} 
@@ -311,7 +316,7 @@ where\\
 \hspace*{0.5cm}$\partial\lambda/\partial x_i$ is the sensitivity of $x_i$, the age-specific parameter of interest,\\
 \hspace*{0.5cm}$\partial\lambda/\partial F_i$ is the sensitivity value for the age-$i$ fertility entry,\\
 \hspace*{0.5cm}$\partial F_i/\partial x_i$ is the partial derivative of the fertility entry for age-$i$ females with respect to the\\ 
-\hspace*{1.5cm}paramter of interest, $x_i$,\\
+\hspace*{1.5cm}parameter of interest, $x_i$,\\
 \hspace*{0.5cm}$x_i$ is either $\psi_i$ or $E_i$ for a fixed age-$i$, and\\
 \hspace*{0.5cm}$i$ is an admissible age (1 through $a_{max}$).\\
  
@@ -323,10 +328,10 @@ where\\
 \hspace*{0.5cm}$\partial\lambda/\partial x$ is the sensitivity of $x$, the parameter of interest,\\
 \hspace*{0.5cm}$\partial\lambda/\partial F_i$ is the sensitivity value for the age-$i$ fertility entry,\\
 \hspace*{0.5cm}$\partial F_i/\partial x$ is the partial derivative of the fertility entry for age-$i$ females with respect to $x$, 
-\hspace*{1.5cm}the paramter of interest, and\\
+\hspace*{1.5cm}the parameter of interest, and\\
 \hspace*{0.5cm}$x$ is one of $r$, $\gamma$, $p_{ret}$, or $\phi_0$.\\
 
-Sensitivities express changes in long-term growth rate $\lambda$ in terms of a unit change of a particular parameter value\footnote{I also computed sensitivity and elasticity values for $a_h$, $k$, and $p_t$ for $t=2,3,4,5$.  These formulas are more complicated to fully list and are not included here, as these parameters were not among the most sensitive.  I have not yet computed sensitivities or elasticities for $a_m$ or $a_M$, but it is on my to do list for added thoroughness.}, while elasticities express changes in the long-term growth rate in relative terms.  This can be an additional useful comparison.  For example, it is not hard to imagine a female's fecundity increasing by one egg; however, it is impossible for age-0 survival to increase by a whole unit.  Instead of unit comparisons, elasticities allow for percentage comparisons---for example, comparing the impact on $\lambda$ of doubling each parameter (while holding the others constant). Parameter elasticities were computed from parameter sensitivities as
+Sensitivities express changes in long-term growth rate ($\lambda$) in terms of a unit change of a particular parameter value\footnote{I also computed sensitivity and elasticity values for $a_h$, $k$, and $p_t$ for $t=2,3,4,5$.  These formulas are more complicated to fully list and are not included here---these parameters were not among the most sensitive.  I have not yet computed sensitivities or elasticities for $a_m$ or $a_M$, but it is on my to do list for added thoroughness.}, while elasticities express changes in the long-term growth rate in relative terms.  This can be an additional useful comparison.  For example, it is not hard to imagine a female's fecundity increasing by one egg; however, it is impossible for age-0 survival to increase by a whole unit.  Instead of unit comparisons, elasticities allow for percentage comparisons---for example, comparing the impact on $\lambda$ of doubling each parameter (while holding the others constant). Parameter elasticities were computed from parameter sensitivities as
 \begin{equation}
 E(x)=\frac{x}{\lambda}\frac{\partial\lambda}{\partial x},
 \end{equation} 
@@ -338,13 +343,43 @@ where\\
 \end{subsubsection}
 
 \begin{subsubsection}{Long-Term Growth Decline Boundaries}
-Describe.
+Long-term growth-decline boundaries were computed for the three parameters expected to be effected by management actions: the probability a drifting free-embryo is retained in the free-flowing Missouri River ($p_{ret}$), the probability a reproductively-ready female spawns in the Missouri River ($\gamma$), and the probability of survival from egg to age-1 given retention in the free-flowing Missouri River ($\phi_0$).  Management actions that are expected to affect age-0 survival, e.g., turbidity manipulations, have not been considered here and are left for future work.  Nonetheless, age-0 survival is highly uncertain.  Considering outcomes across a range of age-0 survival can reveal how important it is to have a good understanding of this parameter value.\\
+
+With the exception of $p_{ret}$, $\gamma$, and $\phi_0$, which were treated as variables, all other parameters were fixed at their baseline values (Table 1).  As $p_{ret}$, $\gamma$, and $\phi_0$ are always found within the model as a product, we first considered the growth-decline boundary of a single variable, $y=\gamma\phi_0 p_{ret}$.  The characteristic equation written in terms of $x$ is described by its associated Euler-Lotka equation.%, as:
+%\begin{equation}
+%equation here,
+%\label{ELeq}
+%\end{equation}   
+%where\\
+%\hspace*{0.5cm} $description here$.\\  
+%Substituting in the baseline values for $r$, $\phi_i$, $\psi_i$, and $E_i$ we obtain:
+%\begin{equation}
+%equation here.
+%\label{chEqY}
+%\end{equation}   
+  Substituting the baseline values for $r$, $\phi_i$, $\psi_i$, and $E_i$ into the Euler-Lotka equation for the Leslie matrix, we obtain
+ a version of the characteristic equation in terms of $x$ and $y$.\\
+  
+If $x=\tilde{\lambda}$ solves the characteristic equation for a fixed value of $y$, then $\tilde{\lambda}$ is an eigenvalue of the Leslie matrix with the given parameterization.  The largest (leading) eigenvalue is the long-term growth rate, and the growth-decline boundary occurs when the largest eigenvalue equals 1 (representing a stable population that is neither growing nor declining).  Setting $x=1$, we solve for $y$ finding that 1 is an eigenvalue of the population model when 
+%\begin{equation}
+%y = \gamma \phi_0 p_{ret} = equation here, 
+%\label{yval}
+%\end{equation}      
+%i.e., 
+$y=\gamma\phi_0p_{ret}\approx0.000185294$.  A quick check reveals that, for the computed value of $y$, %when $y$ satisfies (\ref{yval}), then 
+$x=1$ is in fact the leading eigenvalue of the parameterized Leslie matrix, i.e. $\lambda=1$.  Therefore, %equation (\ref{yval}) describes 
+$\gamma\phi_0p_{ret}\approx0.000185294$ approximates the growth-decline boundary as a surface in 3-dimensional space.  To visualize this surface, we consider the contour curves resulting at fixed retention probability ($p_{ret}$) values.  Retention probabilities were fixed, either to evenly spaced values between 0 and 1 or at those values computed by HEC-RAS for particular year and flow scenario combinations.  Growth-decline curves at the fixed $p_{ret}$ values were plotted in $\gamma$-$\phi_0$ space.    
 \end{subsubsection}
 
-\begin{subsubsection}{Variants}
-For each alternative and year combination, additional long-term growth rates were computed using retention probabilities computed from HEC-RAS outputs and $\gamma$ values of 0.75 and 0.25.  The former value of $\gamma$ assumes the spawning cue produced was strong enough to attract a majority of reproductively-ready females up the Missouri River where they spawned, while the latter assumes the spawning cue was strong enough to result in spawning in the Missouri River but weaker than signal in the Yellowstone River.\\  
+%\begin{subsubsection}{Variants}
+%\begin{paragraph}{Spawning Probability}
+%For each alternative and year combination, additional long-term growth rates were computed using retention probabilities computed from HEC-RAS outputs and $\gamma$ values of 0.75 and 0.25.  The former value of $\gamma$ assumes the spawning cue produced was strong enough to attract a majority of reproductively-ready females up the Missouri River where they spawned, while the latter assumes the spawning cue was strong enough to result in spawning in the Missouri River but weaker than the signal in the Yellowstone River or a high probability of atresia ocurred.
+%\end{paragraph} 
 
-The population-level impact of utilizing different powerhouse operation strategies was also considered with respect to flows observed in 1985.  With the exception of the no action alternative, which did not meet the 20kcfs spawning cue threshold, each alternative scenario was implemented using 3 different powerhouse operation strategies: full, standard, and peak times.  Full powerhouse operations assume 14kcfs are run through the powerhouse 24 hours a day.  During standard powerhouse operations 14kcfs are run through the powerhouse for 12 hours a day with 7kcfs running through the powerhouse the remaining 12 hours.  The peak time strategy assumes 7kcfs are regularly run through the powerhouse except during peak times (\textit{times here}) when powerhouse operations switch to running 14kcfs.   
+\begin{subsubsection}{Powerhouse Operations}
+%\begin{paragraph}{Powerhouse Operations}
+The population-level impact of utilizing different powerhouse operation strategies was also considered with respect to flows observed in 1985.  With the exception of the No Action alternative, which did not meet the 20kcfs spawning cue threshold in 1985, each alternative scenario was implemented using 3 different powerhouse operation strategies: full, standard, and peak times.  Full powerhouse operations assume 14kcfs are run through the powerhouse 24 hours a day.  During standard powerhouse operations 14kcfs are run through the powerhouse for 12 hours a day with 7kcfs running through the powerhouse the remaining 12 hours.  The peak time strategy assumes 7kcfs are regularly run through the powerhouse except during peak times (\textit{times here}) when powerhouse operations switch to running 14kcfs.   
+%\end{paragraph}
 \end{subsubsection}  
 \end{subsection}
 \end{section}
@@ -353,9 +388,9 @@ The population-level impact of utilizing different powerhouse operation strategi
 \begin{subsection}{Baseline Long-Term Growth Rate, Sensitivities, \& Elasticities}
 For the baseline parameterization of the model (Table 1), the long-term growth rate is $\lambda\approx 0.7710$.  With very low baseline values for spawning probability, drifting free-embryo retention, and Missouri River age-0 survival, the population is expected to decline, on average, at about 23\% per year.\\  
 
-The most sensitive Leslie matrix entries in the model, i.e., the entries for which a unit change in value is expected to have the largest impact on the long-term growth rate, are the fertility values of the oldest fish ($F_{60}$, $F_{59}$, etc.).  Increasing the number of age-1 recruits that are offspring from the oldest fish will have the greatest impact on the long-term growth rate.  Increased fecundity for older fish, higher probability of spawning in the Missouri River when reproductively ready, increased free-embryo retention, and increased Missouri River age-0 survival would all increase the number of age-1 recruits.  Of these, the model is most sensitive to the smallest baseline parameters:  survival from egg to age-1, followed by retention probability and Missouri River spawning probability (Table 2).  In relative terms, the highest elasticity value, when rounded to the nearest 6 decimal places, was shared by several parameters:  the top 3 most sensitive parameters ($\phi_0$, $p_{ret}$, and $\gamma$), the sex ratio ($r$), survival probabilities for immature female sturgeon ($\phi_1$--$\phi_{7}$), and survival probabilities of young, potentially mature female sturgeon ($\phi_{8}$--$\phi_{15}$).\\
+The most sensitive Leslie matrix entries in the model, i.e., the entries for which a unit change in value is expected to have the largest impact on the long-term growth rate, are the fertility values of the oldest fish ($F_{60}$, $F_{59}$, etc.).  Increasing the number of age-1 recruits that are offspring from the oldest fish will have the greatest impact on the long-term growth rate.  Increased fecundity for older fish, increased probability of spawning in the Missouri River when reproductively ready, increased free-embryo retention, and increased Missouri River age-0 survival would all increase the number of age-1 recruits.  Of these, the model is most sensitive to the smallest baseline parameters:  survival from egg to age-1, followed by retention probability and Missouri River spawning probability (Table 2).  In relative terms, the highest elasticity value, when rounded to the nearest 6 decimal places, was shared by several parameters:  the top 3 most sensitive parameters ($\phi_0$, $p_{ret}$, and $\gamma$), the sex ratio ($r$), survival probabilities for immature female sturgeon ($\phi_1$--$\phi_{7}$), and survival probabilities of young, potentially mature female sturgeon ($\phi_{8}$--$\phi_{15}$).\\
 
-As the elasticity analysis shows, survival of young fish is important to the outcomes of the population model.  However, it is important to acknowledge the limitations inherent in increasing survival.  For example, age-1 survival can at most be increased from 0.64 to 1, or by 56.25\% (and under biological considerations, we'd expect this to be even smaller).  Missouri River age-0 survival, on the other hand, could be increased by 1,000-fold and still would be a valid survival probability (0.075).  Mathematically, there is a lot of potential for impacting the population growth rate by making efforts to increase these smaller probabilities with high elasticities, such as age-0 survival, given a large percentage increase is biologically feasible.      
+As the elasticity analysis shows, survival of young fish is important to the outcomes of the population model.  However, it is important to acknowledge the limitations inherent in increasing survival or any other probability.  For example, age-1 survival can at most be increased from 0.64 to 1, or by 56.25\% (and under biological considerations, we'd expect this to be even smaller).  Missouri River age-0 survival, on the other hand, could be increased by 1,000-fold and still would be a valid survival probability (0.075).  Mathematically, there is a lot of potential for impacting the population growth rate by making efforts to increase these smaller probabilities with high elasticities, such as age-0 survival, given a large percentage increase is biologically feasible.      
 \end{subsection}
 
 
@@ -373,26 +408,37 @@ then at a baseline Missouri River age-0 survival of 75 out of a million, the pop
 \begin{subsection}{Fort Peck Flow Alternatives}
 \begin{subsubsection}{Long-Term Growth Rates}
 \begin{paragraph}{By Year}
-Tables 3 and 
+Long-term growth rates ($\lambda$-values) computed from the population model using retention probability inputs from HEC-RAS simulations, a spawning probability of 0.5, and median water temperature conditions varied by management alternative scenario and year (Table 3).  Warmer temperatures promote faster development of free-embryos, leading to higher retention probabilities and long-term growth rates.  Long-term growth rates ($\lambda$) were higher by an average of 0.0063 when temperatures were assumed to be at their upper \textit{95\% confidence} limit and were lower by an average of 0.0074 when temperatures were assumed to be at their lower \textit{95\% confidence} limit (Table 4).  %The No Action and Alternative 1a flow scenarios tended to be more sensitive to higher than average temperatures (with $\lambda$ tending to increase more than other scenarios), while the No Action and Alternative 1b were more sensitive to lower than average temperatures.  
+One year and flow scenario combination, Alternative 1a in 1968, did not follow the general trend (lower long-term growth rate at lower temperatures).  Long-term growth rates were nearly the same under median and low water temperatures, with the low water temperatures associated with a $\lambda$ value that was 0.0001 greater than at median temperatures.  This slight difference can be attributed to differences in retention probabilities.  In 1968 simulations for Alternative 1a, low water temperatures had a slightly higher retention probability than median water temperatures---a difference that is opposite the general trend but can potentially be attributed to non-linearities not accounted for when computing retention probabilities via linear interpolation.\\    
 
-Warmer temperatures promote faster development of free-embryos, leading to higher retention probabilities and long-term growth rates.  Thus with very few exceptions, long-term growth rates ($\lambda$) were higher when temperatures were assumed to be at their upper limit and lower when assumed to be at their lower limit (Table 4).  All exceptions had a long-term growth rate that was within 0.002 of the long-term growth rate computed at median temperatures and can potentially be attributed to non-linearities in development not accounted for when computing retention probabilities via linear interpolation.   
+The top scenario, i.e., the alternative management flow scenario that produced the maximum long-term growth rate, varied by year and, in some years, by water temperature (Table 5).  With the exception of the No Action scenario, all other alternative scenarios were ranked as the top scenario for at least 3 combinations of year and water temperature.  Alternatives 1a and 2 were ranked as the top scenario the fewest numbers of times (Table 5).  %When considered across years and temperatures, the "b" alternatives outperformed the standard and "a" alternatives. 
+Alternative 2b was ranked as the top scenario the greatest number of times at 23, or over half of all the temperature and year combinations.  While the No Alternative scenario met the flow criteria in 2 out of the 83 years, the long-term growth rate associated with this scenario at all water temperatures was smaller than those computed for all other viable alternative scenarios at the same water temperature.  
 \end{paragraph}
 \begin{paragraph}{Across the Period of Record}
-Due to environmental conditions \textit{and any other factors? HCs?} it is not possible to produce the desired hydrograph every year.  Additionally, there are some years in which the shape of the desired hydrograph can be achieved, but the magnitude of the peak flows does not surpass 20kcfs, the threshold discharge assumed to cue spawning. \textit{(Check wording with Craig.)}  The number of years in which a hydrograph with a discharge that surpasses 20kcfs could have been produced throughout the period of record (1930-2012) varies by alternative management scenarios (Table 5).  The No Action scenario was the least likely to cue a spawning event, meeting spawning criteria in only 2 of the 83 years on record.  Alternative 2 was the most likely to cue a spawning event, meeting the specified criteria in 12 out of 83 years.\\   
+Due to environmental conditions \textit{and any other factors? HCs?} it is not possible to produce the desired hydrograph every year.  Additionally, there are some years in which the shape of the desired hydrograph can be achieved, but the magnitude of the peak flows does not surpass 20kcfs, the threshold discharge assumed to cue spawning. \textit{(Check wording with Craig.)}  The number of years in which a hydrograph with a discharge that surpasses 20kcfs could have been produced throughout the period of record (1930-2012) varies by alternative management scenarios (Table 6).  The No Action scenario was the least likely to cue a spawning event, meeting the flow criteria in only 2 of the 83 years on record.  Alternative 2 was the most likely to cue a spawning event, meeting the flow criteria in 12 out of 83 years.\\   
 
-Trade-offs can be expected if one alternative is very beneficial to the population (e.g., high long-term growth rate) but can only be implemented rarely.  To understand how a fixed alternative strategy would perform across the period of record, average long-term growth rate values were taken.  During years in which a hydrograph could not be implemented or did not have peak flows that surpassed 20kcfs, it was assumed that no spawning occurred.  Without recruitment to age-1, the population growth rate would be equivalent to the weighted average of the age-specific survivals (weighted by the number of fish in each age class).  Instead of estimating this weighted average, which varies with age-distribution, we considered the minimum ($\phi_1=0.64$) and maximum ($\phi_{15+}=0.94$) survival rates  and computed a range for the average long-term $\lambda$ value across the period of record by alternative.\\
+Trade-offs can be expected if one alternative is very beneficial to the population (e.g., high long-term growth rate) but can only be implemented rarely.  To understand how a fixed alternative strategy would perform across the period of record, average long-term growth rate values were taken.  During years in which a hydrograph could not be implemented or did not have peak flows that surpassed 20kcfs (i.e., did not meet flow criteria), it was assumed that no spawning occurred.  The long-term growth rate under no spawning conditions is $0$.  To account for the reduced growth rates that would occur during years with no recruitment, we used the minimum annual growth rate when flow criteria was not met instead of the associated long-term growth rate.  Without recruitment to age-1, the population growth rate for a single year would be equivalent to the weighted average of the age-specific survivals (weighted by the number of fish in each age class).  The minimum annual growth rate would therefore be equal to the minimum survival rate, or $\phi_1=0.64$.\\
 
-Describe interesting things that happened here!     
+Alternative 2b had the largest average long-term growth rate when long-term $\lambda$ values were averaged across all analyzed years for a particular alternative management scenario (Table 7).  However, Alternative 2 had the largest period of record average---the  growth rate when averaged across the period of record (1930-2012) using an annual growth rate of 0.64 for years in which the alternative scenario was not successfully implemented to cue spawning (did not meet flow criteria).  While Alternative 2, had few years in which it's long-term growth rate was the maximum across scenarios (Table 5), it was able to be successfully implemented for more years than any other scenario (Table 6).  If information is not available to provide an understanding of which management alternative scenarios can be implemented successfully in a given year, then Alternative 2 may be the best choice to account for uncertainties in environmental conditions.  However, if criteria can be established to determine which management scenarios are options for a given a year, then an adaptive decision making approach could be used.  Such an approach would produce a higher period of record average growth rate than any of those given in Table 7.  %The Upper POR Limit averages should be interpretted with a grain of salt, as the high annual growth rates values were used for years that did not meet flow criteria and lower long-term growth rates were used for years in which scenarios did meet flow critera -- such a combination leads to difficult to interpret results (see also Discussion).   
 \end{paragraph}
-\begin{paragraph}{Adaptive Decision-Making Range}
-If Time
-\end{paragraph}
+%\begin{paragraph}{Adaptive Decision-Making Range}
+%If Time
+%\end{paragraph}
+%\begin{paragraph}{Effects of Spawning Probability}
+%\end{paragraph}
 \begin{paragraph}{Effects of Powerhouse Operations}
 Figure \ref{SA85}.
+\begin{itemize}
+\item General trend in which long-term $\lambda$ increases with lower powerhouse operations and higher temperatures.
+\item For most scenarios it does not make a difference, in terms of $\lambda$, if the powerhouse is ran under standard or peak time conditions.
+\item There are a few exceptions to this rule.  Cases where switching from standard operation to peak time operations increases $\lambda$ can be seen at low water temperatures for Alternative 1a, at median water temperatures for Alternatives 2 and 2b, and high water temperatures for Alternative 2.
+\item Additionally, cases where switching from standard operation to peak time operations decreases $\lambda$ can be seen at median water temperatures for Alternatives 1b and 2a.  Craig, any ideas why we would see a decrease with this change?
+\item Caveat: this data only represents one year and these patterns may not be representative of the patterns seen in other years.   
+\end{itemize}
 \end{paragraph}
 \end{subsubsection}
 \begin{subsubsection}{Long-Term Growth-Decline Boundaries}
-Make These
+Figures \ref{YwiA} and \ref{AwiY}.
 \end{subsubsection}
 \end{subsection}
 
@@ -454,7 +500,60 @@ Make These
 \end{section}
 
 \begin{section}{Discussion}
+\begin{itemize}
+\item Future work ideas: 
+	\begin{enumerate}
+	\item A population could have a long-term growth rate that is less than 1 (population decline), but it could still exhibit natural recruitment.  Analyze a recruitment model to add to the metrics for evaluating alternative management scenarios.
+	\item Improve how temperature is handled and related to $\gamma$ in each alternative scenario-year combination.
+	\item The average $\lambda$ across the POR analysis would likely be more informative for starting with a particular initial population and iterating through the population model over the period of record.
+	\item Run a similar POR avearge $\lambda$ analysis with looking at the outcome under adaptive decision-making.
+	\item Produce a figure similar to 9 for L, M, H temperatures combined with spawning probabilities $\gamma=0.25, 0.5, 0.75$ to look at the effects of varying $\gamma$.
+	\item Improve length-age relationship.
+	\item Model is sensitive to fertility values of older fish; these could potentially vary a lot as $E_i$ likely varies a lot at older ages.  a) Look into effects on overall fertility values, b) Reproduce with CI bars or similar, c) Run a stochastic model to better understand the range of outcomes due to variation.
+	\item Break down figures 10 and 11 in order to illustrate certain points.
+	\item Diagram figure visually describing $\psi_i$ and its relationship to $m_i$ and $p_t$.
+	\item Add in more details on the Euler-Lotka equation.
+	\end{enumerate}
+\item Add in a more thorough description of caveats
+\end{itemize}
 \end{section}
+
+\begin{section}{Questions and Comments} 
+\begin{subsection}{For Craig}
+\begin{enumerate}
+\item Alternative 2a 1966 runs were coded as H2, M5, L8 and not H, M, L.  Is there a difference between these codes?  
+	\begin{itemize}
+	\item For now, I have treated them as the same.  
+	\item If there is a difference we should put a caveat in the document about this and any cautions needed when comparing growth rates among the different temperatures.
+	\end{itemize}
+\item Alternative 2a 1987 runs were coded as L2, M2, H2 --- same questions and comments as above. 
+\item I don't have results for Alternative 1 in year 2000, as the files I had access to did not include HEC-RAS outputs for this year and scenario combination.  Did this run get eliminated for some reason? Or accidentally overlooked?, etc.
+\item Please change/add to the last column of the first line of Table 1 -- the explanation/source for the threshold discharge of 20kcfs, as you see fit.  Additionally, if you have any references to add on the topic of spawning conditions, woudd you add them to the last paragraph of Section 2.1.2? 
+\item In Section 2.1.2 there are also 2 footnote questions for you.  As a follow-up to the latter of the two:  
+	\begin{itemize}
+	\item The temperature values ``Below Peck'' in the ``Temp\_Lookup'' excel file are the low, median, and high values from the data taken from the POR, and therefore, are the same for any given year.  I can use these values to determine if $T\geq T^*$ at time of spawning using the spawning dates highlighted in green in the ``Run Dates and Log'' excel file---these are the spawning dates and not the day of drift initiation, correct?
+	\item One concern I had about using the above approach is that these are the values taken over the POR, and the POR typically did not experience warmer flows over the spillway, correct?  The warmer flows over the spillway (which I assume are needed to achieve hydrograph alternatives prior to spawning but perhaps that is not the case) would likely increase the temperature below Fort Peck away from these historical values.  I assume the mixing of different temperature water is taken into account in the HEC-RAS runs, but I wasn't sure at what point in time this mixing was initially taken into account: at spawning?, as soon as flows over the spillway would occur in the spring?, not until drift initiation?  Anyways, I wasn't sure the best way to obtain a temperature value below Fort Peck Dam that reflected the dynamics of what occurred in the hydrograph prior to spawning.
+	\end{itemize}
+\item My descriptions of your temperature levels is very vague, and potentially inaccurate.  Would you check these and change the wording as needed?---Thank you!!
+\item Similarly, my descriptions of why alternatives were run in some years and not others is not the most informed and would benefit from your revisions.  I ended up referring to the conditions which needed to be met for a HEC-RAS analysis to be ran as ``flow criteria''.  I have also referred to ``viable'' or ``successfully implemented'' years.  These may not be the best word choice.  Furthermore, my description of a spawning cue that surpasses a discharge of 20kcfs, may not be the most accurate.  My apolgies and thanks for your corrections!!!
+\item There are a couple of times in this document that I refer to ``peak times'' and my description would benefit from the actual peak times (6am-8am, 6pm-10pm, maybe?) being added in.
+\end{enumerate}
+\end{subsection}
+\begin{subsection}{For Mike}
+\begin{enumerate}
+\item Please clean up the description of the details for computing $E_i$ values in Section 2.1.3.3.  In particular, there is a sentence that needs finishing and elaborating on.
+\item I did not have time to modify Figure 2.  
+	\begin{itemize} 
+	\item Colors were originally generated from a population model standpoint with blue being an established, external model, red being new models (with the HEC-RAS + development part being new), and then the population model (also new but was the focus the figure when I originally created it)... and of course yellow is final output.  I suppose the colors can still be thought of as steps or layers in a process (first blue, then red, then green) to obtaining long-term growth rate values, but see also next bullet.
+	\item Also something to keep in mind:  I originally thought the HEC-ResSim outputs would give us temperatures at time of spawning, but we may need to turn to HEC-RAS outputs for that...probably a question for Craig.  If we do then we may want to reformat the figure.  Since temperatures were assumed greater than 16C for the current analysis, we likely don't need to worry about modifying this aspect right now.
+	\item Shapes: Outer sharp corner boxes were submodels (with the dashed one being an external model to those constructed here).  I believe hexagons were originally being used to identify rates (e.g., maturation rate, or age-specific fertilities as rates because they are ``per female'') and rounded boxes were whole values.  Not sure this is the best approach--it originally came from following the set-up of Buenau et al.'s certification paper.
+	\item We swapped the meaning of $\gamma$ from spawning frequency to spawning probability, but I did not update this figure to reflect that yet.
+	\item I have included the power point file so that you can modify the figure as you all see fit. 
+	\end{itemize} 
+\end{enumerate}
+\end{subsection}
+\end{section}
+
 
 \begin{section}{Acknowledgments}
 \end{section}
@@ -471,9 +570,9 @@ Make These
 Parameter & \hspace{1.5cm} Description & Baseline Value &  \hspace{0.5cm} Source/Explanation\\
 \hline
 & & & \\
-$Q^{*}$ & discharge (cfs) \newline &  20,000 & \\
+$Q^{*}$ & discharge (kcfs) \newline &  20 & Fuller \& Haddix 2013\\
 $T^{*}$ & temperature ($^{\circ}$C) \newline & 16 & DeLonay et al. 2016 \\
-$\gamma_{high}$ & probability a reproductively-ready fish spawns under favorable conditions \newline & 0.75 & \\
+$\gamma_{high}$ & probability a reproductively-ready fish spawns under favorable conditions \newline & 0.5 & equally likely to choose the Yellowstone\\
 $\gamma_{low}$ & probability a reproductively-ready fish spawns under infavorable conditions \newline & 0.009 &  $<1/85$ based on historical observations\\
 $a_{max}$ & maximum age of a female pallid sturgeon (years) \newline & 60 & Braaten et al. 2015\\
 $\phi_1$ & probability of surviving from age-1 to age-2 \newline & 0.64 & Rotella et al. 2017\\
@@ -507,7 +606,7 @@ $\vdots$ & eggs released by females ages 9--59 \newline & \vdots & number of egg
 $E_{60}$ & average number of eggs released by age-60 females \newline & 99,151 & see in-text fecundity simulation details\\
 $\phi_{0}$ & probability of surviving from egg to age-1 given retention in the free-flowing Missouri River \newline & 0.000075 & \\
 $p_{ret}$ & free-embryo retention probability\newline & 0.001 & \\
-$\gamma$ & probability a reproductively-ready fish spawns in the Missouri River \newline & 0.01 & \\
+$\gamma$ & probability a reproductively-ready fish spawns in the Missouri River \newline & 0.01 & approximate geometric \newline mean of $\gamma_{high}$ and $\gamma_{low}$ from 1930-2012 under the No Action scenario\\
 \hline
 \end{longtable}
 
@@ -570,69 +669,128 @@ $\phi_1$ & survival from age-1 to age-2 \newline & 0.02\\
 %\hline
 %&&& Median&Temperature &&&\\
 \begin{table}[h]
-\caption{Long-term growth rates by alternative Fort Peck flow scenario and year given median historical temperature conditions.}
+\caption{Long-term growth rates by alternative Fort Peck flow scenario and year given median historical water temperature conditions.  Years from the period of record (1930-2012) in which at least one alternative hydrograph could be produced with spawning cue discharges greater than 20kcfs were analyzed in HEC-RAS.  Spawning cues surpassing the 20kcfs magnitude were assumed to result in 50\% of reproductively-ready females spawning in the Missouri River (vs. spawning in the Yellowstone River or not spawning).  Retention probabilities were computed from the HEC-RAS simulations and used to compute $\lambda$ values, i.e., the long-term growth rate.  If a long-term growth rate value is absent for a particular year and flow scenario combination, it is because either the hydrograph could not be produce given the environmental conditions of that year or the spawning cue threshold discharge of 20kcfs was not surpassed (and therefore HEC-RAS simulations were not run to calculate a retention probability).   NA's indicate year and scenario combinations for which HEC-RAS outputs are pending.}
 \centering
+%VERSION WITH TOP SCENARIO
+%\begin{tabular}{cccccccclc}		
+%\hline
+%&&& \textbf{Median}&  \textbf{Water} & \textbf{Temperature} &&&\\
+%\hline
+%Year  & Alt. 1 & Alt. 1a & Alt.1b & Alt. 2 & Alt. 2a & Alt. 2b & No Action &\vline& Top Scenario\\ 
+%1966	& & & 0.8474 & 0.8439 & & & &\vline& Alt. 1b\\
+%1968	& 0.8171 & 0.8641	& & 0.8158 & 0.8433 & 0.8516 & &\vline& Alt. 1a\\	
+%1975	& 0.9070 & 0.8929	& 0.9041 & 0.9034 &  0.9126 & 0.9291 & 0.8831 &\vline& Alt. 2b\\
+%1980	& 0.8273 & & 0.8126 & 0.8189 & 0.8442 & 0.8682 & &\vline& Alt. 2b\\	
+%1983	& 0.8642 & & 0.8945 & 0.8386& 0.8797 & 0.8891 & &\vline& Alt. 1b\\	
+%1984	& 0.8501 & & & 0.8523 & 0.8851 & 0.8501 & &\vline& Alt. 2a\\	
+%1985	& 0.8278 & 0.8030 & 0.8961 & 0.8224 & 0.8359 & 0.8548 & &\vline& Alt. 1b\\	
+%1986	& & & & 0.8986 & & & &\vline& Alt. 2\\
+%1987	& & & & 0.9035 & & 0.9402 & &\vline& Alt. 2b\\
+%1998	& 0.8218 & & 0.8373 & 0.8197 & 0.8618 & 0.9142 & &\vline& Alt. 2b\\	
+%2011	& 0.8317 & 0.8135 & 0.8416 & 0.8410 & 0.8446 & 0.8425 & 0.8071 &\vline& Alt. 2a\\
+%2012	& 0.8648 & & & 0.8542 & 0.8469 & & &\vline& Alt. 1\\	
+%\hline
+%\end{tabular}
+%ORIGINAL VERSION
 \begin{tabular}{cccccccc}		
 \hline
 &&& \textbf{Median} & \textbf{Temperature} &&&\\
 \hline
 Year  & Alt. 1 & Alt. 1a & Alt.1b & Alt. 2 & Alt. 2a & Alt. 2b & No Action\\ 
-1966	& & & 0.8474 & 0.8439 & & &\\
-1968	& 0.8171 & 0.8641	& & 0.8158 & 0.8433 & 0.8516 & \\	
-1975	& 0.9070 & 0.8929	& 0.9041 & 0.9034 &  0.9126 & 0.9291 & 0.8831\\
+1947	& & & & & & 0.8740 &\\
+1949	& & & & & & 0.9456 &\\
+1966	& & & 0.8474 & 0.8439 & 0.8653 & 0.8791 &\\
+1968	& 0.8171 & 0.8641	& & 0.8158 & 0.8433 & & \\	
+1975	& 0.9070 & 0.8929	& 0.9041 & 0.9034 &  0.9126 & 0.9287 & 0.8831\\
 1980	& 0.8273 & & 0.8126 & 0.8189 & 0.8442 & 0.8682 & \\	
 1983	& 0.8642 & & 0.8945 & 0.8386& 0.8797 & 0.8891 &\\	
-1984	& 0.8501 & & & 0.8523 & 0.8851 & 0.8501 & \\	
+1984	& 0.8501 & & & 0.8523 & 0.8851 & & \\	
 1985	& 0.8278 & 0.8030 & 0.8961 & 0.8224 & 0.8359 & 0.8548 & \\	
 1986	& & & & 0.8986 & & & \\
-1987	& & & & 0.9035 & & 0.9402 & \\
+1987	& & & & 0.9035 & 0.9264 & 0.9402 & \\
 1998	& 0.8218 & & 0.8373 & 0.8197 & 0.8618 & 0.9142 & \\	
+2000	& NA & & & & & & \\	
 2011	& 0.8317 & 0.8135 & 0.8416 & 0.8410 & 0.8446 & 0.8425 & 0.8071\\
 2012	& 0.8648 & & & 0.8542 & 0.8469 & &\\	
+\hline
+\end{tabular}
+\end{table}
+%\footnote{According to Craig's table the year 2000 should be on here too (for Alt 1), but I don't have simulation data for that year from Craig.}
+
+\newpage
+
+\begin{table}[h!]
+\caption{Differences in long-term growth rates, by alternative Fort Peck flow scenario and year, for historically low and high water temperatures as compared with median water temperatures.  Retention probabilities were computed from the HEC-RAS simulations and used in the population model to compute long-term growth rates assuming a spawning probability of 0.5.  Absent entries represent year and flow scenario combinations for which either the hydrograph could not be produce given the environmental conditions of that year or the spawning cue threshold discharge of 20kcfs was not surpassed.  NA's indicate year and scenario combinations for which HEC-RAS outputs are pending.}
+\centering
+\begin{tabular}{cccccccc}
+\hline
+&&& \textbf{Low} & \textbf{Water} & \textbf{Temperature} &&\\
+\hline
+Year & Alt. 1 & Alt. 1a & Alt.1b & Alt. 2 & Alt. 2a & Alt. 2b & No Action\\ 
+1947	& & & & & & -0.0320 &\\
+1949	& & & & & & -0.0054 &\\
+1966 & & & -0.0028 & -0.0037 & -0.0031 & -0.0038 & \\
+1968 & -0.0028	& 0.0001	&		&	-0.0024 & -0.0022 & & \\
+1975 & -0.0081	& -0.0072	& -0.0248	&	-0.0075 & -0.0052 & -0.0056 & -0.0098\\
+1980 & -0.0108	&		&	-0.0057 & -0.0053 & -0.0066 & -0.0100 & \\
+1983 & -0.0060 & &	-0.0300 & -0.0047 & 0.0000 & -0.0021 & \\
+1984 & -0.0040	&		&		&	-0.0046 & -0.0055 & & \\
+1985 & -0.0032	&	-0.0027	&	-0.0070 & -0.0039 & -0.0055 & -0.0032 & \\
+1986 & &		&		&	-0.0085 & & & \\
+1987 & &		&		&	-0.0023 & -0.0036 & -0.0014 & \\
+1998 & -0.0060	&		&	-0.0040 & -0.0069 & -0.0047 & -0.0057 & \\
+2000	& NA & & & & & & \\	
+2011 & -0.0155 & -0.0116 & -0.0157 & -0.0161 & -0.0159 & 0.0000 & -0.0179\\
+2012 & -0.0053 & & & -0.0053 & -0.0058 & & \\		
+\hline
+&&& \textbf{High} & \textbf{Water} & \textbf{Temperature} &&\\
+\hline
+Year  & Alt. 1 & Alt. 1a & Alt.1b & Alt. 2 & Alt. 2a & Alt. 2b & No Action\\ 
+1947	& & & & & & 0.0048 &\\
+1949	& & & & & & 0.0039 &\\
+1966	& & & 0.0053 & 0.0023 & 0.0030 & 0.0039 & \\
+1968	& 0.0030 &	0.0012	&		&	0.0025 & 0.0032 & & \\
+1975	& 0.0065 & 0.0073	& 0.0015 &	0.0061	& 0.0041 & 0.0028 & 0.0080\\
+1980	& 0.0014 & & 0.0049	&	0.0044	& 0.0079 & 0.0096 & \\
+1983	& 0.0057 & & 0.0059	&	0.0041	& 0.0068 & 0.0070 & \\
+1984	& 0.0039 & & & 0.0045 & 0.0054 & & \\
+1985	&0.0028 & 0.0030 & 0.0059 & 0.0036 & 0.0014 & 0.0030 & \\
+1986	& & & & 0.0083 & & & \\
+1987	& & & & 0.0023 & 0.0033 & 0.0013 & \\
+1998	& 0.0056 & & 0.0123 & 0.0060 & 0.0044 & 0.0092 & \\
+2000	& NA & & & & & & \\	
+2011	& 0.0132 & 0.0370 & 0.0132 &	0.0133 & 0.0127 & 0.0122 & 0.0147\\
+2012	& 0.0063 & & & 0.0060 & 0.0062	& & \\
 \hline
 \end{tabular}
 \end{table}
 
 
 \newpage
-
 \begin{table}[h]
-\caption{Differences, by alternative Fort Peck flow scenario and year, in long-term growth rates for historically low and high temperatures as compared with median temperatures.}
+\caption{The alternative scenario witht the greatest long-term growth rate ($\lambda$ value) by year for low, median, and high water temperatures.  Entries designated with a * are pending HEC-RAS analyses and were determined by the fact that only a single altnernative management flow scenario had the ability to meet the hydrograph requirements, as well as the spawning cue criteria ($>$20kcfs).}
 \centering
-\begin{tabular}{cccccccc}
+\begin{tabular}{cccc}
 \hline
-&&& \textbf{Low} & \textbf{Temperature} &&&\\
+& & Top Scenario & \\
+Year & Low & Median & High\\
 \hline
-Year & Alt. 1 & Alt. 1a & Alt.1b & Alt. 2 & Alt. 2a & Alt. 2b & No Action\\ 
-1966 & & & -0.0028 & -0.0037 & & & \\
-1968 & -0.0028	& 0.0001	&		&	-0.0024	&	-0.0022	&	-0.0373	&	\\
-1975 & -0.0081	& -0.0072	& -0.0248	&	-0.0075	&	-0.0052	&	-0.0056	&	-0.0098\\
-1980 &	-0.0108	&		&	-0.0057	&	-0.0053	&	-0.0066	&	-0.0100 & \\
-1983 &	-0.0060	&		&	-0.0300	&	-0.0047	&		&	-0.0021	& \\
-1984 &	-0.0040	&		&		&	-0.0046	&	-0.0055	& NA & \\
-1985 &	-0.0032	&	-0.0027	&	-0.0070	&	-0.0039	&	-0.0055	& -0.0032 &	\\
-1986 &		&		&		&	-0.0085	&		&		& \\
-1987 &		&		&		&	-0.0023	&		&	-0.0014	& \\
-1998 &	-0.0060	&		&	-0.0040	&	-0.0069	&	-0.0047	& -0.0057 & \\
-2011 &	-0.0155	&	-0.0116	&	-0.0157	&	-0.0161	& -0.0159 & 0.0000 &	-0.0179\\
-2012 & -0.0053 & & & -0.0053 & -0.0058 & & \\		
-\hline
-&&& \textbf{High} & \textbf{Temperature} &&&\\
-\hline
-Year  & Alt. 1 & Alt. 1a & Alt.1b & Alt. 2 & Alt. 2a & Alt. 2b & No Action\\ 
-1966	&&&	0.0053	&	0.0023	&		&		& \\
-1968	& 0.0030 &	0.0012	&		&	0.0025	&	0.0032	&	0.0237	& \\
-1975	& 0.0065 & 0.0073	& 0.0015 &	0.0061	&	0.0041	&	0.0041	&	0.0080\\
-1980	& 0.0014 & & 0.0049	&	0.0044	&	0.0079	&	0.0096	& \\
-1983	& 0.0057 & & 0.0059	&	0.0041	&	0.0068	&	-0.0014	& \\
-1984	& 0.0039 & & &	0.0045	&	0.0054	&	NA	& \\
-1985	&0.0028 & 0.0030 &	0.0059	&	0.0036	&	0.0014	&	0.0030	& \\
-1986	& & & & 0.0083	&		&		& \\
-1987	& & & & 0.0023	&		&	0.0013	& \\
-1998	& 0.0056 & & 0.0123 &	0.0060	&	0.0044	&	-0.0020	& \\
-2011	& 0.0132 & 0.0370 & 0.0132 &	0.0133	&	0.0127	&	0.0122	&	0.0147\\
-2012	& 0.0063 & & & 0.0060 & 0.0062	& & \\
-	
+1947	&	2b	&	2b	&	2b	\\
+1949	&	2b	&	2b	&	2b	\\
+1966	&	2b	&	2b	&	2b	\\
+1968	&	1a	&	1a	&	1a	\\
+1975	&	2b	&	2b	&	2b	\\
+1980	&	2b	&	2b	&	2b	\\
+1983	&	2b	&	1b	&	1b	\\
+1984	&	2a	&	2a	&	2a	\\
+1985	&	1b	&	1b	&	1b	\\
+1986	&	2	&	2	&	2	\\
+1987	&	2b	&	2b	&	2b	\\
+1998	&	2b	&	2b	&	2b	\\
+2000	&	1*	&	1*	&	1*	\\
+2011	&	2b	&	2a	&	2a	\\
+2012	&	1	&	1	&	1	\\
+
 \hline
 \end{tabular}
 \end{table}
@@ -655,6 +813,37 @@ Alternative 2b & 10\\
 \hline
 \end{tabular}
 \end{table}
+
+
+\newpage
+\begin{table}[h]
+\caption{Average growth rate values taken across (1) each of the years in which the particular management flow scenario met the flow criteria and had been analyzed in HEC-RAS and (2) the period of record (1930-2012) where the growth rate was assumed to be 0.64 during each year the management flow scenario did not meet the flow criteria.  Flow criteria was two-fold: the hydrograph needed to both be achieved in shape and timing, as well as produce a spawning cue discharge greater than 20kcfs.  For the one year that has yet to be analyzed in HEC-RAS for Alternative 1, the long-term growth rate was assumed to be the average of the long-term growth rates taken over the 9 years that had been analyzed.  All averages were taken as geometric means.}
+\centering
+\begin{tabular}{ccccc}
+\hline
+& Number of & Number of  & Average & Average\\
+Scenario & Years Meeting &  Years & Growth Rate & Growth Rate\\
+& Flow Criteria & Analyzed & (Analyzed Years) & Period of Record\\
+\hline
+No Action & 2 & 2 & 0.8442 & 0.6443\\
+Alternative 1 & 10 & 9 & 0.8453 & 0.6618\\
+Alternative 1a & 4 & 4 & 0.8426 & 0.6485\\
+Alternative 1b & 7 & 7 & 0.8613 & 0.6562\\
+Alternative 2 & 12 & 12 & 0.8504 & 0.6669\\
+Alternative 2a & 11 & 11 & 0.8673 & 0.6663\\
+Alternative 2b & 10 & 10 & 0.8930 & 0.6662\\
+\hline
+\end{tabular}
+\end{table}
+
+
+
+
+
+
+
+
+
 
 \newpage
 
@@ -704,7 +893,7 @@ Alternative 2b & 10\\
 \begin{figure}[h]
 \centering
 \includegraphics[width=6in]{NEPA_fig_7-growth-decline-space}
-\caption{From left to right, the curves are the population growth-decline boundaries ($\lambda=1$) for retention probabilities $p_{ret}=$1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, and 0.1.  For a given retention probability, a population is expected to grow if spawning and age-0 survival probabilities fall in the space above and to the right of the curve, or, decline if spawning and age-0 survival probabilities fall in the space below and to the left of the curve. }
+\caption{From left to right, the curves are the population growth-decline boundaries ($\lambda=1$) for retention probabilities $p_{ret}=$1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, and 0.1.  For a given retention probability, a population is expected to grow if spawning and age-0 survival probabilities fall in the space above and to the right of the curve, or, decline if spawning and age-0 survival probabilities fall in the space below and to the left of the curve. Spawning probability ($\gamma$) is the probability that a reproductively-ready female spawns in the Missouri River (vs. spawning in the Yellowstone or not spawning and reabsorbing her eggs).  Age-0 survival ($\phi_0$) is the probability of surviving from egg to age-1 given retention in the free-flowing Missouri River.  The retention probability ($p_{ret}$) refers to the probability that a drifting free-embryo is retained in the free-flowing Missouri River and does not drift into Lake Sakakawea prior to settlement.}
 \label{phi0-gamma-pret-space}
 \end{figure}
 
@@ -712,15 +901,31 @@ Alternative 2b & 10\\
 \begin{figure}[h]
 \centering
 \includegraphics[width=6in]{NEPA_Fig_8-boundary-example}
-\caption{Population growth-decline boundaries ($\lambda=1$) when retention probability is A) 20\% and B) 70\%.  All dots indicate a population whose reproductively-ready females spawn in the Missouri River 50\% of the time.  Red dots indicate a population where 75 out of every 1,000,000 eggs are expected to survive to age-1, and blue dots indicate a population where 25 out of every 10,000 eggs are expected to survive to age-1.  Red dots are in a region of decline (below and left of the curve), while blue dots are in a region of growth (above and to the right of the curve).  The dashed line indicates Pine et al.'s (2001) upper estimate of age-0 survival for gulf sturgeon, 0.0004.  Population growth at this survival level can occur but only at high spawning and retention probabilities.}
+\caption{Population growth-decline boundaries ($\lambda=1$) when retention probability is A) 20\% and B) 70\%.  All dots indicate a population whose reproductively-ready females spawn in the Missouri River 50\% of the time, i.e., $\gamma=0.5$.  Red dots indicate a population where 75 out of every 1,000,000 eggs are expected to survive to age-1 given retention in the free-flowing Missouri River ($\phi_0=0.000075$), and blue dots indicate a population where 25 out of every 10,000 eggs are expected to survive to age-1 given retention ($\phi_0=0.0025$).  Red dots are in a region of decline (below and left of the curve), while blue dots are in a region of growth (above and to the right of the curve).  The dashed line indicates Pine et al.'s (2001) upper estimate of age-0 survival for gulf sturgeon, 0.0004.  Population growth at this survival level can occur but only at high spawning and retention probabilities.}
 \label{boundaryEx}
 \end{figure}
 
 \begin{figure}[h]
 \centering
 \hspace*{-0.5in}\includegraphics[width=7.5in]{NEPA_Fig_9-Year85-SA}
-\caption{Long-term growth rate ($\lambda$) values for six Fort Peck flow scenarios under particular historical temperature and powerhouse operation combinations: LF--low temperature, full powerhouse operations; L--low temperature, standard powerhouse operations; LP--low temperature, peak time powerhouse operations, and similar for M--median temperature and H--high temperature.  \textit{Check:  Median temperatures were taken over the historical period of record (years), while low and high temperatures were estimated as the lower and upper 95\% confidence intervals.} Full powerhouse operations assume 14kcfs are run through the powerhouse 24 hours a day; standard powerhouse operations assume 14kcfs are run through the powerhouse for 12 hours a day with 7kcfs running through the powerhouse the remaining 12 hours; peak time powerhouse operations assume 7kcfs are run through the powerhouse except during peak times (\textit{times here}) when 14kcfs are run through.}
+\caption{Long-term growth rate ($\lambda$) values for six Fort Peck flow scenarios under particular historical temperature and powerhouse operation combinations: LF--low water temperature, full powerhouse operations; L--low water temperature, standard powerhouse operations; LP--low water temperature, peak time powerhouse operations, and similar for M--median water temperature and H--high water temperature.  \textit{Check:  Median water temperatures were taken over the historical period of record (years), while low and high water temperatures were estimated as the lower and upper 95\% confidence intervals.} Full powerhouse operations assume 14kcfs are run through the powerhouse 24 hours a day; standard powerhouse operations assume 14kcfs are run through the powerhouse for 12 hours a day with 7kcfs running through the powerhouse the remaining 12 hours; peak time powerhouse operations assume 7kcfs are run through the powerhouse except during peak times (\textit{times here}) when 14kcfs are run through.}
 \label{SA85}
 \end{figure}
+
+\begin{figure}[h]
+\centering
+\hspace*{-0.5in}\includegraphics[width=7.5in]{NEPA_Fig_10-boundaries-year-within-alternative}
+\caption{Growth decline boundaries by alternative management scenario.  Each contour line has a fixed retention probability that was computed form HEC-RAS outputs and represents a particular year in which the given alternative scenario met the flow criteria.   For a given year/retention probability, a population is expected to grow if spawning and age-0 survival probabilities fall in the space above and to the right of the curve, or, decline if spawning and age-0 survival probabilities fall in the space below and to the left of the curve. Spawning probability ($\gamma$) is the probability that a reproductively-ready female spawns in the Missouri River (vs. spawning in the Yellowstone or not spawning and reabsorbing her eggs).  Age-0 survival ($\phi_0$) is the probability of surviving from egg to age-1 given retention in the free-flowing Missouri River.}
+\label{YwiA}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\hspace*{-0.5in}\includegraphics[width=7.5in]{NEPA_Fig_11-boundaries-alternatives-within-year}
+\caption{Growth decline boundaries by year.  Each contour line has a fixed retention probability that was computed form HEC-RAS outputs and represents a particular management scenario that met the flow criteria during the given year.   For a given management scenario/retention probability, a population is expected to grow if spawning and age-0 survival probabilities fall in the space above and to the right of the curve, or, decline if spawning and age-0 survival probabilities fall in the space below and to the left of the curve. Spawning probability ($\gamma$) is the probability that a reproductively-ready female spawns in the Missouri River (vs. spawning in the Yellowstone or not spawning and reabsorbing her eggs).  Age-0 survival ($\phi_0$) is the probability of surviving from egg to age-1 given retention in the free-flowing Missouri River. }
+\label{AwiY}
+\end{figure}
+
+
 
 \end{document}

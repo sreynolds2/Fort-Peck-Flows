@@ -462,8 +462,8 @@ spawning_survival_retention_curves<- function(boundary_inputs=NULL,
 plot_boundary_curves<- function(curve_dat=NULL,
                                 gamma_upper=0.75,
                                 phi0_upper=0.01,
-                                xlabel=expression(paste("MR Spawning Probability  (", gamma, ")")),
-                                ylabel=expression(paste("MR Survival Probability  (  ", phi[0], ")")),
+                                xlabel=expression(paste("Spawning Probability  (", gamma, ")")),
+                                ylabel=expression(paste("Survival Probability  (  ", phi[0], ")")),
                                 xaxis="s")
 {
   pret<-unique(curve_dat$p_retained)
@@ -476,6 +476,7 @@ plot_boundary_curves<- function(curve_dat=NULL,
        tck=0.02, mgp=c(1.5,0.1,0))
   #legend(0.4, tmp[which(tmp$gamma==0.4),"phi0_MR"]+0.001, 
   #       paste("retention =", pret[1]), bty='n')
+  cols<-c("red", "orange", "green", "blue", "purple", "magenta", "black")
   if(length(pret>1))
   {
     invisible(lapply(2:length(pret), function(i)
