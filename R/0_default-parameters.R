@@ -86,3 +86,5 @@ inputs$phi0_MR<-0.000075
 #inputs$gamma_upper<- 0.5
 #inputs$gamma_lower<- 0.01
 inputs$gamma<- 0.01
+
+inputs$id<- 1

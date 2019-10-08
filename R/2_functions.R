@@ -506,50 +506,77 @@ plot_boundary_curves<- function(curve_dat=NULL,
 
 
 # 7. 
-## POPULATION PROJECTION
-project_pop<- function(inputs=NULL,
-                       gamma_hist=1,
-                       phi0_MR_hist=0.000186,
-                       nyears=59,
-                       spnYr=rep(0,59),
-                       p_retained=rep(0.001, 59),
-                       initial_adults=5000,
-                       exact=TRUE,
-                       initial_dist=FALSE,
-                       N0=rmultinom(1, 500, rep(1/60, 60)),
-                       stocking=NULL)
+## INITIAL POPULATION
+initialize_pop<- function(inputs=NULL,
+                          gamma_hist=1,
+                          phi0_MR_hist=0.000186,
+                          stable_age=FALSE,
+                          boom_prob=1/5,
+                          bust_prob=1/5,
+                          boom_recruits=25000,
+                          bust_recruits=0,
+                          avg_recruits=1000,
+                          initial_adults=5000,
+                          exact=TRUE)
 {
   # ERROR CHECK
-  if(length(spnYr)!=nyears | length(p_retained)!=nyears)
+  if(stable_age & (length(initial_adults)!=1 | initial_adults<=0))
   {
-    return(print("The inputs 'spnYr' and 'p_retained' must be vectors of length
-                 'nyears'."))
+    return(print("For a 'stable_age' generation of the initial population, a single
+                  positive value for 'initial_adults' must be specified."))
   }
-  if(initial_dist==TRUE & length(N0)!=inputs$max_age)
+  if(!stable_age)
   {
-    return(print("The input 'N0' must be a vector of the initial number of pallid 
-                 sturgeon in each age class from age 1 to age 'inputs$max_age'."))
+    if(!all(sapply(c(boom_prob, bust_prob, boom_recruits, bust_recruits,
+                      avg_recruits), length)==1))
+    {
+      return(print("For a random generation of the initial population, a single
+                   positive value for each of 'boom_prob', 'bust_prob', 
+                   'boom_recruits', 'bust_recruits', 'avg_recruits' must be 
+                   specified."))
+    }
+    if(boom_prob+bust_prob>1)
+    {
+      return(print("The sum of 'boom_prob' and 'bust_prob' must be between 0 and 1."))
+    }
   }
-  if(initial_dist==TRUE & sum(N0[inputs$mat$a_h:inputs$max_age])!=initial_adults)
+  ## RECORD NEW INPUTS
+  inits<- list()
+  inits$inputs_id<- inputs$id
+  inits$gamma_historical<- gamma_hist
+  inits$phi0_historical<- phi0_MR_hist
+  inits$stable_age<- stable_age
+  inits$exact<- exact
+  if(!stable_age)
   {
-    warning(print("The input 'N0' is being used.  The number of initial adults
-                   in this vector overrides any input for 'initial_adults'."))
+    inits$boom_prob<- boom_prob
+    inits$bust_prob<- bust_prob
+    inits$boom_recruits<- boom_recruits
+    inits$bust_recruits<- bust_recruits
+    inits$avg_recruits<- avg_recruits
   }
-  if(!is.null(stocking) & length(stocking)!=nyears)
+  if(stable_age)
   {
-    return(print("The input 'stocking' must be a vector of length 'nyears'."))
-  }  
-  # RECORD INPUT VALUES
-  inputs$p_retained<- p_retained
-  inputs$nYears<- nyears
-  inputs$gamma_historical<- gamma_hist
-  inputs$phi0_historical<- phi0_MR_hist
-  gamma<- ifelse(spnYr==1, 0.5, 0.009)
-  inputs$gamma<- gamma
-  # INITIALIZE OUTPUT MATRIX
-  out<- matrix(0, nrow=nyears+1, ncol=inputs$max_age)
-  ## INITIAL AGE DISTRIBUTION
-  if(!initial_dist)
+    inits$initial_adults<- initial_adults
+  }
+  ## CREATE INITIAL AGE DISTRIBUTION BY PROJECTIONS OF RANDOM BOOM/BUST YEARS
+  if(!stable_age)
+  {
+    year_type<- rmultinom(inputs$max_age, 1, 
+                          c(bust_prob, 1-bust_prob-boom_prob, boom_prob))
+    vals<- c(bust_recruits, avg_recruits, boom_recruits)
+    N0<- c(vals%*%year_type)
+    for(i in 2:60)
+    {
+      N0[i]<- N0[i]*prod(inputs$phi[1:(i-1)])
+    }
+    if(!exact)
+    {
+      N0<- round(N0)
+    }
+  }
+  ## CREATE INITIAL AGE DISTRIBUTION AT ASSUMED HISTORICAL STEADY AGE DISTRIBUTION
+  if(stable_age)
   {
     # BUILD HISTORICAL LESLIE MATRIX
     A<- matrix(0,inputs$max_age,inputs$max_age)
@@ -571,12 +598,52 @@ project_pop<- function(inputs=NULL,
              rmultinom(1, initial_adults, 
                        ea$stable.age[inputs$mat$a_h:inputs$max_age]))
     }
-    out[1,]<- N0
   }
-  if(initial_dist)
+  inits$N0<- N0
+  return(inits)
+}  
+
+
+  
+# 8.  
+## POPULATION PROJECTION
+project_pop<- function(inputs=NULL,
+                       init_inputs=NULL,
+                       nyears=59,
+                       spnYr=rep(0,59),
+                       p_retained=rep(0.001, 59),
+                       stocking=NULL)
+{
+  # ERROR CHECK
+  if(inputs$id!=init_inputs$inputs_id)
   {
-    out[1,]<- N0
+    warning(print("The inputs id used to generate 'init_inputs'differs from the
+                 current value given in 'inputs'."))
   }
+  if(inputs$max_age!=length(init_inputs$N0))
+  {
+    return(print("The input 'init_inputs' must contain a vector 'N0' of the 
+                  initial population numbers by age class of length 
+                 'inputs$max_age'."))
+  }
+  if(length(spnYr)!=nyears | length(p_retained)!=nyears)
+  {
+    return(print("The inputs 'spnYr' and 'p_retained' must be vectors of length
+                 'nyears'."))
+  }
+  if(!is.null(stocking) & length(stocking)!=nyears)
+  {
+    return(print("The input 'stocking' must be a vector of length 'nyears'."))
+  }  
+  # RECORD INPUT VALUES
+  inputs$p_retained<- p_retained
+  inputs$nYears<- nyears
+  gamma<- ifelse(spnYr==1, 0.5, 0.009)
+  inputs$gamma<- gamma
+  inputs$N0<- init_inputs$N0
+  # INITIALIZE OUTPUT MATRIX
+  out<- matrix(0, nrow=nyears+1, ncol=inputs$max_age)
+  out[1,]<- init_inputs$N0
   # RUN PROJECTION
   for(x in 1:nyears)
   {
@@ -587,14 +654,16 @@ project_pop<- function(inputs=NULL,
     ## FERTILITY VALUES
     A[1,] <- inputs$psi*gamma[x]*inputs$eggs*inputs$probF*p_retained[x]*inputs$phi0_MR 
     # UPDATE POPULATION
-    if(exact)
+    if(init_inputs$exact)
     {
       out[x+1, ]<- A%*%out[x,]
     }
-    if(!exact)
+    if(!init_inputs$exact)
     {
       out[x+1, ]<- round(A%*%out[x,])
     }
   }
   return(list(pop_numbers=out, inputs=inputs))
 }
+
+
