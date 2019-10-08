@@ -1,6 +1,6 @@
 
 
-
+# 1.
 ## GENERATE NEW INPUTS
 create_inputs<-function(max_age=60,  
                         phi=c(0.64, 0.69, 0.72, 0.76, 0.79, 0.82, 0.84, 
@@ -108,6 +108,7 @@ create_inputs<-function(max_age=60,
 
 
 
+#2. 
 ## CONSTRUCT THE LESLIE MATRIX, PERFORM EIGEN-, SENSITIVITY, & 
 ## ELASTICITY ANALYSES
 matrix_eigen_analysis<- function(inputs)
@@ -269,6 +270,9 @@ matrix_eigen_analysis<- function(inputs)
   return(ea)
 }
 
+
+# 3. 
+## PRODUCE TOP SENSITIVITY AND ELASTICITY TABLES
 sens_elas_table<- function(data=NULL,
                            number=10,
                            sensitvities=TRUE,
@@ -333,6 +337,7 @@ sens_elas_table<- function(data=NULL,
 }
 
 
+# 4. 
 ## BOUNDARY PRODUCT VALUE
 boundary_product<- function(inputs=NULL)
 {
@@ -386,6 +391,8 @@ boundary_product<- function(inputs=NULL)
   return(inputs)
 }
 
+
+#5. 
 ## SPAWNING-SURVIVAL CURVES
 spawning_survival_retention_curves<- function(boundary_inputs=NULL,
                                               p_retained=seq(0.1, 1, 0.1))
@@ -459,6 +466,9 @@ spawning_survival_retention_curves<- function(boundary_inputs=NULL,
   return(curve_dat)
 }
 
+
+# 6. 
+## PLOT BOUNDARY CURVES IN SPAWNING-SURVIVAL SPACE
 plot_boundary_curves<- function(curve_dat=NULL,
                                 gamma_upper=0.75,
                                 phi0_upper=0.01,
@@ -491,4 +501,100 @@ plot_boundary_curves<- function(curve_dat=NULL,
       #}
     })) 
   }
+}
+
+
+
+# 7. 
+## POPULATION PROJECTION
+project_pop<- function(inputs=NULL,
+                       gamma_hist=1,
+                       phi0_MR_hist=0.000186,
+                       nyears=59,
+                       spnYr=rep(0,59),
+                       p_retained=rep(0.001, 59),
+                       initial_adults=5000,
+                       exact=TRUE,
+                       initial_dist=FALSE,
+                       N0=rmultinom(1, 500, rep(1/60, 60)),
+                       stocking=NULL)
+{
+  # ERROR CHECK
+  if(length(spnYr)!=nyears | length(p_retained)!=nyears)
+  {
+    return(print("The inputs 'spnYr' and 'p_retained' must be vectors of length
+                 'nyears'."))
+  }
+  if(initial_dist==TRUE & length(N0)!=inputs$max_age)
+  {
+    return(print("The input 'N0' must be a vector of the initial number of pallid 
+                 sturgeon in each age class from age 1 to age 'inputs$max_age'."))
+  }
+  if(initial_dist==TRUE & sum(N0[inputs$mat$a_h:inputs$max_age])!=initial_adults)
+  {
+    warning(print("The input 'N0' is being used.  The number of initial adults
+                   in this vector overrides any input for 'initial_adults'."))
+  }
+  if(!is.null(stocking) & length(stocking)!=nyears)
+  {
+    return(print("The input 'stocking' must be a vector of length 'nyears'."))
+  }  
+  # RECORD INPUT VALUES
+  inputs$p_retained<- p_retained
+  inputs$nYears<- nyears
+  inputs$gamma_historical<- gamma_hist
+  inputs$phi0_historical<- phi0_MR_hist
+  gamma<- ifelse(spnYr==1, 0.5, 0.009)
+  inputs$gamma<- gamma
+  # INITIALIZE OUTPUT MATRIX
+  out<- matrix(0, nrow=nyears+1, ncol=inputs$max_age)
+  ## INITIAL AGE DISTRIBUTION
+  if(!initial_dist)
+  {
+    # BUILD HISTORICAL LESLIE MATRIX
+    A<- matrix(0,inputs$max_age,inputs$max_age)
+    ## SURVIVAL VALUES
+    A[cbind(2:inputs$max_age,1:(inputs$max_age-1))]<- inputs$phi
+    ## FERTILITY VALUES
+    A[1,] <- inputs$psi*gamma_hist*inputs$eggs*inputs$probF*phi0_MR_hist 
+    # HISTORICAL EIGENANALYSIS
+    ea<- eigen.analysis(A)
+    initial_num<- initial_adults/sum(ea$stable.age[inputs$mat$a_h:inputs$max_age])
+    if(exact)
+    {
+      N0<-ea$stable.age*initial_num
+    }
+    if(!exact)
+    {
+      N0<- c(rmultinom(1, initial_num-initial_adults, 
+                       ea$stable.age[1:(inputs$mat$a_h-1)]),
+             rmultinom(1, initial_adults, 
+                       ea$stable.age[inputs$mat$a_h:inputs$max_age]))
+    }
+    out[1,]<- N0
+  }
+  if(initial_dist)
+  {
+    out[1,]<- N0
+  }
+  # RUN PROJECTION
+  for(x in 1:nyears)
+  {
+    # BUILD LESLIE MATRIX
+    A<- matrix(0,inputs$max_age,inputs$max_age)
+    ## SURVIVAL VALUES
+    A[cbind(2:inputs$max_age,1:(inputs$max_age-1))]<- inputs$phi
+    ## FERTILITY VALUES
+    A[1,] <- inputs$psi*gamma[x]*inputs$eggs*inputs$probF*p_retained[x]*inputs$phi0_MR 
+    # UPDATE POPULATION
+    if(exact)
+    {
+      out[x+1, ]<- A%*%out[x,]
+    }
+    if(!exact)
+    {
+      out[x+1, ]<- round(A%*%out[x,])
+    }
+  }
+  return(list(pop_numbers=out, inputs=inputs))
 }

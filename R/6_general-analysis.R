@@ -407,3 +407,125 @@ mtext(expression(paste("Age-0 Survival ( ", phi[0], ")")),
       2, outer=TRUE, padj=1, las=0)
 
 
+## LONG-TERM LAMBDA VS. P_RETAINED
+ps<- seq(0.001, 1, 0.001)
+ls_high<- sapply(ps, function(x)
+{
+  inpts<- inputs
+  inpts$gamma<- 0.5
+  inpts$p_retained<- x
+  ea<- matrix_eigen_analysis(inpts)
+  out<- ea$lambda1
+  return(out)
+})
+ls_low<- sapply(ps, function(x)
+{
+  inpts<- inputs
+  inpts$gamma<- 0.009
+  inpts$p_retained<- x
+  ea<- matrix_eigen_analysis(inpts)
+  out<- ea$lambda1
+  return(out)
+})
+plot(ps, ls_high, type="l", 
+     #ylim=c(min(ls_high, ls_low), max(ls_high, ls_low)),
+     xlab="Retention Probability",
+     ylab="Long-Term Population Growth Rate")
+points(ps, ls_low, type="l", col="gray")
+
+
+#######################################################
+#######################################################
+#######################################################
+
+# NUMBERS ANALYSIS
+
+## PROJECTION FROM 1953 (CLOSING OF GARRISON DAM) TO 2012
+### ASSUMING 5000 ADULTS AND A STABLE AGE DISTRIBUTION IN 1953
+alts<- unique(dat$scenario)
+pop<- lapply(alts, function(x)
+{
+  tmp<- subset(dat, scenario==x & temperature_flow=="M")
+  tmp<- tmp[!duplicated(tmp$year),]
+  tmp$year<- tmp$year-1953
+  tmp<- subset(tmp, year>0)
+  nyears<- 2012-1953
+  spnYr<- ifelse(1:nyears %in% tmp$year, 1, 0)
+  p_retained<- rep(0.001, nyears)
+  p_retained[tmp$year]<- tmp$p_retained
+  #inps<-inputs
+  #inps$phi[12:14]<-c(0.925, 0.935, 0.945) 
+  #inps$phi[15:59]<- 0.95
+  out<- project_pop(inputs=inputs,
+                    nyears=nyears,
+                    spnYr=spnYr,
+                    p_retained=p_retained,
+                    initial_adults = 7500)
+                    #initial_dist = TRUE,
+                    #N0=c(24369, rep(0, 59)))
+  return(out)
+})
+saveRDS(pop, "./output/_projections/1935_to_2012_Projections_7500_34447.rds")
+#saveRDS(pop, "./output/_projections/1935_to_2012_Projections_BackComputed_24369.rds")
+
+final_pop<-lapply(1:length(alts), function(x)
+{
+  pop_trnd<- rowSums(pop[[x]]$pop_numbers)
+  out<- pop_trnd[length(pop_trnd)]
+  return(data.frame(scenario=alts[x], pop_2012=out))
+})
+final_pop<- do.call(rbind, final_pop)
+final_pop$rank<- 0
+final_pop$rank[order(final_pop$pop_2012, decreasing = TRUE)]<- 1:7
+write.csv(final_pop, "./output/_ranks/1935_to_2012_Ranks_7500_34447.csv", row.names = FALSE)
+#write.csv(final_pop, "./output/_ranks/1935_to_2012_Ranks_BackComputed_24369.csv", row.names = FALSE)
+
+
+## DIFFERENT INITIAL AGE DISTRIBUTIONS AND INITIAL POPULATION SIZES
+### DIFFERENT INITIAL POPULATION SIZES AT STEADY STATE
+
+
+
+### CREATE AN INITAL POPULATION WITH BOOM AND BUST YEARS
+boom_prob<- 1/5 
+bust_prob<- 1/5
+year_type<- rmultinom(60, 1, c(bust_prob, 1-bust_prob-boom_prob, boom_prob))
+boom_recruits<- 25000
+bust_recruits<- 0
+avg_recruits<- 1000
+vals<- c(bust_recruits, avg_recruits, boom_recruits)
+recruits<- c(vals%*%year_type)
+for(i in 2:60)
+{
+  recruits[i]<- recruits[i]*prod(inputs$phi[1:(i-1)])
+}
+alts<- unique(dat$scenario)
+pop<- lapply(alts, function(x)
+{
+  tmp<- subset(dat, scenario==x & temperature_flow=="M")
+  tmp<- tmp[!duplicated(tmp$year),]
+  tmp$year<- tmp$year-1953
+  tmp<- subset(tmp, year>0)
+  nyears<- 2012-1953
+  spnYr<- ifelse(1:nyears %in% tmp$year, 1, 0)
+  p_retained<- rep(0.001, nyears)
+  p_retained[tmp$year]<- tmp$p_retained
+  out<- project_pop(inputs=inputs,
+                    nyears=nyears,
+                    spnYr=spnYr,
+                    p_retained=p_retained,
+                    initial_dist = TRUE,
+                    N0=recruits)
+  return(out)
+})
+saveRDS(pop, paste0("./output/Projections/1935_to_2012_populations_", , ".rds"))
+
+final_pop<-lapply(1:length(alts), function(x)
+{
+  pop_trnd<- rowSums(pop[[x]]$pop_numbers)
+  out<- pop_trnd[length(pop_trnd)]
+  return(data.frame(scenario=alts[x], pop_2012=out))
+})
+final_pop<- do.call(rbind, final_pop)
+final_pop$rank<- 0
+final_pop$rank[order(final_pop$pop_2012, decreasing = TRUE)]<- 1:7

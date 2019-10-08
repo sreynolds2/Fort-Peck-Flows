@@ -4,6 +4,10 @@
 # RDS FILES
 *rds
 
+# Large output files
+output/_projections
+output/_ranks
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
