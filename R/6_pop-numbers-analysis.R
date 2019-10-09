@@ -67,13 +67,14 @@ invisible(lapply(1:param_draws, function(i)
 
 
 ## PROJECT THE POPULATIONS FORWARD UNDER EACH ALTERNATIVE SCENARIO
+### USING DATA FROM 1953 TO 2012 IN ORDER
 alts<- unique(dat$scenario)
 pop_files<- dir("./output/_populations/")
 scenario_ranks<- lapply(1:length(pop_files), function(y)
 {
   pDat<- readRDS(paste0("./output/_populations/", pop_files[y]))
   id_rep<- ifelse(pDat$type=="boom_bust", paste0(pDat$id, "-", pDat$rep),
-                  pDat$id)
+                  as.character(pDat$id))
   pop<- lapply(alts, function(x)
   {
     tmp<- subset(dat, scenario==x & temperature_flow=="M")
@@ -111,8 +112,218 @@ scenario_ranks<- lapply(1:length(pop_files), function(y)
     return(pop)
 })
 ranks<- do.call(rbind, scenario_ranks)
+write.csv(ranks, "./output/_ranks/1935_to_2012_Ranks_All.csv", row.names=FALSE)
+
+test<- ddply(ranks, .(Scenario), summarize,
+             min_rank=min(rank),
+             max_rank=max(rank),
+             mean_rank=mean(rank),
+             median_rank=median(rank))
+write.csv(test, "./output/_ranks/1935_to_2012_Ranks_Summary.csv", row.names=FALSE)
 
 
+### USING DATA FROM 1930 TO 2012 PROBABILISTICALLY DRAWN
+### FOR 10, 20, 50, AND 100 YEARS
+alts<- unique(dat$scenario)
+pop_files<- dir("./output/_populations/")
+yrs<- c(10, 20, 50, 100)
+reps<- 100
+scenario_ranks<- lapply(1:length(pop_files), function(y)
+{
+  pDat<- readRDS(paste0("./output/_populations/", pop_files[y]))
+  id_rep<- ifelse(pDat$type=="boom_bust", paste0(pDat$id, "-", pDat$rep),
+                  as.character(pDat$id))
+  pop<- lapply(alts, function(x)
+  {
+    tmp<- subset(dat, scenario==x & temperature_flow=="M")
+    tmp<- tmp[!duplicated(tmp$year),]
+    pop_reps<- lapply(1:reps, function(i)
+    {
+      p_retained<- rmultinom(max(yrs), 1, 
+                             c(rep(1/(2012-1930+1), nrow(tmp)), 
+                               1-nrow(tmp)/(2012-1930+1)))
+      indx<- sapply(1:max(yrs), function(i){which(p_retained[,i]==1)})
+      tmp<- rbind.fill(tmp, 
+                       data.frame(scenario="NoRun",
+                                  p_retained=0))
+      p_retained<- tmp$p_retained[indx]
+      spnYr<- ifelse(p_retained==0, 0, 1)
+      pp<- project_pop(inputs=inputs,
+                       init_inputs=pDat,
+                       nyears=max(yrs),
+                       spnYr=spnYr,
+                       p_retained=p_retained,
+                       stocking=NULL)
+      N_tot<- rowSums(pp$pop_numbers)
+      lambdas<- sapply(1:max(yrs), function(yr)
+      {
+        N_tot[yr+1]/N_tot[yr]
+      })
+      avg_lambda<- sapply(1:max(yrs), function(yr)
+      {
+        (N_tot[yr+1]/N_tot[1])^(1/yr)
+      })
+      pp$lambdas<- data.frame(AlternativeRan=spnYr,
+                              year=1:max(yrs),
+                              annual_GR=lambdas, 
+                              avg_annual_GR=avg_lambda)
+      saveRDS(pp, paste0("./output/_projections/Probabilistic_", x, "_", pDat$type,
+                         "_", id_rep,"-", i, ".rds"))
+      yrs<-c(0, yrs)
+      out<- data.frame(Scenario=rep(x,length(yrs)), 
+                       N0_type=rep(pDat$type,length(yrs)),
+                       N0_id=rep(id_rep,length(yrs)),
+                       Replicate=rep(i, length(yrs)),
+                       Year=yrs,
+                       N_total=N_tot[yrs+1],
+                       N_adults=rowSums(pp$pop_numbers[yrs+1, 15:60]),
+                       Avg_lambda=c(NA, pp$lambda$avg_annual_GR[yrs]))
+      return(out)  
+    })
+    pop_reps<- do.call("rbind", pop_reps)
+    saveRDS(pop_reps, paste0("./output/_projections/Probabilistic_", x, "_", pDat$type,
+                             "_", id_rep,"Summary_All_Reps.rds"))
+    return(pop_reps)
+  })
+  pop<- do.call("rbind", pop)
+  smry<- ddply(pop, .(Scenario, Year), summarize,
+               N0_type=unique(N0_type),
+               N0_id=unique(N0_id),
+               N_min=min(N_total),
+               N_5=quantile(N_total, 0.05),
+               N_median=median(N_total),
+               N_95=quantile(N_total, 0.95),
+               N_max=max(N_total),
+               N_mean=mean(N_total),
+               avg_lambda_min=min(Avg_lambda),
+               avg_lambda_5=quantile(Avg_lambda, 0.05, na.rm=TRUE),
+               avg_lambda_median=median(Avg_lambda),
+               avg_lambda_95=quantile(Avg_lambda, 0.95, na.rm=TRUE),
+               avg_lambda_max=max(Avg_lambda),
+               avg_lambda_mean=mean(Avg_lambda),
+               geometric_lambda=prod(Avg_lambda)^(1/length(Avg_lambda)))
+  smry<- smry[which(smry$Year %in% yrs),]
+  smry$rank<- 0
+  for(j in yrs)
+  {
+    indx<- which(smry$Year==j)
+    rank<- order(smry$avg_lambda_median[indx], decreasing = TRUE)
+    smry$rank[indx[rank]]<-1:length(alts)
+  }
+  write.csv(smry, 
+            paste0("./output/_ranks/Probabilistic_Ranks_", pDat$type,
+                   "_", id_rep, "_Summary_Across_Replicates.csv"), row.names = FALSE)
+  test<- ddply(smry, .(Scenario), summarize,
+               N0_type=unique(N0_type),
+               N0_id=unique(N0_id),
+               min_rank=min(rank),
+               max_rank=max(rank),
+               mean_rank=mean(rank),
+               median_rank=median(rank))
+  write.csv(test, paste0("./output/_ranks/Probabilistic_Ranks_", pDat$type,
+                         "_", id_rep, "_Summary_Across_Replicates_and_Years.csv"), 
+            row.names = FALSE)
+  
+  return(smry[,c(1:4,13,18)])
+  #return(pop)
+})
+ranks<- do.call(rbind, scenario_ranks)
+write.csv(ranks, "./output/_ranks/Probabilistic_Ranks_All_Populations.csv", 
+          row.names=FALSE)
+
+test<- ddply(ranks, .(Scenario, Year), summarize,
+             min_rank=min(rank),
+             max_rank=max(rank),
+             mean_rank=mean(rank),
+             median_rank=median(rank))
+write.csv(test, 
+          "./output/_ranks/Probabilistic_Ranks_Summary_Across_Populations.csv", 
+          row.names=FALSE) 
+
+test2<- ddply(ranks, .(Scenario), summarize,
+              min_rank=min(rank),
+              max_rank=max(rank),
+              mean_rank=mean(rank),
+              median_rank=median(rank))
+write.csv(test2, 
+          "./output/_ranks/Probabilistic_Ranks_Summary_Across_Populations_and_Years.csv", 
+          row.names=FALSE)
+
+### DO A MEDIAN ANALYSIS ACROSS COMPILED POPS
+alts<- unique(dat$scenario)
+pop_files<- dir("./output/_populations/")
+yrs<- c(10, 20, 50, 100)
+pop_reps<- lapply(c("boom_bust", "stable_age"), function(t)
+{
+  ids<- sapply(strsplit(pop_files, paste0(t, "_pop_")), "[[", 1)
+  pop_rep_ids<- lapply(ids, function(i)
+  {
+    pop_alt<- lapply(alts, function(x)
+    {
+      yr_reps<- readRDS(paste0("./output/_projections/Probabilistic_", x, "_", t,
+                                "_", i,"Summary_All_Reps.rds"))
+      return(yr_reps)
+    })
+    pop_alt<- do.call("rbind", pop_alt)
+    return(pop_alt)
+  })
+  pop_rep_ids<- do.call("rbind", pop_rep_ids)
+  return(pop_rep_ids)
+})
+pop_reps<- do.call("rbind", pop_reps)
+smry<- ddply(pop_reps, .(Scenario, Year), summarize,
+             N0_type=unique(N0_type),
+             N0_id=unique(N0_id),
+             N_min=min(N_total),
+             N_5=quantile(N_total, 0.05),
+             N_median=median(N_total),
+             N_95=quantile(N_total, 0.95),
+             N_max=max(N_total),
+             N_mean=mean(N_total),
+             avg_lambda_min=min(Avg_lambda),
+             avg_lambda_5=quantile(Avg_lambda, 0.05, na.rm=TRUE),
+             avg_lambda_median=median(Avg_lambda),
+             avg_lambda_95=quantile(Avg_lambda, 0.95, na.rm=TRUE),
+             avg_lambda_max=max(Avg_lambda),
+             avg_lambda_mean=mean(Avg_lambda),
+             geometric_lambda=prod(Avg_lambda)^(1/length(Avg_lambda)))
+smry<- smry[which(smry$Year %in% yrs),]
+smry$rank<- 0
+for(j in yrs)
+{
+  indx<- which(smry$Year==j)
+  rank<- order(smry$avg_lambda_median[indx], decreasing = TRUE)
+  smry$rank[indx[rank]]<-1:length(alts)
+}
+write.csv(smry, 
+          "./output/_ranks/Probabilistic_Ranks_Summary_Across_All_Population_Replicates.csv",
+          row.names = FALSE)
+test<- ddply(smry, .(Scenario), summarize,
+             N0_type=unique(N0_type),
+             N0_id=unique(N0_id),
+             min_rank=min(rank),
+             max_rank=max(rank),
+             mean_rank=mean(rank),
+             median_rank=median(rank))
+write.csv(test, 
+          "./output/_ranks/Probabilistic_Ranks_Summary_Across_All_Population_Replicates_and_Years.csv", 
+          row.names = FALSE)
+
+
+                         
+
+    
+## DO A YEAR 5 EXAMPLE TO SHOW NOT ENOUGH DIFFERENCEAND VERY STOCHASTIC
+
+### USING DATA FROM 1962 TO 2012 PROBABILISTICALLY DRAWN
+### FOR 10, 20, 50, AND 100 YEARS
+
+
+### USING DATA FROM 1987 TO 2012 PROBABILISTICALLY DRAWN
+### FOR 10, 20, 50, AND 100 YEARS
+
+### USING DATA FROM 2000 TO 2012 PROBABILISTICALLY DRAWN
+### FOR 10, 20, 50, AND 100 YEARS
 
 
 
