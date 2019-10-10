@@ -128,7 +128,17 @@ alts<- unique(dat$scenario)
 pop_files<- dir("./output/_populations/")
 yrs<- c(10, 20, 50, 100)
 reps<- 100
-scenario_ranks<- lapply(1:length(pop_files), function(y)
+
+library(parallel)
+## USE ALL CORES
+numCores<-detectCores()
+## INITIATE CLUSTER
+cl<-makeCluster(numCores)
+## MAKE PREVIOUS ITEMS AND FUNCTIONS AVAILABLE
+clusterExport(cl, c("dat", "inputs", "alts", "pop_files", "yrs", "reps"),envir=environment())
+clusterEvalQ(cl, source("./R/1_global.r"))
+clusterEvalQ(cl, source("./R/2_functions.r"))
+scenario_ranks<- parLapply(cl, 1026:length(pop_files), function(y)
 {
   pDat<- readRDS(paste0("./output/_populations/", pop_files[y]))
   id_rep<- ifelse(pDat$type=="boom_bust", paste0(pDat$id, "-", pDat$rep),
@@ -182,7 +192,7 @@ scenario_ranks<- lapply(1:length(pop_files), function(y)
     })
     pop_reps<- do.call("rbind", pop_reps)
     saveRDS(pop_reps, paste0("./output/_projections/Probabilistic_", x, "_", pDat$type,
-                             "_", id_rep,"Summary_All_Reps.rds"))
+                             "_", id_rep,"_Summary_All_Reps.rds"))
     return(pop_reps)
   })
   pop<- do.call("rbind", pop)
@@ -227,6 +237,7 @@ scenario_ranks<- lapply(1:length(pop_files), function(y)
   return(smry[,c(1:4,13,18)])
   #return(pop)
 })
+stopCluster(cl)
 ranks<- do.call(rbind, scenario_ranks)
 write.csv(ranks, "./output/_ranks/Probabilistic_Ranks_All_Populations.csv", 
           row.names=FALSE)
@@ -271,6 +282,7 @@ pop_reps<- lapply(c("boom_bust", "stable_age"), function(t)
   return(pop_rep_ids)
 })
 pop_reps<- do.call("rbind", pop_reps)
+saveRDS(pop_reps, "./output/_projections/Probabilistic_Summary_All.rds")
 smry<- ddply(pop_reps, .(Scenario, Year), summarize,
              N0_type=unique(N0_type),
              N0_id=unique(N0_id),
