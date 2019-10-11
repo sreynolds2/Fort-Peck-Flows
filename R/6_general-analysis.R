@@ -166,6 +166,20 @@ plot_boundary_curves(crvs, phi0_upper = 0.05)
 #   saveRDS(ea, paste0("./output/scenario_eigen_analysis_g75_", dat$id[i], ".rds"))
 #   return(ea$lambda1)
 # })
+# dat$lambda_50_sr50<- sapply(1:nrow(dat), function(i)
+# {
+#   inps<- inputs
+#   inps$p_retained<- dat$p_retained[i]
+#   inps$gamma<- 0.5
+#   inps$probF<- 0.5
+#   ea<- matrix_eigen_analysis(inps)
+#   ea$alternative<- dat$scenario[i]
+#   ea$year<- dat$year[i]
+#   ea$temp_flow<- dat$temperature_flow[i]
+#   ea$id<- dat$id[i]
+#   saveRDS(ea, paste0("./output/scenario_eigen_analysis_g50_sr50_", dat$id[i], ".rds"))
+#   return(ea$lambda1)
+# })
 # dat$year<- ifelse(dat$year<20, as.numeric(paste0("20", dat$year)),
 #                   as.numeric(paste0("19", dat$year)))
 # write.csv(dat, "./output/baseline_scenario_lambda_data.csv", row.names = FALSE)
@@ -437,4 +451,257 @@ points(ps, ls_low, type="l", col="gray")
 #######################################################
 #######################################################
 #######################################################
+tmp<- subset(dat, is.na(spawn_date))
+tmp<- subset(tmp, temperature_flow %in% c("M", "M2", "M5"))
+hist(tmp$p_retained, xlim=c(0,1), main="", xlab="Retention Proability")#, ylab="", yaxt='n')
+mtext("Retention Probability", 1, padj=3)
+mtext("Frequency", 2, las=0, padj=-3.5)
+par(oma = c(2,2,1,0) + 0.1,
+    mar = c(2,2,1,1) + 0.1)
+#######################################################
+#######################################################
+#######################################################
+params<- lapply(1:nrow(dat), function(i)
+{
+  ea<- readRDS(paste0("./output/scenario_eigen_analysis_g50_", dat$id[i], ".rds"))
+  se<- sens_elas_table(ea, 100)
+  # SENSITIVITY: TOP PARAMETERS
+  sens<-se$Sensitivities[se$Sensitivities$Type %in% c("Parameter", "Both"),]
+  if(any(sens$Parameter=="prod"))
+  {
+    indx<- which(sens$Parameter=="prod")
+    sens<- sens[-indx,]
+  }
+  sens<- sens[order(sens$rank),]
+  sens<- sens[sens$Sensitivity>=sens$Sensitivity[5],]
+  sens_check<- all(c("phi0_MR", "p_retained", "sexratio", "gamma", 
+                     "phi1") %in% sens$Parameter)
+  sens_extra<- ifelse(length(setdiff(sens$Parameter, 
+                                     c("phi0_MR", "p_retained", 
+                                       "sexratio", "gamma", "phi1")))>0,
+                      TRUE, FALSE)
+  sens_dat<- data.frame(check=sens_check,
+                        extra=sens_extra,
+                        id=dat$id[i])
+  # ELASTICITY: TOP PARAMETERS
+  elas<-se$Elasticities[se$Elasticities$Type %in% c("Parameter", "Both"),]
+  if(any(elas$Parameter=="prod"))
+  {
+    indx<- which(elas$Parameter=="prod")
+    elas<- elas[-indx,]
+  }
+  elas<- elas[order(elas$rank),]
+  elas<- elas[elas$Elasticity>=elas$Elasticity[5],]
+  elas_check<- all(c("phi0_MR", "p_retained", "sexratio", "gamma", 
+                     "phi1", paste0("phi", 2:7)) %in% elas$Parameter)
+  elas_extra<- ifelse(length(setdiff(elas$Parameter, 
+                                     c("phi0_MR", "p_retained", 
+                                       "sexratio", "gamma", "phi1",
+                                       paste0("phi", 2:7))))>0,
+                      TRUE, FALSE)
+  elas_extra_phi<- FALSE
+  if(elas_extra)
+  {
+    elas_extra_phi<- all(setdiff(elas$Parameter, 
+                                 c("phi0_MR", "p_retained", "sexratio", 
+                                   "gamma", "phi1", paste0("phi", 2:7))) 
+                         %in% paste0("phi", 8:59))
+  }
+  elas_dat<- data.frame(check=elas_check,
+                        extra=elas_extra,
+                        extra_phi=elas_extra_phi,
+                        id=dat$id[i])
+  return(list(Sensitivities=sens_dat, Elasticities=elas_dat))
+})
+sens<- do.call(rbind, lapply(params, "[[", 1))
+elas<- do.call(rbind, lapply(params, "[[", 2))
 
+all(sens$check==TRUE)
+all(sens$extra==FALSE)
+all(elas$check==TRUE)
+indx<- which(elas$extra==TRUE)
+all(elas$extra_phi[indx]==TRUE)
+
+indx<- which(sens$check==FALSE)
+indx<- sens$id[indx]
+ea<- lapply(indx, function(i)
+{
+  tmp2<- readRDS(paste0("./output/scenario_eigen_analysis_g50_", i, ".rds"))
+  se<- sens_elas_table(tmp2, 100)
+  sens<-se$Sensitivities[se$Sensitivities$Type %in% c("Parameter", "Both"),]
+  if(any(sens$Parameter=="prod"))
+  {
+    indx2<- which(sens$Parameter=="prod")
+    sens<- sens[-indx2,]
+  }
+  sens<- sens[order(sens$rank),]
+  sens$id<- i
+  return(sens)
+})
+
+head(ea[[1]])
+##p_retained>0.77 replaces gamma with phi2
+### ALL BUT ONE OF THESE ARE FROM THE 1985 RUNS AND DON'T ALIGN WITH 
+###OTHER DATA SO MAY BE IN ERROR 
+
+
+params<- lapply(1:nrow(dat), function(i)
+{
+  ea<- readRDS(paste0("./output/scenario_eigen_analysis_g50_", dat$id[i], ".rds"))
+  se<- sens_elas_table(ea, 100)
+  # SENSITIVITY: TOP PARAMETERS
+  sens<-se$Sensitivities[se$Sensitivities$Type %in% c("Parameter", "Both"),]
+  if(any(sens$Parameter=="prod"))
+  {
+    indx<- which(sens$Parameter=="prod")
+    sens<- sens[-indx,]
+  }
+  sens<- sens[order(sens$rank),]
+  sens<- sens[sens$Sensitivity>=sens$Sensitivity[5],]
+  sens_check1<- sens$Parameter[1]=="phi0_MR"
+  sens_check2<- sens$Parameter[2]=="p_retained"
+  sens_check3<- sens$Parameter[3]=="sexratio"
+  sens_check4<- sens$Parameter[4]=="gamma"
+  sens_check5<- sens$Parameter[5]=="phi1"
+  sens_dat<- data.frame(check1=sens_check1,
+                        check2=sens_check2,
+                        check3=sens_check3,
+                        check4=sens_check4,
+                        check5=sens_check5,
+                        id=dat$id[i])
+  # ELASTICITY: TOP PARAMETERS
+  elas<-se$Elasticities[se$Elasticities$Type %in% c("Parameter", "Both"),]
+  if(any(elas$Parameter=="prod"))
+  {
+    indx<- which(elas$Parameter=="prod")
+    elas<- elas[-indx,]
+  }
+  elas<- elas[order(elas$rank),]
+  elas<- elas[elas$Elasticity>=elas$Elasticity[5],]
+  elas_check<- elas$Elasticity[1]==elas$Elasticity[nrow(elas)]
+  elas_dat<- data.frame(check=elas_check,
+                        id=dat$id[i])
+  return(list(Sensitivities=sens_dat, Elasticities=elas_dat))
+})
+sens<- do.call(rbind, lapply(params, "[[", 1))
+elas<- do.call(rbind, lapply(params, "[[", 2))
+
+all(sens$check1==TRUE)
+indx<- which(sens$check1==FALSE)
+indx<- sens$id[indx]
+ea<- lapply(indx, function(i)
+{
+  tmp2<- readRDS(paste0("./output/scenario_eigen_analysis_g50_", i, ".rds"))
+  se<- sens_elas_table(tmp2, 100)
+  sens<-se$Sensitivities[se$Sensitivities$Type %in% c("Parameter", "Both"),]
+  if(any(sens$Parameter=="prod"))
+  {
+    indx2<- which(sens$Parameter=="prod")
+    sens<- sens[-indx2,]
+  }
+  sens<- sens[order(sens$rank),]
+  sens$id<- i
+  return(sens)
+})
+
+
+all(sens$check2==TRUE)
+indx<- which(sens$check2==FALSE)
+indx<- sens$id[indx]
+indx<- setdiff(indx, 166)
+ea<- lapply(indx, function(i)
+{
+  tmp2<- readRDS(paste0("./output/scenario_eigen_analysis_g50_", i, ".rds"))
+  se<- sens_elas_table(tmp2, 100)
+  sens<-se$Sensitivities[se$Sensitivities$Type %in% c("Parameter", "Both"),]
+  if(any(sens$Parameter=="prod"))
+  {
+    indx2<- which(sens$Parameter=="prod")
+    sens<- sens[-indx2,]
+  }
+  sens<- sens[order(sens$rank),]
+  sens$id<- i
+  return(sens)
+})
+
+head(ea[[1]])
+all(sapply(1:length(ea), function(i)
+{
+  ea[[i]]$Parameter[2]
+})=="sexratio")
+
+all(sens$check3==TRUE)
+indx3<- which(sens$check3==FALSE)
+indx3<- sens$id[indx3]
+indx3<- setdiff(indx3, indx)
+
+
+all(sens$check4==TRUE)
+indx<- which(sens$check4==FALSE)
+indx<- sens$id[indx]
+indx<- setdiff(indx, c(157,192,193,195,196,199))
+ea<- lapply(indx, function(i)
+{
+  tmp2<- readRDS(paste0("./output/scenario_eigen_analysis_g50_", i, ".rds"))
+  se<- sens_elas_table(tmp2, 100)
+  sens<-se$Sensitivities[se$Sensitivities$Type %in% c("Parameter", "Both"),]
+  if(any(sens$Parameter=="prod"))
+  {
+    indx2<- which(sens$Parameter=="prod")
+    sens<- sens[-indx2,]
+  }
+  sens<- sens[order(sens$rank),]
+  sens$id<- i
+  return(sens)
+})
+
+head(ea[[1]])
+all(sapply(1:length(ea), function(i)
+{
+  ea[[i]]$Parameter[2]
+})=="sexratio")
+all(sapply(1:length(ea), function(i)
+{
+  ea[[i]]$Parameter[3]
+})=="gamma")
+
+all(sens$check5==TRUE)
+indx3<- which(sens$check5==FALSE)
+indx3<- sens$id[indx3]
+indx3<- setdiff(indx3, indx)
+indx3<- setdiff(indx3, c(157,192,193,195,196,199))
+
+
+all(elas$check==TRUE)
+
+#######################################################
+########################################################
+#######################################################
+
+# SENSITIVITY BARPLOT
+tmp<- subset(dat, is.na(spawn_date) & temperature_flow=="M")
+inps<- inputs
+inps$gamma<-0.5
+inps$p_retained<- median(tmp$p_retained)
+ea<- matrix_eigen_analysis(inps)
+tbl<- sens_elas_table(ea, 50)
+sens<- tbl$Sensitivities[tbl$Sensitivities$Type %in% c("Parameter", "Both"),]
+par(oma = c(3,6,1,0) + 0.1,
+    mar = c(1,4,1,1) + 0.1)
+barplot(sens$Sensitivity[7:2], 
+        names.arg=c("Age-2 Survival", "Age-1 Survival", "Spawning Probability",
+                    "Sex Ratio", "Retention Probability", "Survival Given Retention"),
+        horiz=TRUE, xlab="", las=1)
+mtext("Sensitivity", 1, padj=3)
+
+elas<- tbl$Elasticities[tbl$Elasticities$Type %in% c("Parameter", "Both"),]
+elas<-elas[-which(elas$Parameter=="prod"),]
+elas<- elas[which(elas$Elasticity==elas$Elasticity[1]),]
+
+par(oma = c(3,6,1,0) + 0.1,
+    mar = c(1,4,1,1) + 0.1)
+barplot(elas$Elasticity[1:5], 
+        names.arg=c( "Survival","Spawning Probability",
+                    "Sex Ratio", "Retention Probability", "Survival Given Retention"),
+        horiz=TRUE, xlab="", las=1)
+mtext("Elasticity", 1, padj=3)
