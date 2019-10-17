@@ -2,12 +2,13 @@
 *xlsx
 
 # RDS FILES
-# *rds
+*rds
 
 # Large output files
 # output/_populations
 output/_projections
 output/_ranks
+output/_eigenanalyses
 
 # Windows image file caches
 Thumbs.db
