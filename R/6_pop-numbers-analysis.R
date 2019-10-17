@@ -138,7 +138,7 @@ cl<-makeCluster(numCores)
 clusterExport(cl, c("dat", "inputs", "alts", "pop_files", "yrs", "reps"),envir=environment())
 clusterEvalQ(cl, source("./R/1_global.r"))
 clusterEvalQ(cl, source("./R/2_functions.r"))
-scenario_ranks<- parLapply(cl, 1026:length(pop_files), function(y)
+scenario_ranks<- parLapply(cl, 1207:length(pop_files), function(y)
 {
   pDat<- readRDS(paste0("./output/_populations/", pop_files[y]))
   id_rep<- ifelse(pDat$type=="boom_bust", paste0(pDat$id, "-", pDat$rep),
