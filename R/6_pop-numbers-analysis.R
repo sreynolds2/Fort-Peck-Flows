@@ -64,12 +64,47 @@ invisible(lapply(1:param_draws, function(i)
                         "-", tmp$rep, ".rds"))
   }))
 }))
+### ONE PARAMETER CHANGE FROM BASELINE VALUES
+reps<- 1000
+boom_bust_pops<- lapply(1:reps, function(x)
+{
+  tmp<- initialize_pop(inputs = inputs,
+                       stable_age=FALSE,
+                       boom_prob=1/5, 
+                       bust_prob=1/5,
+                       boom_recruits=25000,
+                       bust_recruits=0,
+                       avg_recruits=5000)
+  tmp$type<- ifelse(tmp$stable_age, "stable_age", "boom_bust")
+  tmp$id<- 120
+  tmp$rep<- x
+  saveRDS(tmp, paste0("./output/_populations/", tmp$type, "_pop_", tmp$id,
+                      "-", tmp$rep, ".rds"))
+  return(tmp$N0)
+})
 
+# boom_prob: 0, 0.1, 0.3, 0.4, 0.5
+# Populatons: 102, 103, 104, 105, 106
+
+# bust_prob: 0, 0.1, 0.3, 0.4, 0.5
+# Populatons: 107, 108, 109, 110, 111
+
+# boom_recruits: 2000, 5000, 10000, 50000
+# Populatons: 112, 113, 114, 115
+
+# bust_recruits: 5, 10
+# Populatons: 116, 117
+
+# avg_recruits: 100, 500, 5000
+# Populatons: 118, 119, 120
 
 ## PROJECT THE POPULATIONS FORWARD UNDER EACH ALTERNATIVE SCENARIO
 ### USING DATA FROM 1953 TO 2012 IN ORDER
 alts<- unique(dat$scenario)
 pop_files<- dir("./output/_populations/")
+pop_files<- pop_files[-setdiff(1:30021, grep(".rds", pop_files))]
+indx<- c(sapply(102:120, function(x){grep(paste0("_", x, "-"), pop_files)}))
+pop_files<- pop_files[-indx]
 scenario_ranks<- lapply(1:length(pop_files), function(y)
 {
   pDat<- readRDS(paste0("./output/_populations/", pop_files[y]))
@@ -126,6 +161,9 @@ write.csv(test, "./output/_ranks/1935_to_2012_Ranks_Summary.csv", row.names=FALS
 ### FOR 10, 20, 50, AND 100 YEARS
 alts<- unique(dat$scenario)
 pop_files<- dir("./output/_populations/")
+pop_files<- pop_files[-setdiff(1:30021, grep(".rds", pop_files))]
+indx<- c(sapply(102:120, function(x){grep(paste0("_", x, "-"), pop_files)}))
+pop_files<- pop_files[-indx]
 yrs<- c(10, 20, 50, 100)
 reps<- 100
 
@@ -263,6 +301,9 @@ write.csv(test2,
 ### DO A MEDIAN ANALYSIS ACROSS COMPILED POPS
 alts<- unique(dat$scenario)
 pop_files<- dir("./output/_populations/")
+pop_files<- pop_files[-setdiff(1:30021, grep(".rds", pop_files))]
+indx<- c(sapply(102:120, function(x){grep(paste0("_", x, "-"), pop_files)}))
+pop_files<- pop_files[-indx]
 yrs<- c(10, 20, 50, 100)
 pop_reps<- lapply(c("boom_bust", "stable_age"), function(t)
 {
@@ -339,6 +380,164 @@ write.csv(test,
 
 
 
+##############################################################
+##############################################################
+##############################################################
+
+## GROWTH RATE AFTER A SINGLE YEAR
+pop_files<- dir("./output/_populations/")
+pop_files<- pop_files[-setdiff(1:30021, grep(".rds", pop_files))]
+prod<- seq(0,0.0004,0.00005)
+
+library(parallel)
+## USE ALL CORES
+numCores<-detectCores()
+## INITIATE CLUSTER
+cl<-makeCluster(numCores)
+## MAKE PREVIOUS ITEMS AND FUNCTIONS AVAILABLE
+clusterExport(cl, c("dat", "inputs", "pop_files", "prod"), envir=environment())
+clusterEvalQ(cl, source("./R/1_global.r"))
+clusterEvalQ(cl, source("./R/2_functions.r"))
+lambda_var<- parLapply(cl, 1:length(pop_files), function(y)
+{
+  pDat<- readRDS(paste0("./output/_populations/", pop_files[y]))
+  id_rep<- ifelse(pDat$type=="boom_bust", paste0(pDat$id, "-", pDat$rep),
+                  as.character(pDat$id))
+  lambda<- annual_lambda(inputs=inputs,
+                         init_inputs=pDat,
+                         gamma_phi_ret_prod=prod)
+  out<- data.frame(pop_type=rep(pDat$type, length(prod)),
+                   pop_id=rep(id_rep, length(prod)),
+                   N0_total=sum(pDat$N0),
+                   product=prod,
+                   annual_lambda=lambda)
+  if(pDat$type=="boom_bust")
+  {
+    out$boom_prob<- pDat$boom_prob
+    out$bust_prob<- pDat$bust_prob
+    out$boom_recruits<- pDat$boom_recruits
+    out$bust_recruits<- pDat$bust_recruits
+    out$avg_recruits<- pDat$avg_recruits
+  }
+  return(out)
+})
+stopCluster(cl)
+lambda_var<- do.call("rbind.fill", lambda_var)
+write.csv(lambda_var, "output/annual_lambda_variation.csv", row.names = FALSE)
+
+par(mfrow=c(1,1))
+boxplot(annual_lambda~product, data=lambda_var,
+        xlab="Product", ylab="Annual Growth Rate",
+        outline=FALSE)
+boxplot(lambda_var$annual_lambda~lambda_var$product+lambda_var$pop_type,
+        xlab="Product", ylab="Annual Growth Rate", xaxt="n",
+        outline=FALSE)
+abline(v=9.5)
+axis(1, at=c(2*(1:ceiling(length(prod)/2))-1, 2*(0:floor(length(prod)/2))+length(prod)+1), 
+     labels=rep(prod[2*(1:ceiling(length(prod)/2))-1],2))
+mtext("Boom-Bust                                                                 Stable-Age", 3)
+
+tmp<- subset(lambda_var, pop_type=="boom_bust")
+id_ls<- strsplit(as.character(tmp$pop_id), "-")
+tmp$ids<- sapply(id_ls, "[[", 1)
+tmp$reps<-sapply(id_ls, "[[", 2)
+
+par(mfrow=c(2,2))
+boxplot(annual_lambda~product, data=tmp, subset=ids=="1",
+        outline=FALSE)
+boxplot(annual_lambda~product, data=tmp, subset=ids=="2",
+        outline=FALSE)
+boxplot(annual_lambda~product, data=tmp, subset=ids=="3",
+        outline=FALSE)
+boxplot(annual_lambda~product, data=tmp, subset=ids=="4",
+        outline=FALSE)
+
+unique(tmp[tmp$ids %in% c("1", "2", "3", "4"),]$boom_prob)
+unique(tmp[tmp$ids%in% c("1", "2", "3", "4"),]$bust_prob)
+unique(tmp[tmp$ids%in% c("1", "2", "3", "4"),]$boom_recruits)
+unique(tmp[tmp$ids%in% c("1", "2", "3", "4"),]$bust_recruits)
+unique(tmp[tmp$ids%in% c("1", "2", "3", "4"),]$avg_recruits)
+
+lambda_smry<- ddply(lambda_var, .(product), summarize,
+                    q_95L=quantile(annual_lambda, 0.025),
+                    q_68L=quantile(annual_lambda, 0.16),
+                    median=median(annual_lambda),
+                    q_68U=quantile(annual_lambda, 0.84),
+                    q_95U=quantile(annual_lambda, 0.975),
+                    mean=mean(annual_lambda),
+                    sd=sd(annual_lambda))
+lambda_smry$minus_sd<- lambda_smry$mean-lambda_smry$sd
+lambda_smry$plus_sd<- lambda_smry$mean+lambda_smry$sd
+par(mfrow=c(1,1))
+plot(lambda_smry$product,lambda_smry$median, type="l", 
+     ylim=c(min(lambda_smry$q_95L), max(lambda_smry$q_95U)),
+     xlab="Product", ylab="Annual Growth Rate")
+polygon(c(lambda_smry$product,lambda_smry$product[length(lambda_smry$product):1]), 
+        c(lambda_smry$q_95L, lambda_smry$q_95U[length(lambda_smry$q_95U):1]),
+        border="gray", col="gray")
+points(lambda_smry$product,lambda_smry$median, type="l")
+
+plot(lambda_smry$product,lambda_smry$mean, type="l",
+     ylim=c(min(lambda_smry$q_68L, lambda_smry$minus_sd), 
+            max(lambda_smry$q_68U, lambda_smry$plus_sd)))
+#polygon(c(lambda_smry$product,lambda_smry$product[length(lambda_smry$product):1]), 
+#         c(lambda_smry$q_68L, lambda_smry$q_68U[length(lambda_smry$q_68U):1]),
+#         border="gray", col="gray")
+polygon(c(lambda_smry$product,lambda_smry$product[length(lambda_smry$product):1]), 
+        c(lambda_smry$minus_sd, lambda_smry$plus_sd[length(lambda_smry$plus_sd):1]),
+        border="gray", col="gray")
+points(lambda_smry$product,lambda_smry$mean, type="l")
+
+tmp<- subset(lambda_var, pop_type=="boom_bust")
+id_ls<- strsplit(as.character(tmp$pop_id), "-")
+tmp$ids<- sapply(id_ls, "[[", 1)
+tmp$reps<-sapply(id_ls, "[[", 2)
+tmp<- tmp[tmp$ids %in% c(1,102:120),]
+
+# VARYING INPUTS
+## BOOM_PROB
+par(mfrow=c(3,3))
+invisible(lapply(unique(round(tmp$product,5)), function(prod)
+{
+  tmp2<- subset(tmp, bust_prob==0.2 & boom_recruits==25000 & 
+                  bust_recruits==0 & avg_recruits==1000)
+  boxplot(annual_lambda~boom_prob, data=tmp2, 
+          subset=product==0.0001,
+          outline=FALSE)
+}))
+
+boxplot(annual_lambda~boom_prob, data=test, outline=FALSE)
+par(mfrow=c(1,1))
+boxplot(annual_lambda~product, data=tmp, 
+        subset=c(boom_prob==0.1, bust_prob==1/5, boom_recruits==25000, 
+                 bust_recruits==0, avg_recruits==1000))
+## BUST_PROB
+par(mfrow=c(3,3))
+invisible(lapply(unique(round(tmp$product,5)), function(prod)
+{
+  boxplot(annual_lambda~boom_prob, data=tmp, 
+          subset=c(bust_prob==1/5, boom_recruits==25000, bust_recruits==0,
+                   avg_recruits==1000, product==prod),
+          outline=FALSE)
+}))
+
+par(mfrow=c(3,3))
+invisible(lapply(unique(round(tmp$product,5)), function(prod)
+{
+  boxplot(annual_lambda~boom_prob, data=tmp, 
+          subset=c(bust_prob==1/5, boom_recruits==25000, bust_recruits==0,
+                   avg_recruits==1000, product==prod),
+          outline=FALSE)
+}))
+
+par(mfrow=c(3,3))
+invisible(lapply(unique(round(tmp$product,5)), function(prod)
+{
+  boxplot(annual_lambda~boom_prob, data=tmp, 
+          subset=c(bust_prob==1/5, boom_recruits==25000, bust_recruits==0,
+                   avg_recruits==1000, product==prod),
+          outline=FALSE)
+}))
 
 ##############################################################
 ##############################################################

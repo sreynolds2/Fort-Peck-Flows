@@ -667,3 +667,52 @@ project_pop<- function(inputs=NULL,
 }
 
 
+# 8.  
+## ONE YEAR OF GROWTH
+annual_lambda<- function(inputs=NULL,
+                         init_inputs=NULL,
+                         gamma_phi_ret_prod=NULL)
+{
+  # ERROR CHECK
+  if(inputs$id!=init_inputs$inputs_id)
+  {
+    warning(print("The inputs id used to generate 'init_inputs'differs from the
+                  current value given in 'inputs'."))
+  }
+  if(inputs$max_age!=length(init_inputs$N0))
+  {
+    return(print("The input 'init_inputs' must contain a vector 'N0' of the 
+                 initial population numbers by age class of length 
+                 'inputs$max_age'."))
+  }
+  
+  # RECORD INPUT VALUES
+  inputs$product<-gamma_phi_ret_prod
+  inputs$phi0_MR<- NA
+  inputs$gamma<- NA
+  inputs$p_retained<- NA
+  inputs$N0<- init_inputs$N0
+  # PROJECT A SINGLE YEAR FOR EACH PRODUCT VALUE GIVEN
+  out<-sapply(gamma_phi_ret_prod, function(prod)
+  {
+    # BUILD LESLIE MATRIX
+    A<- matrix(0,inputs$max_age,inputs$max_age)
+    ## SURVIVAL VALUES
+    A[cbind(2:inputs$max_age,1:(inputs$max_age-1))]<- inputs$phi
+    ## FERTILITY VALUES
+    A[1,] <- inputs$psi*inputs$eggs*inputs$probF*prod 
+    # UPDATE POPULATION
+    if(init_inputs$exact)
+    {
+      outt<- A%*%init_inputs$N0
+    }
+    if(!init_inputs$exact)
+    {
+      outt<- round(A%*%init_inputs$N0)
+    }
+    lambda<-sum(outt)/sum(init_inputs$N0)
+    return(lambda) 
+  })
+  return(out)
+}
+

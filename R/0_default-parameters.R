@@ -67,7 +67,9 @@ for(i in (a_min+1):60)
 rm(i, a_min)
 
 ## SEX RATIO (PROBABILITY OF BEING FEMALE)
-inputs$probF<- 40/125 #JAEGER ET AL. 2009 
+inputs$probF<- 0.5 #ASSUME EQUAL AND PROBABILITY BELOW REPRESENTS
+                   #HIGHER HISTORICAL FISHING OF FEMALES FOR CAVIAR
+  #40/125 #JAEGER ET AL. 2009  
 
 ## NUMBER OF EGGS PER SPAWNING FEMALE
 E<- read.csv("./dat/fecundity_estimates_by_age.csv")
