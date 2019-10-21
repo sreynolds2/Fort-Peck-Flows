@@ -500,44 +500,86 @@ par(mfrow=c(3,3))
 invisible(lapply(unique(round(tmp$product,5)), function(prod)
 {
   tmp2<- subset(tmp, bust_prob==0.2 & boom_recruits==25000 & 
-                  bust_recruits==0 & avg_recruits==1000)
-  boxplot(annual_lambda~boom_prob, data=tmp2, 
-          subset=product==0.0001,
-          outline=FALSE)
+                  bust_recruits==0 & avg_recruits==1000 & 
+                  round(product,5)==prod)
+  boxplot(annual_lambda~boom_prob, data=tmp2, outline=FALSE,
+          ylim=c(0.65, max(tmp2$annual_lambda)))
 }))
 
-boxplot(annual_lambda~boom_prob, data=test, outline=FALSE)
-par(mfrow=c(1,1))
-boxplot(annual_lambda~product, data=tmp, 
-        subset=c(boom_prob==0.1, bust_prob==1/5, boom_recruits==25000, 
-                 bust_recruits==0, avg_recruits==1000))
+par(mfrow=c(2,1))
+test<- subset(tmp, bust_prob==0.2 & boom_recruits==25000 & 
+                bust_recruits==0 & avg_recruits==1000)
+boxplot(annual_lambda~product+boom_prob, data=test, outline=FALSE)
+boxplot(annual_lambda~boom_prob+product, data=test, outline=FALSE)
+
+
 ## BUST_PROB
 par(mfrow=c(3,3))
 invisible(lapply(unique(round(tmp$product,5)), function(prod)
 {
-  boxplot(annual_lambda~boom_prob, data=tmp, 
-          subset=c(bust_prob==1/5, boom_recruits==25000, bust_recruits==0,
-                   avg_recruits==1000, product==prod),
-          outline=FALSE)
+  tmp2<- subset(tmp, boom_prob==0.2 & boom_recruits==25000 & 
+                  bust_recruits==0 & avg_recruits==1000 & 
+                  round(product,5)==prod)
+  boxplot(annual_lambda~bust_prob, data=tmp2, outline=FALSE,
+          ylim=c(0.65, max(tmp2$annual_lambda)))
 }))
 
+par(mfrow=c(2,1))
+test<- subset(tmp, boom_prob==0.2 & boom_recruits==25000 & 
+                bust_recruits==0 & avg_recruits==1000)
+boxplot(annual_lambda~product+bust_prob, data=test, outline=FALSE)
+boxplot(annual_lambda~bust_prob+product, data=test, outline=FALSE)
+
+## BOOM_RECRUITS
 par(mfrow=c(3,3))
 invisible(lapply(unique(round(tmp$product,5)), function(prod)
 {
-  boxplot(annual_lambda~boom_prob, data=tmp, 
-          subset=c(bust_prob==1/5, boom_recruits==25000, bust_recruits==0,
-                   avg_recruits==1000, product==prod),
-          outline=FALSE)
+  tmp2<- subset(tmp, boom_prob==0.2 & bust_prob==0.2 & 
+                  bust_recruits==0 & avg_recruits==1000 & 
+                  round(product,5)==prod)
+  boxplot(annual_lambda~boom_recruits, data=tmp2, outline=FALSE,
+          ylim=c(0.65, max(tmp2$annual_lambda)))
 }))
 
+par(mfrow=c(2,1))
+test<- subset(tmp, boom_prob==0.2 & bust_prob==0.2 & 
+                bust_recruits==0 & avg_recruits==1000)
+boxplot(annual_lambda~product+boom_recruits, data=test, outline=FALSE)
+boxplot(annual_lambda~boom_recruits+product, data=test, outline=FALSE)
+
+## BUST_RECRUITS
 par(mfrow=c(3,3))
 invisible(lapply(unique(round(tmp$product,5)), function(prod)
 {
-  boxplot(annual_lambda~boom_prob, data=tmp, 
-          subset=c(bust_prob==1/5, boom_recruits==25000, bust_recruits==0,
-                   avg_recruits==1000, product==prod),
-          outline=FALSE)
+  tmp2<- subset(tmp, boom_prob==0.2 & bust_prob==0.2 & 
+                  boom_recruits==25000 & avg_recruits==1000 & 
+                  round(product,5)==prod)
+  boxplot(annual_lambda~bust_recruits, data=tmp2, outline=FALSE,
+          ylim=c(0.65, max(tmp2$annual_lambda)))
 }))
+
+par(mfrow=c(2,1))
+test<- subset(tmp, boom_prob==0.2 & bust_prob==0.2 & 
+                boom_recruits==25000 & avg_recruits==1000)
+boxplot(annual_lambda~product+bust_recruits, data=test, outline=FALSE)
+boxplot(annual_lambda~bust_recruits+product, data=test, outline=FALSE)
+
+## AVG_RECRUITS
+par(mfrow=c(3,3))
+invisible(lapply(unique(round(tmp$product,5)), function(prod)
+{
+  tmp2<- subset(tmp, boom_prob==0.2 & bust_prob==0.2 & 
+                  boom_recruits==25000 & bust_recruits==0 & 
+                  round(product,5)==prod)
+  boxplot(annual_lambda~avg_recruits, data=tmp2, outline=FALSE,
+          ylim=c(0.65, max(tmp2$annual_lambda)))
+}))
+
+par(mfrow=c(2,1))
+test<- subset(tmp, boom_prob==0.2 & bust_prob==0.2 & 
+                boom_recruits==25000 & bust_recruits==0)
+boxplot(annual_lambda~product+avg_recruits, data=test, outline=FALSE)
+boxplot(annual_lambda~avg_recruits+product, data=test, outline=FALSE)
 
 ##############################################################
 ##############################################################
