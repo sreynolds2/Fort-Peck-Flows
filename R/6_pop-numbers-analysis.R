@@ -167,6 +167,10 @@ pop_files<- pop_files[-indx]
 yrs<- c(10, 20, 50, 100)
 reps<- 100
 
+indx<-c(sapply(c(27:24,50:47,72:69,94:91), function(x){grep(paste0("_", x, "-"), pop_files)}))
+#original length 3600, so 7200 in ranks and 36000 in projections
+#needs finishing: 28, 51, 73, 95, 99
+
 library(parallel)
 ## USE ALL CORES
 numCores<-detectCores()
@@ -176,7 +180,7 @@ cl<-makeCluster(numCores)
 clusterExport(cl, c("dat", "inputs", "alts", "pop_files", "yrs", "reps"),envir=environment())
 clusterEvalQ(cl, source("./R/1_global.r"))
 clusterEvalQ(cl, source("./R/2_functions.r"))
-scenario_ranks<- parLapply(cl, 1207:length(pop_files), function(y)
+scenario_ranks<- parLapply(cl, indx[5:length(indx)], function(y)
 {
   pDat<- readRDS(paste0("./output/_populations/", pop_files[y]))
   id_rep<- ifelse(pDat$type=="boom_bust", paste0(pDat$id, "-", pDat$rep),
@@ -215,7 +219,7 @@ scenario_ranks<- parLapply(cl, 1207:length(pop_files), function(y)
                               year=1:max(yrs),
                               annual_GR=lambdas, 
                               avg_annual_GR=avg_lambda)
-      saveRDS(pp, paste0("./output/_projections/Probabilistic_", x, "_", pDat$type,
+      saveRDS(pp, paste0("D:/Ft-Peck-Flows/output/_projections/Probabilistic_", x, "_", pDat$type,
                          "_", id_rep,"-", i, ".rds"))
       yrs<-c(0, yrs)
       out<- data.frame(Scenario=rep(x,length(yrs)), 
@@ -229,7 +233,7 @@ scenario_ranks<- parLapply(cl, 1207:length(pop_files), function(y)
       return(out)  
     })
     pop_reps<- do.call("rbind", pop_reps)
-    saveRDS(pop_reps, paste0("./output/_projections/Probabilistic_", x, "_", pDat$type,
+    saveRDS(pop_reps, paste0("D:/Ft-Peck-Flows/output/_projections/Probabilistic_", x, "_", pDat$type,
                              "_", id_rep,"_Summary_All_Reps.rds"))
     return(pop_reps)
   })
@@ -259,7 +263,7 @@ scenario_ranks<- parLapply(cl, 1207:length(pop_files), function(y)
     smry$rank[indx[rank]]<-1:length(alts)
   }
   write.csv(smry, 
-            paste0("./output/_ranks/Probabilistic_Ranks_", pDat$type,
+            paste0("D:/Ft-Peck-Flows/output/_ranks/Probabilistic_Ranks_", pDat$type,
                    "_", id_rep, "_Summary_Across_Replicates.csv"), row.names = FALSE)
   test<- ddply(smry, .(Scenario), summarize,
                N0_type=unique(N0_type),
@@ -268,7 +272,7 @@ scenario_ranks<- parLapply(cl, 1207:length(pop_files), function(y)
                max_rank=max(rank),
                mean_rank=mean(rank),
                median_rank=median(rank))
-  write.csv(test, paste0("./output/_ranks/Probabilistic_Ranks_", pDat$type,
+  write.csv(test, paste0("D:/Ft-Peck-Flows/output/_ranks/Probabilistic_Ranks_", pDat$type,
                          "_", id_rep, "_Summary_Across_Replicates_and_Years.csv"), 
             row.names = FALSE)
   
@@ -580,6 +584,56 @@ test<- subset(tmp, boom_prob==0.2 & bust_prob==0.2 &
                 boom_recruits==25000 & bust_recruits==0)
 boxplot(annual_lambda~product+avg_recruits, data=test, outline=FALSE)
 boxplot(annual_lambda~avg_recruits+product, data=test, outline=FALSE)
+
+##############################################################
+##############################################################
+##############################################################
+
+lambda_var<- read.csv( "output/annual_lambda_variation.csv")
+tmp<- subset(lambda_var, pop_type=="boom_bust")
+id_ls<- strsplit(as.character(tmp$pop_id), "-")
+tmp$ids<- sapply(id_ls, "[[", 1)
+tmp$reps<-sapply(id_ls, "[[", 2)
+
+# NUMBER OF REPLICATE POPULATIONS NEEDED
+pop_files<- dir("./output/_populations/")
+pop_files<- pop_files[-setdiff(1:30021, grep(".rds", pop_files))]
+tmp<- pop_files[grep("_1-", pop_files)]
+
+indices<- matrix(0, nrow=1000, ncol=100)
+for(i in 1:ncol(indices))
+{
+  indices[,i]<- sample(1:length(tmp), 1000, replace=FALSE)
+}
+saveRDS(indices, "output/_replicate_tests/pop_1_indices.rds")
+
+vals<- seq(100, 1000, 100)
+prod<- 0.00005
+tmp2<- subset(tmp, product==prod & ids==1)
+no_reps<- lapply(1:ncol(indices), function(j)
+{
+  single<- lapply(vals, function(x)
+  {
+    l<- tmp2[indices[1:x,j],]$annual_lambda
+    out<- data.frame(pop_id=1,
+               replicates_used=x,
+               order=j,
+               min_annual_GR=min(l),
+               median_annual_GR=median(l),
+               max_annual_GR=max(l),
+               mean_annual_GR=mean(l),
+               sd_annual_GR=sd(l))
+    return(out)
+  })
+  single<- do.call("rbind", single)
+  return(single)
+})
+no_reps<- do.call("rbind", no_reps)
+
+boxplot(mean_annual_GR~replicates_used, data=no_reps)
+#BUT THIS IS TO BE EXPECTED GIVEN USING THE SAME 1000 PTS
+
+boxplot(sd_annual_GR~replicates_used, data=no_reps)
 
 ##############################################################
 ##############################################################
