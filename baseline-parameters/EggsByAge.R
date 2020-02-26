@@ -20,6 +20,10 @@ age_1_length<- function(n=NULL,
 
 # UPPER RIVER VON BERTALANFFY GROWTH PARAMETER DISTRIBUTION
 ln_Linf_mu<-7.136028770
+# ## USED FOR THE COMPARISON DATA:
+# ## mean(dat[which(dat$BASIN=="Upper"),]$FL, na.rm=TRUE) # 1475.72
+# ## log(1475.72)    # 7.296901
+# ## ln_Linf_mu<- 7.296901
 ln_k_mu<- -3.003764445
 vcv<- matrix(c(0.2768,-0.364,-0.364,0.6342), 
              nrow=2, ncol=2, byrow=TRUE)
@@ -54,7 +58,7 @@ length_at_age<- function(age=NULL,
 }
 
 # UPPER RIVER LENGTH-FECUNDITY RELATIONSHIP
-dat<-read.csv("./GitHub/fecundity/_dat/Fecundity.csv")
+dat<-read.csv("C:/Users/sreynolds/Documents/GitHub/fecundity/_dat/Fecundity.csv")
 ## FILL MISSING VALUES AS NA
 dat[dat==-99]<-NA
 ## ADD AN INDVIDUAL ID
@@ -87,7 +91,7 @@ eggs<- function(fork_length=NULL,
 
 ## SIMULATE FECUNDITY BY AGE
 n=1000000
-a=8:60
+a=1:60
 fec<- lapply(a, function(x)
 {
   lower_ls<-age_1_length(n=n, mu=mu_l_1, sd=sd_l_1, min=min_l_1, max=max_l_1)
@@ -97,16 +101,24 @@ fec<- lapply(a, function(x)
   ##WHY WAS LOG USED FOR THE PARAMETERS???
   lengths<- length_at_age(age=x, length_at_age_1=lower_ls, Linf=VBparams[[1]],
                           k=VBparams[[2]])
+  mn_lgth<- mean(lengths)
+  med_lgth<- median(lengths)
+  lgth_1400_plus<- length(which(lengths>=1400))/length(lengths)
   fecundity<- eggs(fork_length=lengths, a=intrcpt, b=slp, dispersion_param=disp)
-  mn<- mean(fecundity)
-  med<- median(fecundity) 
-  return(list(mean_eggs=mn, median_eggs=med))
+  mn_eggs<- mean(fecundity)
+  med_eggs<- median(fecundity) 
+  return(list(mean_eggs=mn_eggs, median_eggs=med_eggs, 
+              mean_length=mn_lgth, median_length=med_lgth,
+              proportion_1400_plus=lgth_1400_plus))
 })
 fecundity<- data.frame(Age=a, 
                        Mean_Eggs_Produced=sapply(fec, "[[", 1),
-                       Median_Eggs_Produced=sapply(fec, "[[", 2))
-#write.csv(fecundity, "./baseline-parameters/fecundity_estimates_by_age.csv",
-#          row.names = FALSE)
+                       Median_Eggs_Produced=sapply(fec, "[[", 2),
+                       Mean_Length=sapply(fec, "[[", 3),
+                       Median_Length=sapply(fec, "[[", 4),
+                       Proportion_Length_1400plus=sapply(fec, "[[", 5))
+# write.csv(fecundity, "./baseline-parameters/fecundity_estimates_by_age_comparison.csv",
+#           row.names = FALSE)
 
 # MEAN FECUNDITY INCREASES LINEARLY WITH AGE AND IS CLOSE TO 100,000 BY AGE 60 
 # THIS MAY BE EXPECTED BASED ON THE MATH--CHECK!
@@ -116,3 +128,57 @@ fecundity<- data.frame(Age=a,
 fecundity<- read.csv("./baseline-parameters/fecundity_estimates_by_age.csv")
 plot(fecundity$Age, fecundity$Mean_Eggs_Produced/1000, xlab="Age (Years)", 
      ylab="Thousands of Eggs Produced Per Female", pch=19)
+
+
+
+# ## CHECK VB_PARAMS
+# VBparams<- growth_params(n=n, mu_ln_Linf=ln_Linf_mu, mu_ln_k=ln_k_mu, 
+#                          vcv=vcv)
+# length(which(VBparams[[1]]<1400))/length(VBparams[[1]])
+# # 0.589312
+# indx<- which(VBparams[[1]]>1400)
+# a<- -1/(VBparams[[2]][indx])*log((VBparams[[1]][indx]-1400)/(VBparams[[1]][indx]-200))+1
+# min(a)
+# # 22.83147
+# max(a)
+# # 467.6466
+# length(which(a<60))/length(a)
+# # 0.7228918
+# a_50<- -1/(VBparams[[2]][indx])*log((VBparams[[1]][indx]-1400)/(VBparams[[1]][indx]-50))+1
+# min(a_50)
+# # 24.50924
+# a_350<- -1/(VBparams[[2]][indx])*log((VBparams[[1]][indx]-1400)/(VBparams[[1]][indx]-350))+1
+# min(a_350)
+# # 20.98657
+# 
+# 
+# lower_ls<-age_1_length(n=n, mu=mu_l_1, sd=sd_l_1, min=min_l_1, max=max_l_1)
+# 
+# a=1:60
+# lengths<- lapply(a, function(x)
+# {
+#   out<- length_at_age(age=x, length_at_age_1=lower_ls, Linf=VBparams[[1]],
+#                           k=VBparams[[2]])
+#   return(out)
+# })
+# maxL<- sapply(1:length(lengths), function(x){max(lengths[[x]])})
+# perc<- sapply(1:length(lengths), function(x)
+# {
+#   length(which(lengths[[x]]>=1400))/length(lengths[[x]])
+# })
+# mn_lgth<- sapply(1:length(lengths), function(x){mean(lengths[[x]])})
+# med_lgth<- sapply(1:length(lengths), function(x){median(lengths[[x]])})
+# 
+# fecundity<- lapply(1:length(a), function(x)
+# {
+#   out<- eggs(fork_length=lengths[[x]], a=intrcpt, b=slp, dispersion_param=disp)
+#   return(out)
+# })
+# mn_fec<- sapply(1:length(fecundity), function(x){mean(fecundity[[x]])})
+# med_fec<- sapply(1:length(fecundity), function(x){median(fecundity[[x]])})
+# 
+# 
+# plot(a,mn_fec)
+# points(a, med_fec, col="blue")
+# max(mn_fec)
+# max(med_fec)

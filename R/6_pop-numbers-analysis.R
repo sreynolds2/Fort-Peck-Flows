@@ -167,9 +167,33 @@ pop_files<- pop_files[-indx]
 yrs<- c(10, 20, 50, 100)
 reps<- 100
 
-indx<-c(sapply(c(27:24,50:47,72:69,94:91), function(x){grep(paste0("_", x, "-"), pop_files)}))
+#indx<-c(sapply(c(25:24,48:47,70:69,92:91), function(x){grep(paste0("_", x, "-"), pop_files)}))
 #original length 3600, so 7200 in ranks and 36000 in projections
-#needs finishing: 28, 51, 73, 95, 99
+#needs finishing: 26, 27, 28, 49, 50, 51, 71, 72, 73, 93, 94, 95, 99
+vals<- sapply(c(26, 49, 71, 93), function(x)
+{
+  paste0("_", x, "-", c(3:9, 24:99), ".rds")
+})
+indx1<- c(sapply(c(vals), function(x){grep(x, pop_files)}))
+vals<- sapply(c(27, 50, 72, 94), function(x)
+{
+  paste0("_", x, "-", c(1, 4:10, 33:99), ".rds")
+})
+indx2<- c(sapply(c(vals), function(x){grep(x, pop_files)}))
+indx<- c(indx2, indx1)
+
+
+vals<- sapply(c(28, 51, 73, 95), function(x)
+{
+  paste0("_", x, "-", c(6:9, 50:99), ".rds")
+})
+indx1<- c(sapply(c(vals), function(x){grep(x, pop_files)}))
+indx<-c(indx1, indx)
+indx2<- c(sapply(c("_5-1.rds", "_7-1.rds", "_7-10.rds", "_99-1.rds", 
+                "_99-10.rds", "_99-100.rds"), function(x)
+                  {grep(x, pop_files)}))
+indx<- c(indx2, indx)
+rm(indx1, indx2)
 
 library(parallel)
 ## USE ALL CORES
@@ -177,10 +201,10 @@ numCores<-detectCores()
 ## INITIATE CLUSTER
 cl<-makeCluster(numCores)
 ## MAKE PREVIOUS ITEMS AND FUNCTIONS AVAILABLE
-clusterExport(cl, c("dat", "inputs", "alts", "pop_files", "yrs", "reps"),envir=environment())
+clusterExport(cl, c("indx", "dat", "inputs", "alts", "pop_files", "yrs", "reps"),envir=environment())
 clusterEvalQ(cl, source("./R/1_global.r"))
 clusterEvalQ(cl, source("./R/2_functions.r"))
-scenario_ranks<- parLapply(cl, indx[5:length(indx)], function(y)
+scenario_ranks<- parLapply(cl, indx, function(y)
 {
   pDat<- readRDS(paste0("./output/_populations/", pop_files[y]))
   id_rep<- ifelse(pDat$type=="boom_bust", paste0(pDat$id, "-", pDat$rep),

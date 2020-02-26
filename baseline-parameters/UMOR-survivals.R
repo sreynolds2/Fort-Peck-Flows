@@ -5,7 +5,7 @@
 library(tabulizer)
 library(plyr)
 
-setwd("C:/Users/sreynolds/Documents")
+setwd("C:/Users/sreynolds/Documents/GitHub/Fort-Peck-Flows")
 
 ###############################################
 #                                             #
@@ -107,6 +107,13 @@ phi_MO_fing<- lapply(unique(MO_FNG$Cohort), function(x)
 })
 phi_MO_fing<- do.call(rbind, phi_MO_fing)
 phi_MO_fing$Weighted_Val<- phi_MO_fing$Estimate*phi_MO_fing$Numbers
+
+# tmp<- ddply(phi_MO_fing, .(Parameter), summarize,
+#                     unweighted_mean=mean(Estimate),
+#                     weighted_mean=sum(Weighted_Val)/sum(Numbers))
+# max(abs(tmp$unweighted_mean-tmp$weighted_mean))
+# # 0.0008075766  
+# ## VERY LITTLE DIFFERENCE BETWEEN WEIGHTED AND UNWEIGHTED MEANS
 
 phi_MO_fing<- ddply(phi_MO_fing, .(Parameter), summarize,
                     Estimate=sum(Weighted_Val)/sum(Numbers))

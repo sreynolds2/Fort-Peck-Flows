@@ -72,12 +72,74 @@ tblH$Elasticities
 bnd_inp<- boundary_product(inputs)
 crvs<- spawning_survival_retention_curves(boundary_inputs = bnd_inp)
 plot_boundary_curves(crvs, phi0_upper = 0.01, xlab="", ylab="")
-legend(0, 0.002, expression(paste(p[ret],"=1")), bty='n')
-legend(0.35, 0.007, expression(paste(p[ret],"=0.1")), bty='n')
+# legend(0, 0.002, expression(paste(p[ret],"=1")), bty='n')
+# legend(0.35, 0.007, expression(paste(p[ret],"=0.1")), bty='n')
+# mtext(expression(paste("Spawning Probability (", gamma, ")")), 1,
+#       outer=TRUE, padj=1.2)
+# mtext(expression(paste("Age-0 Survival ( ", phi[0], ")")), 2,
+#       outer=TRUE, padj=2, las=0)
+legend(-0.003, 0.002, expression(paste(p[ret],"=1")), bty='n')
+legend(0.197, 0.0075, expression(paste(p[ret],"=0.1")), bty='n')
 mtext(expression(paste("Spawning Probability (", gamma, ")")), 1,
-      outer=TRUE, padj=1.2)
-mtext(expression(paste("Age-0 Survival ( ", phi[0], ")")), 2,
-      outer=TRUE, padj=2, las=0)
+      outer=TRUE, padj=-4)
+mtext(expression(paste("Age-0 Survival Given Retention (  ", phi[0], ")")), 2,
+      outer=TRUE, padj=2.5, las=0)
+points(0.5, 0.000075, pch=16, col="red")
+points(0.5, 0.0004, pch=16, col="red")
+points(0.5, 0.0075, pch=16, col="red")
+points(0.5, 0.003, pch=16, col="blue")
+points(0.7, 0.001, pch=16, col="black")
+
+# PRESENTATION FIGURES
+# LARGE, GENERAL PICTURE
+phi0<- seq(0.001, 0.01, 0.001)
+spnProb<- seq(0.05, 1, 0.05)
+
+tbl<- lapply(phi0, function(s)
+{
+    tbl1<- lapply(spnProb, function(g)
+    {
+      inps<- inputs
+      inps$p_retained<-0.1
+      inps$phi0_MR<- s
+      inps$gamma<- g
+      ea<- matrix_eigen_analysis(inps)
+      out<- data.frame(phi0=s, gamma=g, lambda=ea$lambda1)
+      return(out)
+    })
+    tbl1<- do.call("rbind", tbl1)
+    return(tbl1)
+})
+tbl<- do.call("rbind", tbl)
+
+library(lattice)
+library(grid)
+crvs<- spawning_survival_retention_curves(boundary_inputs = bnd_inp,
+                                          p_retained = 0.1)
+crvs<- crvs[order(crvs$gamma),]
+col.l <- colorRampPalette(c('black', 'red', 'white', 'blue', 'black'))(200)
+levelplot(lambda~gamma+phi0,tbl, col.regions=col.l,
+          at=seq(0.75, 1.25, 0.01),  
+          panel=function(...){panel.levelplot(...); 
+            panel.axis("bottom",  half = FALSE,labels=F) 
+            panel.axis("left",  half = FALSE,labels=F) 
+            grid.lines(crvs[,1], 
+                       crvs[,2], 
+                       default.units="native", 
+                       gp=gpar(col="gray", lwd=2))
+          }, scales = list(tck = c(-1,-1)),
+          xlab="Spawning Probability", 
+          ylab="Age-0 Survival Given Retention")
+
+
+plot_boundary_curves(crvs, phi0_upper = 0.01, xlab="", ylab="")
+#legend(0.2, 0.007, expression(paste(p[ret],"=0.1")), bty='n')
+mtext(expression(paste("Spawning Probability (", gamma, ")")), 1,
+      outer=TRUE, padj=-4)
+mtext(expression(paste("Age-0 Survival Given Retention (  ", phi[0], ")")), 2,
+      outer=TRUE, padj=2.5, las=0)
+points(0.5, 0.000075)
+points(0.5, 0.003)
 
 #FIGURE 8
 par(mfrow=c(2,1),
