@@ -5,6 +5,8 @@ dat<- read.xlsx("./dat/Alt1_Retention_Out_12.xlsx", "OO")
 #COL 7: FIRST TEMPERATURE
 #COL 8: FIRST SPATIAL DISTRIBUTION
 
+
+## FIND THE PULSE AND PULSE ABOVE ANOXIC ZONE
 test<- lapply(1:96, function(x)
 {
   pulse1<- which.max(dat[,3*x+5])
@@ -32,6 +34,8 @@ ret_pulse_below<- sum(dat[1:test[min(which(pulse_dd_aboveLS>200)),"pulse_aboveLS
                       as.character(min(which(pulse_dd_aboveLS>200)))])/sum(
                         dat[,as.character(min(which(pulse_dd_aboveLS>200)))])
 ret_pulse_below
+
+
 
 
 pulse_dd9<- cumsum(30/(9*24)*test$pulse_temperature)
@@ -148,3 +152,24 @@ perc_below<- cumsum(dat[,3*indx+5])/sum(dat[,3*indx+5])
 indx2<- min(which(perc_below>0.001))
 dat[indx2,"RS"]
 ### NOT REALLY DIFFERENT FROM 200 ABOVE
+
+
+
+### RERUN AVERAGE CALCS WITHOUT INCLUSION OF RIVER MILES PAST ANOXIC ZONE
+n<- length(dat[1,6:ncol(dat)])/3
+PITU<- sapply(1:n, function(i)
+{
+  sum((3/24*dat[1:459,3*i+4]/(1923*dat[1:459,3*i+4]^(-0.74)))*(dat[1:459,3*i+5]/sum(dat[1:459,3*i+5])))
+})
+PCTU<- cumsum(PITU)
+ret<- sapply(1:n, function(i)
+{
+  sum(dat[1:459,3*i+5])/sum(dat[,3*i+5])
+})
+indx<- min(which(PCTU>1))
+new_ret<- (ret[indx]*(1-PCTU[indx-1])+ret[indx-1]*(PCTU[indx]-1))/(PCTU[indx]-PCTU[indx-1])
+new_ret
+orig_ret<- 0.0117
+(new_ret-orig_ret)*100
+
+## TO DO EVENTUALLY:  REWORK ABOVE TO CREATE TWO FUNCTIONS -- ONE FOR ANOXIC ZONE ANALYSIS
