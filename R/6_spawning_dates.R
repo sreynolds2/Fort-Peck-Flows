@@ -343,6 +343,8 @@ Spawn_List<- lapply(1:nrow(tbl), function(i)
 Spawn_List<- do.call(rbind, Spawn_List)
 write.csv(Spawn_List, "./output/Spawn_Dates_Summary2.csv", row.names = FALSE)
 
+tbl<- read.csv("./output/Spawn_Dates_Summary.csv")
+Spawn_List<- read.csv("./output/Spawn_Dates_Summary2.csv")
 
 tmp<- Spawn_List[order(Spawn_List$Flow_Scenario),]
 tmp<- tmp[,c(3,1:2,4:10)]
