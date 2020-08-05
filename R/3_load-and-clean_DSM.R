@@ -42,6 +42,7 @@ DSM_ret<- lapply(dev, function(dv)
 })
 DSM_ret<- do.call(rbind, DSM_ret)
 
+write.csv(DSM_ret, "./output/All_Temps_Retentions.csv")
 
 
 # alts<- c("1", "1a", "1b", "2", "2a", "2b", "NA")
