@@ -2,8 +2,8 @@
 source("./r/1_global_DSM.R")
 source("./r/2_functions_DSM.R")
 
-
-anx<- TRUE
+# COMPUTE ALL TYPES OF RETENTION VALUES
+anx<- FALSE
 dev<- c("New", "Old")
 DSM_ret<- lapply(dev, function(dv)
 {
@@ -42,9 +42,20 @@ DSM_ret<- lapply(dev, function(dv)
 })
 DSM_ret<- do.call(rbind, DSM_ret)
 
-write.csv(DSM_ret, "./output/All_Temps_Retentions.csv")
+# ## FOR anx=TRUE
+# write.csv(DSM_ret, "./output/All_Temps_Retentions.csv", row.names = FALSE)
+# ## FOR anx=FALSE
+# write.csv(DSM_ret, "./output/Above_Anoxic_Retentions.csv", row.names = FALSE)
 
+## FULL TABLE
+al<- read.csv("./output/All_Temps_Retentions.csv", stringsAsFactors = FALSE)
+al[is.na(al$Alt),]$Alt<- "NA"
+ab<- read.csv("./output/Above_Anoxic_Retentions.csv", stringsAsFactors = FALSE)
+ab[is.na(ab$Alt),]$Alt<- "NA"
+DSM_full<- rbind(al, ab)
+write.csv(DSM_full, "./output/Retentions.csv", row.names = FALSE)
 
+# KEY RETENTIONS ONLY
 # alts<- c("1", "1a", "1b", "2", "2a", "2b", "NA")
 # DSM_ret<- lapply(alts, function(alt)
 # {
