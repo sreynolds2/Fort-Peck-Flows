@@ -32,12 +32,15 @@ compute_retention<- function(data=NULL,
   dat<- dat[,-c(6:8)]
   ### REMOVE EXTRA ROWS
   indx<- which(dat[,5]==0 | is.na(dat[,5]))
-  #### CHECK ROW CONSISTENCY
-  if(!all(indx %in% c(1, 20:22, 179:181, 364:366, 575)) | length(indx)!=11)
+  if(length(indx)>0)
   {
-    print(return("Row breaks are different than expected."))
+    #### CHECK ROW CONSISTENCY
+    if(!all(indx %in% c(1, 20:22, 179:181, 364:366, 575)) | length(indx)!=11)
+    {
+      print(return("Row breaks are different than expected."))
+    }
+    dat<- dat[-indx,]
   }
-  dat<- dat[-indx,]
   ### CHECK DATA COLUMNS
   if(!grepl("velocity", names(dat)[6]) | 
      !grepl("Temperature", names(dat)[7]) | 
