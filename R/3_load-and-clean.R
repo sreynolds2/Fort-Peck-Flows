@@ -2,47 +2,47 @@
 source("./R/0_default-parameters.r")
 source("./R/1_global.r")
 
-## RUNS OUT OF MEMORY
-#if(full_run)
-#{
-  alt_files<- list.files("./dat", "_Retention_Out_12.xlsx")
-  #dat<- lapply(1:length(alt_files), function(x)
-  #{
-  x<- 1
-    alt_dat<- read.xlsx(paste0("./dat/", alt_files[x]), "Retention")
-    #alt_dat<- alt_dat[,1:2]
-    alt_dat<- alt_dat[,c(1,4)]
-    ## ERROR HANDLING
-    if(names(alt_dat)[1]!="Hatch.Date"){return(print("First column does not give hatch date."))}
-    if(as.character(alt_dat[1,2])!="New;0.9"){return(print("Issues with extracting correct retention probabilities."))}
-    ## CLEAN FILE GIVEN NO ERRORS
-    alt_dat<- alt_dat[2:nrow(alt_dat),]
-    names(alt_dat)<- c("Hatch_Date", "Retention_Probability")
-    if(any(is.na(alt_dat$Retention_Probability) & is.na(alt_dat$Hatch_Date)))
-    {
-      indx<- which(is.na(alt_dat$Retention_Probability) & is.na(alt_dat$Hatch_Date))
-      alt_dat<- alt_dat[-indx, ]
-      rm(indx)
-    }
-    ## MISSING DATA HANDLING
-    if(any(is.na(alt_dat$Retention_Probability) | is.na(alt_dat$Hatch_Date)))
-    {
-      return(print("NA's present in data."))
-    }
-    ## ADD ESTIMATE TYPE
-    alt_dat$Estimate_Type<- "New;0.9"
-    ## ADD ALTERNATIVE/VARIANT NAME
-    alt_dat$Flow_Scenario<- unlist(strsplit(alt_files[x], "_Retention_Out_12.xlsx"))
-    ## ADD IN FLOW YEAR
-    alt_dat$Year<- as.numeric(format(alt_dat[,1], "%Y"))
-    #return(alt_dat)
-  #})
-    write.csv(alt_dat, paste0("./dat/",
-                              unlist(strsplit(alt_files[x], "_Retention_Out_12.xlsx")),
-                              "_retention_data.csv"), row.names = FALSE)
-  #dat<-do.call(rbind, dat)
-  #write.csv(dat, "./dat/scenario_retention_data.csv", row.names = FALSE)
-#}
+# ## RUNS OUT OF MEMORY
+# #if(full_run)
+# #{
+#   alt_files<- list.files("./dat", "_Retention_Out_12.xlsx")
+#   #dat<- lapply(1:length(alt_files), function(x)
+#   #{
+#   x<- 1
+#     alt_dat<- read.xlsx(paste0("./dat/", alt_files[x]), "Retention")
+#     #alt_dat<- alt_dat[,1:2]
+#     alt_dat<- alt_dat[,c(1,4)]
+#     ## ERROR HANDLING
+#     if(names(alt_dat)[1]!="Hatch.Date"){return(print("First column does not give hatch date."))}
+#     if(as.character(alt_dat[1,2])!="New;0.9"){return(print("Issues with extracting correct retention probabilities."))}
+#     ## CLEAN FILE GIVEN NO ERRORS
+#     alt_dat<- alt_dat[2:nrow(alt_dat),]
+#     names(alt_dat)<- c("Hatch_Date", "Retention_Probability")
+#     if(any(is.na(alt_dat$Retention_Probability) & is.na(alt_dat$Hatch_Date)))
+#     {
+#       indx<- which(is.na(alt_dat$Retention_Probability) & is.na(alt_dat$Hatch_Date))
+#       alt_dat<- alt_dat[-indx, ]
+#       rm(indx)
+#     }
+#     ## MISSING DATA HANDLING
+#     if(any(is.na(alt_dat$Retention_Probability) | is.na(alt_dat$Hatch_Date)))
+#     {
+#       return(print("NA's present in data."))
+#     }
+#     ## ADD ESTIMATE TYPE
+#     alt_dat$Estimate_Type<- "New;0.9"
+#     ## ADD ALTERNATIVE/VARIANT NAME
+#     alt_dat$Flow_Scenario<- unlist(strsplit(alt_files[x], "_Retention_Out_12.xlsx"))
+#     ## ADD IN FLOW YEAR
+#     alt_dat$Year<- as.numeric(format(alt_dat[,1], "%Y"))
+#     #return(alt_dat)
+#   #})
+#     write.csv(alt_dat, paste0("./dat/",
+#                               unlist(strsplit(alt_files[x], "_Retention_Out_12.xlsx")),
+#                               "_retention_data.csv"), row.names = FALSE)
+#   #dat<-do.call(rbind, dat)
+#   #write.csv(dat, "./dat/scenario_retention_data.csv", row.names = FALSE)
+# #}
 
 
 if(full_run)
@@ -63,7 +63,11 @@ if(full_run)
   print("NOTE DUE TO MEMORY LIMITS THIS IS RAN FROM THE .CSV FILES; UPDATE THESE FILES PRIOR TO COMPLETING A FULL RUN!")
 }
 
-dat<- read.csv("./dat/scenario_retention_data.csv")
+
+if(!full_run)
+{
+  dat<- read.csv("./dat/scenario_retention_data.csv")
+}
 
 
 
