@@ -129,21 +129,35 @@ source("./R/1_global.r")
 spawning_info<- read.csv("./dat/Spawning_Info_By_Year_And_Threshold.csv")
 
 
-# # DETERMINE WEATHER PATTERN FOR EACH YEAR
-# BC_temps<- read.csv("./dat/BC_POR.csv")
-# names(BC_temps)[1]<- "Date"
-# BC_temps$Date<- as.Date(BC_temps$Date)
-# write.csv(BC_temps, "./dat/Estimated_Annual_Temperatures.csv", row.names = FALSE)
-# tmp<- BC_temps[grep("-06-01", BC_temps$Date),]
-# tmp$Weather<- ifelse(tmp$Spillway %in% c(14.41, 14.67), "High",
-#                      ifelse(tmp$Spillway %in% c(12.67, 12.93), "Median",
-#                             "Low"))
-# tmp$Year<- format(tmp$Date, "%Y")
-# tmp<- tmp[, c("Year", "Weather")]
-# write.csv(tmp, "./dat/Observed_Annual_Weather.csv", row.names = FALSE)
-
-weather<- read.csv("./dat/Observed_Annual_Weather.csv")
-temps<- read.csv("./dat/Estimated_Annual_Temperatures.csv")
+# ## THE FOLLOWING IS THE ORIGINAL CODE USED; 
+# ## THE WEATHER PATTERNS HAVE SINCE BEEN UPDATED BY CRAIG AND ARE 
+# ## STORED IN THE FILE TempClass Post 1930.xlsx -- WILL CLEAN AND UPDATE HERE
+# # # DETERMINE WEATHER PATTERN FOR EACH YEAR
+# # BC_temps<- read.csv("./dat/BC_POR.csv")
+# # names(BC_temps)[1]<- "Date"
+# # BC_temps$Date<- as.Date(BC_temps$Date)
+# # write.csv(BC_temps, "./dat/Estimated_Annual_Temperatures.csv", row.names = FALSE)
+# # tmp<- BC_temps[grep("-06-01", BC_temps$Date),]
+# # tmp$Weather<- ifelse(tmp$Spillway %in% c(14.41, 14.67), "High",
+# #                      ifelse(tmp$Spillway %in% c(12.67, 12.93), "Median",
+# #                             "Low"))
+# # tmp$Year<- format(tmp$Date, "%Y")
+# # tmp<- tmp[, c("Year", "Weather")]
+# # write.csv(tmp, "./dat/Observed_Annual_Weather.csv", row.names = FALSE)
+# 
+# weather<- read.csv("./dat/Observed_Annual_Weather.csv")
+# temps<- read.csv("./dat/Estimated_Annual_Temperatures.csv")
+#
+# tmp<- read.xlsx("./dat/TempClass Post 1930.xlsx", "Classification2",
+#                 stringsAsFactors = FALSE)
+# names(tmp)[3]<- "Weather"
+# tmp<- tmp[,c("Year", "Weather")]
+# tmp[which(tmp$Weather=="Normal"),]$Weather<- "Median"
+# write.csv(tmp, "./dat/Observed_Annual_Temperature_Class.csv", row.names = FALSE)
+# diff<- which(weather$Weather!=tmp$Weather[1:nrow(weather)])
+# yrs<- weather[diff, "Year"]
+# rm(tmp, diff, yrs)
+weather<- read.csv("./dat/Observed_Annual_Temperature_Class.csv")
 
 # DETERMINE IF SPAWNING OCCURS GIVEN WEATHER PATTERN AND PP INFO
 spawning_dates<- function(weather_data=NULL,
@@ -159,7 +173,8 @@ spawning_dates<- function(weather_data=NULL,
   if(nrow(dat)==0){return(print("The spawning information for the requested threshold 
                                 combination is not available. Please update the spawning 
                                 info table to obtain further output."))}
-  out<- lapply(1:nrow(weather_data), function(i)
+  indx<- which(weather_data$Year==2012)
+  out<- lapply(1:indx, function(i)
   {
     tmp<- subset(dat, Year==weather_data$Year[i] & Weather_Pattern==weather_data$Weather[i])
     tmp$spawn_date<- format(as.Date(ifelse(tmp$Max_Date+post_peak>=tmp$Overlap_Start & 
