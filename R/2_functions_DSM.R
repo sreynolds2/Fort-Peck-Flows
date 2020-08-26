@@ -31,6 +31,7 @@ compute_retention<- function(data=NULL,
   ### REMOVE INITIAL TIME STEP
   dat<- dat[,-c(6:8)]
   ### REMOVE EXTRA ROWS
+  if(nrow(dat)==565 & dat[nrow(dat),5]==0){dat<- dat[1:(nrow(dat)-1),]}
   indx<- which(dat[,5]==0 | is.na(dat[,5]))
   if(length(indx)>0)
   {
