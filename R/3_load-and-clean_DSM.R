@@ -62,9 +62,10 @@ if(fullrun_DSM)
   tmp<- subset(DSM_ret, anoxic_layer==FALSE)
   write.csv(tmp, "./output/Above_Anoxic_Retentions.csv", row.names = FALSE)
   
-  ## FOR KEy RETENTIONS ONLY
+  ## FOR KEY RETENTIONS ONLY
   tmp<- subset(tmp, Develop_Mod=="New" & Drift_Mod==0.9)
-  write.csv(DSM_ret, "./output/New_9_above_Retentions.csv")
+  write.csv(tmp, "./output/New_9_above_Retentions.csv", 
+            row.names = FALSE)
 }
 
 if(!fullrun_DSM)
