@@ -60,9 +60,9 @@ dat$anoxic_layer<- FALSE
 dat<- dat[,c("Alt", "Year", "Weather", "Spawn", "Retention", "Hatch_Date",
              "Spawn_Date", "Develop_Mod", "Drift_Mod", "anoxic_layer")]
 dat<- dat[order(dat$Alt, dat$Year),]
-write.csv(dat,
-          "./output/_stochastic/Standard_Annual_Retentions_by_Alt.csv",
-          row.names = FALSE)
+# write.csv(dat,
+#           "./output/_stochastic/Standard_Annual_Retentions_by_Alt.csv",
+#           row.names = FALSE)
 #dat<- read.csv("./output/_stochastic/Standard_Annual_Retentions_by_Alt.csv", 
 #               stringsAsFactors = FALSE)
 
@@ -71,8 +71,8 @@ trans<- read.csv("./output/_stochastic/Temperature_Transition_Matrix.csv",
                  row.names = 1)
 
 # SIMULATE POPULATION TRAJECTORIES
-yrs<- 10000 
-reps<- 5
+yrs<- 750 
+reps<- 5000
 ## GENERATE BASELINE POPULATION TRANSITION MATRIX
 A_base<- matrix(0,60,60)
 ### SURVIVAL VALUES
@@ -104,7 +104,10 @@ eggs<- c(17858.32, 19196.99, 20567.28, 21929.43, 23349.27,
          81574.96, 83282.14, 85053.37, 86523.37, 88186.36, 89790.52, 
          91420.39, 92923.74, 94449.11, 96010.70, 97906.26, 99150.91)
 sexratio<- 0.32
-phi0_MR<- 0.000075
+phi0_MR<- 0.000075  ## ROUNDS 1 & 2, 2A, 2Aplus, 2B
+# phi0_MR<- 0.0004  ## ROUND 2C
+# phi0_MR<- 0.00075  ## ROUND 2D
+# phi0_MR<- 0.001  ## ROUND 2E
 A_base[1,8:60] <- psi*eggs*sexratio*phi0_MR
 rm(psi, eggs, sexratio, phi0_MR)
 
@@ -121,7 +124,7 @@ for(j in 1:reps)
                     prob=trans[,W[i-1,j]])
   }
 }
-write.csv(W, "./output/_stochastic/Sample_Temp_Class_Round_1.csv", 
+write.csv(W, "./output/_stochastic/Sample_Temp_Class_Round_2plus.csv", 
           row.names = FALSE)
 ## SIMULATE ENVIRONMENT DATA BY CHOOSING A YEAR WITH GIVEN TEMPERATURE
 omega<- sapply(1:length(W), function(i)
@@ -129,16 +132,24 @@ omega<- sapply(1:length(W), function(i)
   sample(temps[which(temps$Weather==c(W[i])),]$Year,1)
 })
 omega<- matrix(omega, nrow=yrs, ncol=reps, byrow = FALSE)
-write.csv(omega, "./output/_stochastic/Sample_Paths_Round_1.csv", 
+write.csv(omega, "./output/_stochastic/Sample_Paths_Round_2plus.csv", 
           row.names = FALSE)
-#test<- read.csv("./output/_stochastic/Sample_Paths_Round_1.csv")
-#test<- unname(as.matrix(test))
+#omega<- read.csv("./output/_stochastic/Sample_Paths_Round_2plus.csv")
+#omega<- unname(as.matrix(omega))
 rm(W, i, j)
 ## SIMULATE POPULATION STRUCTURE OVER THE YEARS FOR EACH ALTERNATIVE
 alts<- c("1", "1a", "1b", "2", "2a", "2b", "NoAct")
 ### PULL AVERAGE MATRIX POPULATION STRUCTURE
 AvgMC_dat<- readRDS("./output/_stochastic/Average_Matrix_Data_MC.rds")
-Y0<- AvgMC_dat$`1`$stable_age
+#### INITIAL STRUCTURE
+# Y0<- AvgMC_dat$`1`$stable_age ## ROUND 1
+# Y0<- AvgMC_dat$`1b`$stable_age ## ROUND 2
+N0<- 1000000*cumprod(c(1, 0.64, 0.69, 0.72, 0.76, 0.79, 0.82, 0.84, 
+                        0.86, 0.88, 0.895, 0.91, 0.92, 0.93, 0.935, 
+                        rep(0.94, 45)))
+Y0<- N0/sum(N0)  ## ROUND 2A, 2Aplus
+# Y0<- rep(1/60,60) ## ROUNDS 2B & 2C
+# GET EXPECTED UMOR AGE STRUCTURE AND RUN HERE ??
 out<- lapply(alts, function(y)
 {
   # ## USE INITIAL AND SUBSEQUENT POPULATION STRUCTURE TO ESTIMATE
@@ -172,7 +183,7 @@ out<- lapply(alts, function(y)
   {
     Y_t<- Y0
     loglt<- NULL
-    for(i in 1:665)#yrs)
+    for(i in 1:yrs)
     {
       if(tmp[which(tmp$Year==omega[i,w]),]$Spawn==0)
       {
@@ -184,18 +195,111 @@ out<- lapply(alts, function(y)
         A_t<- A_base
         A_t[1,8:60]<- A_t[1,8:60]*0.5*tmp[which(tmp$Year==omega[i,w]),]$Retention
       }
-      Y_t<- A_t%*%Y_t/sum(A_t%*%Y_t)
-      loglt<- c(loglt, log(sum(A_t%*%Y_t)))
-        #CHECK ON SUM ABOVE; NEED CODE FOR WHEN POPULATION GOES EXTINCT
+      ## HANDLE POPULATION GOING EXTINCT
+      if(sum(A_t%*%Y_t)==0)
+      {
+        loglt<- c(loglt, -Inf)
+        Y_t<- rep(0,60)
+      }
+      ## HANDLE PERSISTING POPULATION
+      if(sum(A_t%*%Y_t)!=0)
+      {
+        loglt<- c(loglt, log(sum(A_t%*%Y_t)))
+        Y_t<- A_t%*%Y_t/sum(A_t%*%Y_t)
+      }
     }
     return(loglt)
   })
   write.csv(logl_t, paste0("./output/_stochastic/Alt_", y, 
-                           "_Loglt_Round_1.csv"), row.names = FALSE)
+                           "_Loglt_Round_2Aplus.csv"), row.names = FALSE)
   return(logl_t)
 })
 names(out)<- alts
-saveRDS(out, "./output/_stochastic/Loglt_Round_1.rds")
+saveRDS(out, "./output/_stochastic/Loglt_Round_2Aplus.rds")
+
+
+
+
+## TIME TO EXTINCTION
+dat<- readRDS("./output/_stochastic/Loglt_Round_2A.rds")
+
+out<- lapply(1:7, function(x)
+{
+  tmp<- dat[[x]]
+  extinct<- sapply(1:ncol(tmp), function(j)
+  {
+    ifelse(length(which(tmp[,j]==-Inf))==0, 10001, 
+           min(which(tmp[,j]==-Inf)))
+  })
+  extinct<- extinct[which(extinct<10001)]
+  extinct<- data.frame(year=extinct[order(extinct)], freq=1)
+  extinct$prob<- cumsum(extinct$freq)/500
+  extinct$alt<- names(dat)[x]
+  extinct<- extinct[,c(1,3,4)]
+  return(extinct)
+})
+out<- do.call(rbind, out)
+plot(c(out[which(out$alt=="NoAct"),]$year, 
+       (max(out[which(out$alt=="NoAct"),]$year)+1):10000), 
+     c(out[which(out$alt=="NoAct"),]$prob, 
+       rep(1,10000-max(out[which(out$alt=="NoAct"),]$year))), 
+     type="l", xlim=c(0,10000), ylim=c(0,1), lwd=2,
+     xlab="Year", ylab="Fraction of Extinct Replicates")
+points(c(out[which(out$alt=="1a"),]$year, 
+         (max(out[which(out$alt=="1a"),]$year)+1):10000), 
+       c(out[which(out$alt=="1a"),]$prob, 
+         rep(1,10000-max(out[which(out$alt=="1a"),]$year))), 
+       type="l", col="red", lwd=3)
+points(c(out[which(out$alt=="2a"),]$year, 
+         (max(out[which(out$alt=="2a"),]$year)+1):10000), 
+       c(out[which(out$alt=="2a"),]$prob, 
+         rep(1,10000-max(out[which(out$alt=="2a"),]$year))),
+       type="l", col="blue", lwd=2)
+points(out[which(out$alt=="1"),]$year, 
+       out[which(out$alt=="1"),]$prob, type="l", col="orange", lwd=2)
+points(out[which(out$alt=="2"),]$year, 
+       out[which(out$alt=="2"),]$prob, type="l", col="green", lwd=2)
+points(out[which(out$alt=="1b"),]$year, 
+       out[which(out$alt=="1b"),]$prob, type="l", col="magenta", lwd=2)
+points(out[which(out$alt=="2b"),]$year, 
+       out[which(out$alt=="2b"),]$prob, type="l", col="cyan",lwd=2)
+legend(5000, 0.98, c("No Act", "Alt 1", "Alt 1a", "Alt 1b", "Alt 2", "Alt 2a", "Alt 2b"),
+       lty=1, lwd=2, 
+       col=c("black", "orange", "red", "magenta", "green", "blue", "cyan"),
+       bty="n")
+
+
+## BURN-IN YEARS
+dat<- readRDS("./output/_stochastic/Loglt_Round_2A.rds")
+
+test<- dat[[1]]
+extinct<- sapply(1:ncol(test), function(j)
+{
+  out<- ifelse(length(which(test[,j]==-Inf))==0, 10001, 
+               min(which(test[,j]==-Inf)))
+  return(out)
+})
+extinct[order(extinct)]
+               
+
+logLtau<- apply(test, 2, cumsum)
+lt<- matrix(0, nrow = nrow(logLtau), ncol = ncol(logLtau))
+for(i in 1:nrow(logLtau))
+{
+  lt[i,]<- logLtau[i,]/i
+}
+lt_mean<- apply(lt, 1, mean)
+plot(lt_mean2)
+
+test2<- test[1:1000, -which(test[1000,]==-Inf)]
+logLtau2<- apply(test2, 2, cumsum)
+lt2<- matrix(0, nrow = nrow(logLtau2), ncol = ncol(logLtau2))
+for(i in 1:nrow(logLtau2))
+{
+  lt2[i,]<- logLtau2[i,]/i
+}
+lt_mean2<- apply(lt2, 1, mean)
+plot(exp(lt_mean2))
 
 # ALT 1
 ## LONG-TERM LAMBDA
