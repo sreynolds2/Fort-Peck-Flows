@@ -185,7 +185,7 @@ plot(fecundity$Age, fecundity$Mean_Eggs_Produced/1000, xlab="Age (Years)",
 
 
 # ##### REPEAT FOR LOWER RIVER
-# # UPPER RIVER VON BERTALANFFY GROWTH PARAMETER DISTRIBUTION
+# # LOWER RIVER VON BERTALANFFY GROWTH PARAMETER DISTRIBUTION
 # ln_Linf_muL<-6.982160
 # ln_k_muL<- -2.382711
 # vcvL<- matrix(c(0.0894,-0.1327,-0.1327,0.3179),
@@ -207,9 +207,9 @@ plot(fecundity$Age, fecundity$Mean_Eggs_Produced/1000, xlab="Age (Years)",
 # fecL<- lapply(aL, function(x)
 # {
 #   lower_ls<-age_1_length(n=n, mu=mu_l_1, sd=sd_l_1, min=min_l_1, max=max_l_1)
-#   VBparams<- growth_params(n=n, mu_ln_Linf=ln_Linf_muL, mu_ln_k=ln_k_muL, 
+#   VBparams<- growth_params(n=n, mu_ln_Linf=ln_Linf_muL, mu_ln_k=ln_k_muL,
 #                            vcv=vcvL)
-#   # max(VBparams[[1]])  ##TOO LARGE OF FISH PRODUCED... NEW MODEL FIT?... 
+#   # max(VBparams[[1]])  ##TOO LARGE OF FISH PRODUCED... NEW MODEL FIT?...
 #   ##WHY WAS LOG USED FOR THE PARAMETERS???
 #   lengths<- length_at_age(age=x, length_at_age_1=lower_ls, Linf=VBparams[[1]],
 #                           k=VBparams[[2]])
@@ -218,19 +218,19 @@ plot(fecundity$Age, fecundity$Mean_Eggs_Produced/1000, xlab="Age (Years)",
 #   lgth_1400_plus<- length(which(lengths>=1400))/length(lengths)
 #   fecundity<- eggs(fork_length=lengths, a=intrcptL, b=slpL, dispersion_param=dispL)
 #   mn_eggs<- mean(fecundity)
-#   med_eggs<- median(fecundity) 
-#   return(list(mean_eggs=mn_eggs, median_eggs=med_eggs, 
+#   med_eggs<- median(fecundity)
+#   return(list(mean_eggs=mn_eggs, median_eggs=med_eggs,
 #               mean_length=mn_lgth, median_length=med_lgth,
 #               proportion_1400_plus=lgth_1400_plus))
 # })
-# fecundityL<- data.frame(Age=aL, 
+# fecundityL<- data.frame(Age=aL,
 #                        Mean_Eggs_Produced=sapply(fecL, "[[", 1),
 #                        Median_Eggs_Produced=sapply(fecL, "[[", 2),
 #                        Mean_Length=sapply(fecL, "[[", 3),
 #                        Median_Length=sapply(fecL, "[[", 4),
 #                        Proportion_Length_1400plus=sapply(fecL, "[[", 5))
 # 
-# plot(fecundity$Age, fecundity$Mean_Eggs_Produced/1000, xlab="Age (Years)", 
+# plot(fecundity$Age, fecundity$Mean_Eggs_Produced/1000, xlab="Age (Years)",
 #      ylab="Thousands of Eggs Produced Per Female", pch=17, ylim=c(0,100))
 # points(fecundityL$Age, fecundityL$Mean_Eggs_Produced/1000,pch=19)
 # legend("topleft", c("UMOR", "LMOR"), pch=c(17,19), bty="n")

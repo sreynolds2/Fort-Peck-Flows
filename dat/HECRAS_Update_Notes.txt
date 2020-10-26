@@ -1,0 +1,27 @@
+List of Needed File Changes
+
+Alt 1:
+   * 33->30
+
+Alt 1a
+   * None
+
+Alt 1b:
+   * Alt1bR2_30 (has "B")
+   * Alt1bR2_49 (has "B")  
+   * Alt1bR2_83_P (missing R2)
+   * Alt1bR2_86_P (missing b)
+   * Alt1bR2_87_P (missing b)
+   * Alt1bR2_94_P (missing b)
+   * Alt1bR2_12 (has "B")  
+
+Alt 2:
+   * Alt2R2_11 (missing t)
+
+Alt 2a:
+   * Alt2aR2_11_P02
+
+Alt 2b:
+   * Alt2bR2_75
+
+No Act:
