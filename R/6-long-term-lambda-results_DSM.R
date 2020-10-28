@@ -21,6 +21,54 @@ write.csv(DSM_full, "./output/long-term-lambda_DSM.csv",
           row.names = FALSE)
 
 # TABLE LIKE GRAHAM'S
+DSM_full<- read.csv("./output/long-term-lambda_DSM.csv", 
+                    stringsAsFactors = FALSE)
+DSM_full[which(is.na(DSM_full$Alt)),]$Alt<- "NoAct"
+DSM_full$Hatch_Date<- as.Date(DSM_full$Hatch_Date)
+
+# USE ONLY THE NEW DEVELOPMENT MODEL WITH 0.9 DRIFT MODEL
+dat<- subset(DSM_full, Develop_Mod=="New" & Drift_Mod==0.9 & anoxic_layer==FALSE)
+dat$Spawn_Date<- dat$Hatch_Date-7
+
+# USE ONLY STANDARD SPAWN DATES
+spn<- read.csv("./output/Spawn_Dates_Summary.csv", stringsAsFactors = FALSE)
+spn<- spn[,c("Year", "Weather_Pattern", "Flow_Scenario", "Standard")]
+spn[which(spn$Flow_Scenario=="Alt1"),]$Flow_Scenario<- "Alt.1"
+spn$Flow_Scenario<- gsub("Alt.", "", spn$Flow_Scenario)
+spn[which(spn$Flow_Scenario=="No.Act"),]$Flow_Scenario<- "NoAct"
+spn<- subset(spn, Standard!="Fail")
+spn$Standard<- as.Date(paste(spn$Year, spn$Standard, sep="-"))
+spn[which(spn$Year==1975),]$Standard<- "1975-07-02" #NEEDS CHANGING EVENTUALLY
+spn[which(spn$Year==1976),]$Standard<- "1976-06-14" #NEEDS CHANGING EVENTUALLY
+spn[which(spn$Year==1997),]$Standard<- "1997-06-25" #NEEDS CHANGING EVENTUALLY
+spn[which(spn$Year==1997 & spn$Flow_Scenario %in% c("1b", "2a")),]$Standard<- "1997-06-30" #NEEDS CHANGING EVENTUALLY
+
+tmp<- merge(spn, dat, by.x=c("Year", "Flow_Scenario", "Standard"), 
+            by.y=c("Year", "Alt", "Spawn_Date"), all.x=TRUE)
+tmp[which(tmp$Year==1997 & tmp$Flow_Scenario=="1b"), 5:10]<- #APPROXIMATE BASED ON SIMILAR FLOWS AND SAME HATCH DATE
+  tmp[which(tmp$Year==1997 & tmp$Flow_Scenario=="2a"),5:10] #NEEDS CHANGING EVENTUALLY
+
+
+tbl_LTL<- expand.grid(Year=1930:2012, Flow_Scenario=unique(DSM_full$Alt))
+tbl_LTL<- merge(tbl_LTL, tmp, by=c("Year", "Flow_Scenario"), all=TRUE)
+tbl_LTL[which(is.na(tbl_LTL$Long_Term_Growth_Rate)),"Long_Term_Growth_Rate"]<- 0
+tbl_LTL<- dcast(tbl_LTL, 
+                Year~Flow_Scenario, 
+                value.var = "Long_Term_Growth_Rate")
+  
+tbl_LTL<-tbl_LTL[,c(1,8,2:7)]
+write.csv(tbl_LTL, 
+          "./output/long-term_lambda_Standard_by_Year_DSM.csv", 
+          row.names = FALSE)
+
+
+
+# FULL TABLE (ALL DRIFT AND DEVELOPMENT MODELS) LIKE GRAHAM'S
+DSM_full<- read.csv("./output/long-term-lambda_DSM.csv", 
+                    stringsAsFactors = FALSE)
+DSM_full[which(is.na(DSM_full$Alt)),]$Alt<- "NoAct"
+DSM_full$Hatch_Date<- as.Date(DSM_full$Hatch_Date)
+
 tmp<- expand.grid(Year=1930:2012, Flow_Scenario=unique(DSM_full$Alt))
 tbl_LTL<- merge(DSM_full, tmp, by.x=c("Year", "Alt"), 
                 by.y=c("Year", "Flow_Scenario"), all=TRUE)
@@ -36,7 +84,7 @@ tbl_LTL[which(is.na(tbl_LTL$`2`)),]$`2`<-0
 tbl_LTL[which(is.na(tbl_LTL$`2a`)),]$`2a`<-0
 tbl_LTL[which(is.na(tbl_LTL$`2b`)),]$`2b`<-0
 tbl_LTL[which(is.na(tbl_LTL$`NA`)),]$`NA`<-0
-  
+
 tbl_LTL<-tbl_LTL[,c(1:5,12,6:11)]
 write.csv(tbl_LTL, 
           "./output/long-term_lambda_by_flow_and_hatch_date_DSM.csv", 

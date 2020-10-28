@@ -8,7 +8,7 @@
 inputs<- list()
 
 # MAXIMUM AGE
-inputs$max_age<- 60
+inputs$max_age<- 60 #100
 
 # AGE-1+ SURVIVALS
 phi<- read.csv("./dat/BaselinePhi.csv")
@@ -20,10 +20,10 @@ rm(phi)
 # FECUNDITIES
 ## PROPORTION OF FEMALES THAT ARE REPRODUCTIVELY READY
 ### MATURATION
-a_min<- 8
-a_max<- 21
-a_h<- 15
-k<- 1 #k=1 means 3*sigma is approximately 5 years
+a_min<- 8 #14 
+a_max<- 21 #27 
+a_h<- 15 #19   
+k<- 1 #k=1 means 3*sigma is approximately 5 years; #k=0.77 & k=0.9 means 3*sigma is approximately 7 and 6 years
 mat_Cdist<-1/(1+exp(-k*(a_min:(a_max-1)-a_h)))
 m<-rep(0, a_max-a_min+1)
 m[1]<-mat_Cdist[1]
@@ -59,7 +59,7 @@ rm(max_period, probs)
 ### AND REPRODUCTION PERIODS
 inputs$psi<- rep(0, inputs$max_age)
 inputs$psi[a_min]<- inputs$mat$m_i[a_min]
-for(i in (a_min+1):60)
+for(i in (a_min+1):inputs$max_age)
 {
   inputs$psi[i]<- inputs$mat$m_i[i]+
     sum(inputs$psi[a_min:(i-1)]*inputs$reproduction$p_t[i-a_min:(i-1)])
