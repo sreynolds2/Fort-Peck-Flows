@@ -47,7 +47,8 @@ tmp<- merge(spn, dat, by.x=c("Year", "Flow_Scenario", "Standard"),
             by.y=c("Year", "Alt", "Spawn_Date"), all.x=TRUE)
 tmp[which(tmp$Year==1997 & tmp$Flow_Scenario=="1b"), 5:10]<- #APPROXIMATE BASED ON SIMILAR FLOWS AND SAME HATCH DATE
   tmp[which(tmp$Year==1997 & tmp$Flow_Scenario=="2a"),5:10] #NEEDS CHANGING EVENTUALLY
-
+write.csv(tmp, "./output/long-term_lambda_Standard_by_Year_DSM_no_zeros.csv",
+          row.names = FALSE)
 
 tbl_LTL<- expand.grid(Year=1930:2012, Flow_Scenario=unique(DSM_full$Alt))
 tbl_LTL<- merge(tbl_LTL, tmp, by=c("Year", "Flow_Scenario"), all=TRUE)
@@ -62,6 +63,46 @@ write.csv(tbl_LTL,
           row.names = FALSE)
 
 
+## PLOT OF OUTCOMES WITH CHANGES IN AGE-0 SURVIVAL
+### PULL 1985 STANDARD DATA
+tmp<- tmp[which(tmp$Year==1985),]
+LTLs<- lapply(1:nrow(tmp), function(x)
+{
+  inps<- inputs
+  inps$p_retained<- tmp$Retention[x]
+  out<- lapply(seq(0.00002, 0.002, 0.00002), function(y)
+  {
+    inps$phi0_MR<- y
+    ea<- matrix_eigen_analysis(inps)
+    outt<- data.frame(Flow_Scenario=tmp$Flow_Scenario[x],
+                      Spawn_Date=tmp$Standard[x],
+                      Retention=inps$p_retained,
+                      phi0_MR=inps$phi0_MR,
+                      Long_Term_Growth_Rate=ea$lambda1)
+    return(outt)
+  })
+  out<- do.call(rbind, out)
+})
+LTLs<- do.call(rbind, LTLs)
+
+par(mfrow=c(1,1))
+alts<- unique(tmp$Flow_Scenario)
+cls<- c("darkgreen", "blue", "black", "red")
+plot(LTLs[which(LTLs$Flow_Scenario==alts[1]),]$phi0_MR,
+     LTLs[which(LTLs$Flow_Scenario==alts[1]),]$Long_Term_Growth_Rate,
+     ylim=c(0.75, 1), xlab="Age-0 Survival Given Retention", 
+     ylab="Long-Term Population Growth Rate", type="l", lwd=2, 
+     col=cls[1], tck=0.02, mgp=c(1.5,0.1,0))
+invisible(lapply(2:length(alts), function(i)
+{
+  points(LTLs[which(LTLs$Flow_Scenario==alts[i]),]$phi0_MR,
+       LTLs[which(LTLs$Flow_Scenario==alts[i]),]$Long_Term_Growth_Rate,
+       ylim=c(0.75, 1), xlab="Age-0 Survival Given Retention", 
+       ylab="Long-Term Population Growth Rate", type="l", lwd=2,
+       col=cls[i]) 
+}))
+legend("bottomright", paste0("Alternative ", alts), lwd=2, col=cls, 
+       bty="n")
 
 # FULL TABLE (ALL DRIFT AND DEVELOPMENT MODELS) LIKE GRAHAM'S
 DSM_full<- read.csv("./output/long-term-lambda_DSM.csv", 
