@@ -70,6 +70,7 @@ LTLs<- lapply(1:nrow(tmp), function(x)
 {
   inps<- inputs
   inps$p_retained<- tmp$Retention[x]
+  inps$gamma<- 0.5
   out<- lapply(seq(0.00002, 0.002, 0.00002), function(y)
   {
     inps$phi0_MR<- y
@@ -90,7 +91,7 @@ alts<- unique(tmp$Flow_Scenario)
 cls<- c("darkgreen", "blue", "black", "red")
 plot(LTLs[which(LTLs$Flow_Scenario==alts[1]),]$phi0_MR,
      LTLs[which(LTLs$Flow_Scenario==alts[1]),]$Long_Term_Growth_Rate,
-     ylim=c(0.75, 1), xlab="Age-0 Survival Given Retention", 
+     ylim=c(0.75, 1.1), xlab="Age-0 Survival Given Retention", 
      ylab="Long-Term Population Growth Rate", type="l", lwd=2, 
      col=cls[1], tck=0.02, mgp=c(1.5,0.1,0))
 invisible(lapply(2:length(alts), function(i)

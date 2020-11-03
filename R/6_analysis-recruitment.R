@@ -146,16 +146,16 @@ saveRDS(age_st, "./output/_long-term/age_structure/Target_Structure_Baseline.rds
 round(age_st[[1]]$vals$N_target*age_st[[1]]$stable_age)
 lbl<- c(rep("topleft", 5), rep("topright", 10))
 par(mfrow=c(3,3),
-    mar = c(5, 4, 4, 2)+0.1,
-    oma=c(0,0,0,0))
+    mar = c(2, 2, 1, 1)+0.1,
+    oma=c(0,2,0,0))
 for(i in c(2,4:7,9,11,13,15))
 {
   barplot(ceiling(age_st[[i]]$vals$N_target*age_st[[i]]$stable_age))
   legend(lbl[i], paste0("Retention Probability =", 
                         age_st[[i]]$vals$pret), bty="n")
 }
-mtext("Ages 1-60 (Years)", 1, outer=TRUE, padj=-3)
-mtext("Abundance", 2, outer=TRUE, padj=1.5)
+mtext("Ages 1-60 (Years)", 1, outer=TRUE, padj=-1.5)
+mtext("Abundance", 2, outer=TRUE, padj=-0.5)
 
 age_st[[3]]$vals
 round(age_st[[3]]$vals$p_RRfemale*age_st[[3]]$vals$N_target)
@@ -172,8 +172,8 @@ sum(N_RR)/sum(N_age)
 
 lbl<- c(rep("topleft", 5), rep("top",2), rep("topright", 8))
 par(mfrow=c(3,3),
-    mar = c(5, 4, 4, 2)+0.1,
-    oma=c(0,1,2,0))
+    mar = c(2, 2, 1, 1)+0.1,
+    oma=c(0,2,2,0))
 for(i in c(2,4:7,9,11,13,15))
 {
   N_age<- ceiling(age_st[[i]]$vals$N_target*age_st[[i]]$stable_age)
@@ -187,8 +187,8 @@ for(i in c(2,4:7,9,11,13,15))
                    paste0("Spawning Females = ", 
                           sum(N_RR))), bty="n")
 }
-mtext("Ages 1-60 (Years)", 1, outer=TRUE, padj=-3)
-mtext("Abundance", 2, outer=TRUE, padj=1.5)
+mtext("Ages 1-60 (Years)", 1, outer=TRUE, padj=-1.5)
+mtext("Abundance", 2, outer=TRUE, padj=-0.5)
 par(mfrow=c(1,1), fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), 
     mar = c(0, 0, 0, 0), new=TRUE)
 plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")

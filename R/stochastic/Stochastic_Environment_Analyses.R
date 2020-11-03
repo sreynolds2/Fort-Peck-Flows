@@ -269,6 +269,45 @@ legend(5000, 0.98, c("No Act", "Alt 1", "Alt 1a", "Alt 1b", "Alt 2", "Alt 2a", "
        bty="n")
 
 
+## SWITCHING TO SURVIVAL CURVE
+out2<- ddply(out, .(alt, year), summarize,
+             ext_prob=max(prob))
+out2$surv_prob<- 1-out2$ext_prob
+par(mfrow=c(1,1),
+    mar=c(5,4,4,2)+0.1)
+plot(c(0, out2[which(out2$alt=="NoAct"),]$year, 
+       (max(out2[which(out2$alt=="NoAct"),]$year)+1):10000), 
+     c(1, out2[which(out2$alt=="NoAct"),]$surv_prob, 
+       rep(0,10000-max(out2[which(out2$alt=="NoAct"),]$year))), 
+     type="l", xlim=c(0,10000), ylim=c(0,1), lwd=2, mgp=c(1.5,0.1,0), 
+     tck=0.02, xlab="Year", ylab="Fraction of Surviving Replicates")
+points(c(0, out2[which(out2$alt=="1a"),]$year, 
+         (max(out2[which(out2$alt=="1a"),]$year)+1):10000), 
+       c(1, out2[which(out2$alt=="1a"),]$surv_prob, 
+         rep(0,10000-max(out2[which(out2$alt=="1a"),]$year))), 
+       type="l", col="red", lwd=3)
+points(c(0, out2[which(out2$alt=="2a"),]$year, 
+         (max(out2[which(out2$alt=="2a"),]$year)+1):10000), 
+       c(1, out2[which(out2$alt=="2a"),]$surv_prob, 
+         rep(0,10000-max(out2[which(out2$alt=="2a"),]$year))),
+       type="l", col="blue", lwd=2)
+points(c(0, out2[which(out2$alt=="1"),]$year), 
+       c(1, out2[which(out2$alt=="1"),]$surv_prob), type="l", col="orange", lwd=2)
+points(c(0, out2[which(out2$alt=="2"),]$year), 
+       c(1, out2[which(out2$alt=="2"),]$surv_prob), type="l", col="green", lwd=2)
+points(c(0, out2[which(out2$alt=="1b"),]$year), 
+       c(1, out2[which(out2$alt=="1b"),]$surv_prob), type="l", col="magenta", lwd=2)
+points(c(0, out2[which(out2$alt=="2b"),]$year), 
+       c(1, out2[which(out2$alt=="2b"),]$surv_prob), type="l", col="cyan",lwd=2)
+legend(5000, 0.5, c("No Act", "Alt 1", "Alt 1a", "Alt 1b", "Alt 2", "Alt 2a", "Alt 2b"),
+       lty=1, lwd=2, 
+       col=c("black", "orange", "red", "magenta", "green", "blue", "cyan"),
+       bty="n")
+
+
+
+
+
 ## BURN-IN YEARS
 dat<- readRDS("./output/_stochastic/Loglt_Round_2A.rds")
 
