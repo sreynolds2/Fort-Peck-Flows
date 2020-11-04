@@ -322,15 +322,67 @@ barplot(abund$N_2020, names.arg = abund$age_class,
         ylim=c(0,3000), xlab= "Age (Years)", ylab="Abundance")
 sum(abund$N_2020)
 
-abund$mat_2020<- round(inputs$psi[1:23]*abund$N_2020)
-sum(abund$mat_2020)
-abund$imm_2020<- abund$N_2020-abund$mat_2020 
 
-barplot(matrix(c(abund$mat_2020, abund$imm_2020), byrow = TRUE, 
-               ncol = length(abund$mat_2020)), 
-        names.arg = abund$age_class, col=c("blue", "gray"),
-        legend.text = c("Reproductively Ready", "Immature or Not Reproductively Ready"),
+### UPDATE MATURATION INPUTS AND COMPUTE MATURE FEMALES
+inps<- create_inputs(a_mat_min = 14,  a_mat_max=27, a_mat_h=19)
+
+abund$matF_2020<- round(inps$probF*cumsum(inps$mat$m_i)[1:23]*abund$N_2020)
+abund$RRF_2020<- round(inps$probF*inps$psi[1:23]*abund$N_2020)
+sum(abund$matF_2020)
+sum(abund$RRF_2020)
+abund$immFM_2020<- abund$N_2020-abund$matF_2020 
+
+barplot(matrix(c(abund$immFM_2020, abund$matF_2020), byrow = TRUE, 
+               ncol = length(abund$matF_2020)), 
+        names.arg = abund$age_class, col=c("gray", "blue"),
+        legend.text = c("Males and Not Reproductively Ready Females",
+                        "Reproductively Ready Females (37 HOPS)"),
         args.legend=list(bty="n"),
+        ylim=c(0,3000), xlab= "Age (Years)", ylab="Abundance")
+
+### ADD IN WILD FISH USING JAEGER ET AL. 2009 ESTIMATES FROM 2008
+### AND AN INCREASED SURVIVAL OF 0.95
+wld<- round(125*0.95^12)
+wldF<- round(40*0.95^12)
+age<- sample(63:100, wld, replace=TRUE)
+  # BRAATEN ET AL. 2015 PRE-1957
+sex<- sample(1:wld, wldF, replace = FALSE)
+ageF<- age[sex]
+wld_dat<- data.frame(age_class=24:100, 
+                     N_2020=sapply(24:100, function(i){length(which(age==i))}),
+                     matF_2020=sapply(24:100, function(i){length(which(ageF==i))}))
+wld_dat$immFM_2020<- wld_dat$N_2020-wld_dat$matF_2020 
+wld_dat$RRF_2020<- rbinom(nrow(wld_dat), wld_dat$matF_2020, inps$psi[60])
+abund<- merge(abund, wld_dat, all=TRUE)
+abund$matF_nonRR_2020<- abund$matF_2020-abund$RRF_2020
+barplot(matrix(c(abund$immFM_2020[60:100], abund$matF_nonRR_2020[60:100], 
+                 abund$RRF_2020[60:100]), 
+               byrow = TRUE, nrow=3, ncol = length(abund$matF_2020[60:100])), 
+        names.arg = abund$age_class[60:100], col=c("gray", "blue", "red"),
+        legend.text = c("Males",
+                        "Mature, Non-reproductive Females",
+                        "Reproductively Ready Females"),
+        args.legend=list(bty="n"), border=NA,
+        ylim=c(0,8), xlab= "Age (Years)", ylab="Abundance")
+
+barplot(matrix(c(abund$immFM_2020[1:25], abund$matF_nonRR_2020[1:25], 
+                 abund$RRF_2020[1:25]), 
+               byrow = TRUE, nrow=3, ncol = length(abund$matF_2020[1:25])), 
+        names.arg = abund$age_class[1:25], col=c("gray", "blue", "red"),
+        legend.text = c("Males and Immature Females",
+                        "Mature, Non-reproductive Females",
+                        "Reproductively Ready Females"),
+        args.legend=list(bty="n"), border=NA,
+        ylim=c(0,3000), xlab= "Age (Years)", ylab="Abundance")
+
+barplot(matrix(c(abund$immFM_2020, abund$matF_nonRR_2020, 
+                 abund$RRF_2020), 
+               byrow = TRUE, nrow=3, ncol = length(abund$matF_2020)), 
+        names.arg = abund$age_class, col=c("gray", "blue", "red"),
+        legend.text = c("Males and Immature Females",
+                        "Mature, Non-reproductive Females",
+                        "Reproductively Ready Females"),
+        args.legend=list(bty="n"), border=NA,
         ylim=c(0,3000), xlab= "Age (Years)", ylab="Abundance")
 
 
@@ -435,7 +487,7 @@ crvs<- spawning_survival_retention_curves2(bnd_inps, phi0MR = phi0)
 #   xyplot(tmp2$p_retained~tmp2$gamma, type="l", col="red", lwd=2)
 # }
 
-indx<- 4
+indx<- 3
 z<- phi0[indx]
 tmp<- vals[which(vals$phi0_MR==z),]
 x<- unique(tmp$gamma)
@@ -450,8 +502,8 @@ vals2<- sapply(y, function(j)
   })
   return(out)
 })
-contour(x, y, vals2, nlevels = 30, labels = NULL, 
-        xlim=c(0,1), ylim=c(0,1), 
+contour(x, y, vals2, nlevels = 20, labels = NULL, 
+        xlim=c(0,1), ylim=c(0,1), mgp=c(1.5,0.1,0), tck=0.02, 
         xlab="Spawning Probability below Fort Peck given Reproductive-Readiness",
         ylab="Retention Probability",
         main="Expected Age-1 Recruits per 100 Reproductively-Ready Females")
