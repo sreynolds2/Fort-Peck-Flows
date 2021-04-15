@@ -91,7 +91,7 @@ eggs<- function(fork_length=NULL,
 
 ## SIMULATE FECUNDITY BY AGE
 n=1000000
-a=1:60
+a=1:100
 fec<- lapply(a, function(x)
 {
   lower_ls<-age_1_length(n=n, mu=mu_l_1, sd=sd_l_1, min=min_l_1, max=max_l_1)
@@ -117,15 +117,15 @@ fecundity<- data.frame(Age=a,
                        Mean_Length=sapply(fec, "[[", 3),
                        Median_Length=sapply(fec, "[[", 4),
                        Proportion_Length_1400plus=sapply(fec, "[[", 5))
-# write.csv(fecundity, "./baseline-parameters/fecundity_estimates_by_age_comparison.csv",
-#           row.names = FALSE)
+write.csv(fecundity, "./baseline-parameters/fecundity_estimates_by_age_comparison_100.csv",
+          row.names = FALSE)
 
 # MEAN FECUNDITY INCREASES LINEARLY WITH AGE AND IS CLOSE TO 100,000 BY AGE 60 
 # THIS MAY BE EXPECTED BASED ON THE MATH--CHECK!
-# DO WE EXPECTE THIS IN REALITY?
+# DO WE EXPECT THIS IN REALITY?
 # MEDIAN FECUNDITY INCREASES WITH SLIGHT DIMINISHING RETURNS AND IS MUCH LOWER
 
-fecundity<- read.csv("./baseline-parameters/fecundity_estimates_by_age.csv")
+fecundity<- read.csv("./baseline-parameters/fecundity_estimates_by_age_100.csv")
 plot(fecundity$Age, fecundity$Mean_Eggs_Produced/1000, xlab="Age (Years)", 
      ylab="Thousands of Eggs Produced Per Female", pch=19)
 

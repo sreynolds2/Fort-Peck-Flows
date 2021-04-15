@@ -145,3 +145,19 @@ key_LTL[which(is.na(key_LTL$`2a`)),]$`2a`<-0
 key_LTL[which(is.na(key_LTL$`2b`)),]$`2b`<-0
 key_LTL[which(is.na(key_LTL$`NA`)),]$`NA`<-0
 
+
+tbl_LTL<- read.csv("./output/long-term_lambda_Standard_by_Year_DSM_no_zeros.csv",
+                   stringsAsFactors = FALSE)
+par(mfrow=c(3,3))
+tmp<- tbl_LTL[which(tbl_LTL$Flow_Scenario=="NoAct"),]
+hist(tmp$Long_Term_Growth_Rate, 10, freq=FALSE, ylim=c(0,30), xlab="Long-Term Growth Rate", 
+     main=paste0("Alternative ", "NoAct"), col="darkgray")
+plot.new()
+plot.new()
+invisible(lapply(alts[1:6], function(x)
+{
+  tmp<- tbl_LTL[which(tbl_LTL$Flow_Scenario==x),]
+  hist(tmp$Long_Term_Growth_Rate, 10, freq=FALSE, ylim=c(0,30), xlab="Long-Term Growth Rate", 
+       main=paste0("Alternative ", x), col="darkgray")
+}))
+

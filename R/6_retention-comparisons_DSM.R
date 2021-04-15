@@ -71,12 +71,33 @@ tmp<- std_ret[which(std_ret$Flow_Scenario=="NoAct"),]
 hist(tmp$Retention, 10, freq=FALSE, ylim=c(0,5), xlab="Retention", 
      main=paste0("No Action Alternative"), col="darkgray")
 
+par(mfrow=c(3,3))
+tmp<- std_ret[which(std_ret$Flow_Scenario=="NoAct"),]
+hist(tmp$Retention, 10, freq=FALSE, ylim=c(0,5), xlab="Retention", 
+     main=paste0("Alternative ", "NoAct"), col="darkgray")
+plot.new()
+plot.new()
+invisible(lapply(alts[1:6], function(x)
+{
+  tmp<- std_ret[which(std_ret$Flow_Scenario==x),]
+  hist(tmp$Retention, 10, freq=FALSE, ylim=c(0,5), xlab="Retention", 
+       main=paste0("Alternative ", x), col="darkgray")
+}))
+
 
 ## HISTOGRAM OF SPAWNING BY ALTERNATIVE
 tmp<- expand.grid(Year=1930:2012, Flow_Scenario=unique(std_ret$Flow_Scenario))
 std_ret<- merge(std_ret, tmp, by=c("Year", "Flow_Scenario"), all=TRUE)
 std_ret[which(is.na(std_ret$Retention)),"Retention"]<- 0
 std_ret$spawning_prob<- ifelse(std_ret$Retention==0, 0, 0.5)
+
+spn_prob<- aggregate(spawning_prob~Flow_Scenario, std_ret, sum)
+spn_prob$spawning_prob<- spn_prob$spawning_prob*2/83 
+barplot(spn_prob$spawning_prob, space=0, ylim=c(0,0.2), 
+        names.arg=spn_prob$Flow_Scenario, 
+        xlab="Flow Alternative", 
+        ylab="Percentage of Years with Spawning")
+
 x<- alts[3]
 tmp<- std_ret[which(std_ret$Flow_Scenario==x),]
 par(mfrow=c(1,1),
