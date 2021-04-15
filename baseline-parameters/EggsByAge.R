@@ -76,7 +76,10 @@ intrcpt<- unname(fixef(fit)[1])
 slp<- unname(fixef(fit)[2])
 disp<- (sd(unlist(ranef(fit)$id))*(length(unlist(ranef(fit)$id))-1)/length(unlist(ranef(fit)$id))
         +sd(unlist(ranef(fit)$id)))/2
-rm(fit)
+# plot(dat$FL, dat$EGGS)
+# points(800:1700, exp(intrcpt+slp*scale(800:1700, center = mean_fl, scale = sd_fl)), 
+#        col="blue", type="l")
+
 eggs<- function(fork_length=NULL,
                 a=NULL,
                 b=NULL,
@@ -108,15 +111,18 @@ fec<- lapply(a, function(x)
   mn_eggs<- mean(fecundity)
   med_eggs<- median(fecundity) 
   return(list(mean_eggs=mn_eggs, median_eggs=med_eggs, 
+              max_eggs=max(fecundity), min_eggs=min(fecundity),
               mean_length=mn_lgth, median_length=med_lgth,
               proportion_1400_plus=lgth_1400_plus))
 })
 fecundity<- data.frame(Age=a, 
                        Mean_Eggs_Produced=sapply(fec, "[[", 1),
                        Median_Eggs_Produced=sapply(fec, "[[", 2),
-                       Mean_Length=sapply(fec, "[[", 3),
-                       Median_Length=sapply(fec, "[[", 4),
-                       Proportion_Length_1400plus=sapply(fec, "[[", 5))
+                       Max_Eggs_Simulated=sapply(fec, "[[", 3),
+                       Min_Eggs_Simulated=sapply(fec, "[[", 4),
+                       Mean_Length=sapply(fec, "[[", 5),
+                       Median_Length=sapply(fec, "[[", 6),
+                       Proportion_Length_1400plus=sapply(fec, "[[", 7))
 write.csv(fecundity, "./baseline-parameters/fecundity_estimates_by_age_comparison_100.csv",
           row.names = FALSE)
 
@@ -126,9 +132,10 @@ write.csv(fecundity, "./baseline-parameters/fecundity_estimates_by_age_compariso
 # MEDIAN FECUNDITY INCREASES WITH SLIGHT DIMINISHING RETURNS AND IS MUCH LOWER
 
 fecundity<- read.csv("./baseline-parameters/fecundity_estimates_by_age_100.csv")
+
 plot(fecundity$Age, fecundity$Mean_Eggs_Produced/1000, xlab="Age (Years)", 
      ylab="Thousands of Eggs Produced Per Female", pch=19)
-
+points(fecundity$Age, fecundity$Median_Eggs_Produced/1000, col="blue")
 
 
 # ## CHECK VB_PARAMS
