@@ -112,3 +112,11 @@ fecundity<- read.csv("./baseline-parameters/fecundity_estimates_by_age_100_new.c
 plot(fecundity$Age, fecundity$Mean_Eggs_Produced/1000, xlab="Age (Years)", 
      ylab="Thousands of Eggs Produced Per Female", pch=19)
 points(fecundity$Age, fecundity$Median_Eggs_Produced/1000, col="blue")
+
+# MEAN COMPARISONS
+age<- 1:100
+fl<- Linf*(1-exp(-k*(age-t0)))
+fl_normalized<- (fl - mean_fl)/sd_fl
+eggs<- exp(intrcpt + slp*fl_normalized)
+points(age, eggs/1000, col="green")
+# MEAN OF MEAN IS APPROXIMATELY MEDIAN OF DISTRIBUTION
