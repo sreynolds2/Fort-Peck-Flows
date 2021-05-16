@@ -123,8 +123,8 @@ fecundity<- data.frame(Age=a,
                        Mean_Length=sapply(fec, "[[", 5),
                        Median_Length=sapply(fec, "[[", 6),
                        Proportion_Length_1400plus=sapply(fec, "[[", 7))
-write.csv(fecundity, "./baseline-parameters/fecundity_estimates_by_age_comparison_100.csv",
-          row.names = FALSE)
+# write.csv(fecundity, "./baseline-parameters/fecundity_estimates_by_age_100.csv",
+#           row.names = FALSE)
 
 # MEAN FECUNDITY INCREASES LINEARLY WITH AGE AND IS CLOSE TO 100,000 BY AGE 60 
 # THIS MAY BE EXPECTED BASED ON THE MATH--CHECK!
