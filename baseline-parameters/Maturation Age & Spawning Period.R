@@ -6,19 +6,30 @@
 #                                     #
 #######################################
 
-x<-8:20
-Cdist<-1/(1+exp(15-x))
+# k=1/s
+# var=s^2*pi^2/3
+# sigma=pi/(k*sqrt(3))
+# k=pi/(sigma*sqrt(3))
+# 3*sigma=8, then k approx. 0.68
+
+m<- 19
+k<- 0.68
+a_m<- 14
+a_M<- 27
+x<-a_m:a_M
+a_max<- 100
+Cdist<- 1/(1+exp(k*(m-x)))
 mi<-rep(0, length(x)+1)
 mi[1]<-Cdist[1]
 for(i in 2:length(x))
 {
   mi[i]<- Cdist[i]-Cdist[i-1]
 }
-mi[length(x)+1]<- 1-Cdist[length(x)]
-barplot(mi, names.arg=8:21, ylim=c(0,0.25),
+mi[length(x)+1]<- 1-sum(mi[1:length(x)])
+barplot(mi, names.arg=a_m:(a_M+1), ylim=c(0,0.2),
         xlab="Maturation Age (Years)", ylab="Probability Density")
-dat<-data.frame(Age=1:60,
-                m_i=c(rep(0,7), mi, rep(0, 60-21)))
+dat<-data.frame(Age=1:a_max,
+                m_i=c(rep(0,min(x)-1), mi, rep(0, a_max-max(x)-1)))
 
 
 #######################################
@@ -121,12 +132,12 @@ legend("topright",
 
 
 ## OR SPECIFIC PERIOD 1-3 PROBS WITH RELATIONSHIP AMONG 4-MAX
-probs<-c(0, 8/21, 13/21*3/5, rep(0, max_period-3))
+probs2<-c(0, 8/21, 13/21*3/5, rep(0, max_period-3))
 ### RULE EACH REDUCED BY HALF THE PROB
-probs<- probs +
+probs2<- probs2 +
   c(0, 0, 0, 
     13/21*2/5*1/sum(2^(0:(max_period-4)))*2^((max_period-4):0))
-barplot(probs, names.arg = 1:max_period,
+barplot(probs2, names.arg = 1:max_period,
         ylim=c(0,0.5))
 #barplot(probs[2:max_period], names.arg = 2:max_period, 
 #        xlab="Reproductive Period (Years)", 
@@ -200,14 +211,14 @@ barplot(p, names.arg = 1:length(p), ylab="Probability",
 p
 
 
-p_dat<- data.frame(Years=1:60,
-                   Probability=c(probs, rep(0, 60-max_period)))
-#write.csv(p_dat, "C:/Users/sreynolds/Desktop/Parameters/BaseLine/Reproductive_Period_Probs.csv",
-#          row.names = FALSE)
+p_dat<- data.frame(Years=1:a_max,
+                   Probability=c(probs2, rep(0, a_max-max_period)))
+# write.csv(p_dat, "./baseline-parameters/reproductive_period_probs.csv",
+#           row.names = FALSE)
 
 dat$psi_i<- dat$m_i
 start<-min(which(dat$m_i!=0))
-for(i in (start+1):60)
+for(i in (start+1):a_max)
 {
   dat$psi_i[i]<- dat$m_i[i]+
     sum(dat$psi_i[start:(i-1)]*p_dat$Probability[i-start:(i-1)])
@@ -217,7 +228,7 @@ plot(dat$Age, dat$psi_i, xlab="Age (Years)",
      ylab="Proportion of Females Reproductively Ready to Spawn",
      pch=19)
 
-#write.csv(dat, "./baseline-parameters/Psi_by_Age.csv",
-#          row.names = FALSE)
+# write.csv(dat, "./baseline-parameters/Psi_by_Age_new.csv",
+#           row.names = FALSE)
 
-dat<- read.csv("./baseline-parameters/Psi_by_Age.csv")
+dat<- read.csv("./baseline-parameters/Psi_by_Age_new.csv")
