@@ -13,23 +13,23 @@
 # 3*sigma=8, then k approx. 0.68
 
 m<- 19
-k<- 0.68
+k<- 0.77
 a_m<- 14
 a_M<- 27
 x<-a_m:a_M
 a_max<- 100
 Cdist<- 1/(1+exp(k*(m-x)))
-mi<-rep(0, length(x)+1)
+mi<-rep(0, length(x))
 mi[1]<-Cdist[1]
-for(i in 2:length(x))
+for(i in 2:(length(x)-1))
 {
   mi[i]<- Cdist[i]-Cdist[i-1]
 }
-mi[length(x)+1]<- 1-sum(mi[1:length(x)])
-barplot(mi, names.arg=a_m:(a_M+1), ylim=c(0,0.2),
+mi[length(x)]<- 1-sum(mi[1:(length(x)-1)])
+barplot(mi, names.arg=a_m:a_M, ylim=c(0,0.2),
         xlab="Maturation Age (Years)", ylab="Probability Density")
 dat<-data.frame(Age=1:a_max,
-                m_i=c(rep(0,min(x)-1), mi, rep(0, a_max-max(x)-1)))
+                m_i=c(rep(0,min(x)-1), mi, rep(0, a_max-max(x))))
 
 
 #######################################
