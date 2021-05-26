@@ -676,7 +676,7 @@ project_pop<- function(inputs=NULL,
 }
 
 
-# 8.  
+# 9.  
 ## ONE YEAR OF GROWTH
 annual_lambda<- function(inputs=NULL,
                          init_inputs=NULL,

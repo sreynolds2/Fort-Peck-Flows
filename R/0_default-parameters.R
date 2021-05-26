@@ -64,7 +64,7 @@ for(i in (a_min+1):inputs$max_age)
   inputs$psi[i]<- inputs$mat$m_i[i]+
     sum(inputs$psi[a_min:(i-1)]*inputs$reproduction$p_t[i-a_min:(i-1)])
 }
-rm(i, a_min)
+rm(i)
 
 ## SEX RATIO (PROBABILITY OF BEING FEMALE)
 inputs$probF<- 0.5 #ASSUME EQUAL AND PROBABILITY BELOW REPRESENTS
@@ -73,8 +73,9 @@ inputs$probF<- 0.5 #ASSUME EQUAL AND PROBABILITY BELOW REPRESENTS
 
 ## NUMBER OF EGGS PER SPAWNING FEMALE
 E<- read.csv("./dat/fecundity_estimates_by_age.csv")
-inputs$eggs<- c(rep(0,7), E$Mean_Eggs_Produced)
-rm(E)
+inputs$eggs<- E$Mean_Eggs_Produced
+inputs$eggs[1:(a_min-1)]<- 0
+rm(E, a_min)
 
 ## AGE-0 SURVIVAL
 ### RETENTION IN MR

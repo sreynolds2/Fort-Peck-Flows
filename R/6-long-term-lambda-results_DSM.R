@@ -17,11 +17,11 @@ DSM_full$Long_Term_Growth_Rate<- sapply(1:nrow(DSM_full), function(x)
   return(ea$lambda1)
 })
 
-write.csv(DSM_full, "./output/long-term-lambda_DSM.csv",
+write.csv(DSM_full, "./output/long-term-lambda_DSM_new.csv",
           row.names = FALSE)
 
 # TABLE LIKE GRAHAM'S
-DSM_full<- read.csv("./output/long-term-lambda_DSM.csv", 
+DSM_full<- read.csv("./output/long-term-lambda_DSM_new.csv", 
                     stringsAsFactors = FALSE)
 DSM_full[which(is.na(DSM_full$Alt)),]$Alt<- "NoAct"
 DSM_full$Hatch_Date<- as.Date(DSM_full$Hatch_Date)
@@ -47,7 +47,7 @@ tmp<- merge(spn, dat, by.x=c("Year", "Flow_Scenario", "Standard"),
             by.y=c("Year", "Alt", "Spawn_Date"), all.x=TRUE)
 tmp[which(tmp$Year==1997 & tmp$Flow_Scenario=="1b"), 5:10]<- #APPROXIMATE BASED ON SIMILAR FLOWS AND SAME HATCH DATE
   tmp[which(tmp$Year==1997 & tmp$Flow_Scenario=="2a"),5:10] #NEEDS CHANGING EVENTUALLY
-write.csv(tmp, "./output/long-term_lambda_Standard_by_Year_DSM_no_zeros.csv",
+write.csv(tmp, "./output/long-term_lambda_Standard_by_Year_DSM_no_zeros_new.csv",
           row.names = FALSE)
 
 tbl_LTL<- expand.grid(Year=1930:2012, Flow_Scenario=unique(DSM_full$Alt))
@@ -59,7 +59,7 @@ tbl_LTL<- dcast(tbl_LTL,
   
 tbl_LTL<-tbl_LTL[,c(1,8,2:7)]
 write.csv(tbl_LTL, 
-          "./output/long-term_lambda_Standard_by_Year_DSM.csv", 
+          "./output/long-term_lambda_Standard_by_Year_DSM_new.csv", 
           row.names = FALSE)
 
 
@@ -91,22 +91,23 @@ alts<- unique(tmp$Flow_Scenario)
 cls<- c("darkgreen", "blue", "black", "red")
 plot(LTLs[which(LTLs$Flow_Scenario==alts[1]),]$phi0_MR,
      LTLs[which(LTLs$Flow_Scenario==alts[1]),]$Long_Term_Growth_Rate,
-     ylim=c(0.75, 1.1), xlab="Age-0 Survival Given Retention", 
+     ylim=c(0.75, 1.1), xlab="", 
      ylab="Long-Term Population Growth Rate", type="l", lwd=2, 
      col=cls[1], tck=0.02, mgp=c(1.5,0.1,0))
 invisible(lapply(2:length(alts), function(i)
 {
   points(LTLs[which(LTLs$Flow_Scenario==alts[i]),]$phi0_MR,
        LTLs[which(LTLs$Flow_Scenario==alts[i]),]$Long_Term_Growth_Rate,
-       ylim=c(0.75, 1), xlab="Age-0 Survival Given Retention", 
+       ylim=c(0.75, 1), xlab="", 
        ylab="Long-Term Population Growth Rate", type="l", lwd=2,
        col=cls[i]) 
 }))
 legend("bottomright", paste0("Alternative ", alts), lwd=2, col=cls, 
        bty="n")
+mtext("Age-0 Survival Given Retention", 1, outer=TRUE)
 
 # FULL TABLE (ALL DRIFT AND DEVELOPMENT MODELS) LIKE GRAHAM'S
-DSM_full<- read.csv("./output/long-term-lambda_DSM.csv", 
+DSM_full<- read.csv("./output/long-term-lambda_DSM_new.csv", 
                     stringsAsFactors = FALSE)
 DSM_full[which(is.na(DSM_full$Alt)),]$Alt<- "NoAct"
 DSM_full$Hatch_Date<- as.Date(DSM_full$Hatch_Date)
@@ -125,11 +126,11 @@ tbl_LTL[which(is.na(tbl_LTL$`1b`)),]$`1b`<-0
 tbl_LTL[which(is.na(tbl_LTL$`2`)),]$`2`<-0
 tbl_LTL[which(is.na(tbl_LTL$`2a`)),]$`2a`<-0
 tbl_LTL[which(is.na(tbl_LTL$`2b`)),]$`2b`<-0
-tbl_LTL[which(is.na(tbl_LTL$`NA`)),]$`NA`<-0
+tbl_LTL[which(is.na(tbl_LTL$NoAct)),]$NoAct<-0
 
 tbl_LTL<-tbl_LTL[,c(1:5,12,6:11)]
 write.csv(tbl_LTL, 
-          "./output/long-term_lambda_by_flow_and_hatch_date_DSM.csv", 
+          "./output/long-term_lambda_by_flow_and_hatch_date_DSM_new.csv", 
           row.names = FALSE)
 
 key_LTL<- subset(tbl_LTL, Develop_Mod=="New" & Drift_Mod==0.9 & 
@@ -143,10 +144,10 @@ key_LTL[which(is.na(key_LTL$`1b`)),]$`1b`<-0
 key_LTL[which(is.na(key_LTL$`2`)),]$`2`<-0
 key_LTL[which(is.na(key_LTL$`2a`)),]$`2a`<-0
 key_LTL[which(is.na(key_LTL$`2b`)),]$`2b`<-0
-key_LTL[which(is.na(key_LTL$`NA`)),]$`NA`<-0
+key_LTL[which(is.na(key_LTL$NoAct)),]$NoAct<-0
 
 
-tbl_LTL<- read.csv("./output/long-term_lambda_Standard_by_Year_DSM_no_zeros.csv",
+tbl_LTL<- read.csv("./output/long-term_lambda_Standard_by_Year_DSM_no_zeros_new.csv",
                    stringsAsFactors = FALSE)
 par(mfrow=c(3,3))
 tmp<- tbl_LTL[which(tbl_LTL$Flow_Scenario=="NoAct"),]

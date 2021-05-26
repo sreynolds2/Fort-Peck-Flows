@@ -71,7 +71,7 @@ bnd_inps<- boundary_product(inps)
 crvs<- spawning_survival_retention_curves2(bnd_inps)
 plot_boundary_curves2(crvs)
 
-crvsB<-spawning_survival_retention_curves2(bnd_inps, phi0MR=0.00012) 
+crvsB<-spawning_survival_retention_curves2(bnd_inps, phi0MR=0.00011) 
 points(crvsB$gamma, crvsB$p_retained, 
        type="l", lty=3, col="gray")
 
