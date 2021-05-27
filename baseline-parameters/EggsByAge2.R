@@ -4,7 +4,7 @@ library(lme4)
 library(merTools)
 
 # UPPER RIVER VON BERTALANFFY GROWTH PARAMETER DISTRIBUTION
-## PULL JAGS FIT W/ Linf TRUNCATED AT 1700 
+## PULL JAGS FIT W/ Linf TRUNCATED AT 1800 
 fn<- dir("../PDSG-growth/_outputs/_model-fits")
 fn<- fn[grep("vbgf", fn)]
 fn<- fn[grep("unknown-age_1800.RDS", fn)]

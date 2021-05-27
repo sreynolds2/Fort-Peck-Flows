@@ -69,6 +69,9 @@ plot_boundary_curves2<- function(curve_dat=NULL,
 inps<- inputs
 bnd_inps<- boundary_product(inps)
 crvs<- spawning_survival_retention_curves2(bnd_inps)
+par(mfrow=c(1,1),
+    oma=c(0,0,0,0),
+    mar=c(3,3,1,1)+0.1)
 plot_boundary_curves2(crvs)
 
 crvsB<-spawning_survival_retention_curves2(bnd_inps, phi0MR=0.00011) 
