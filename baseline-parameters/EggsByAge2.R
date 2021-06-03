@@ -102,6 +102,17 @@ fecundity<- data.frame(Age=a,
 write.csv(fecundity, "./baseline-parameters/fecundity_estimates_by_age_100_new.csv",
           row.names = FALSE)
 
+# fecundity<- data.frame(Age=101, 
+#                        Mean_Eggs_Produced=mn_eggs,
+#                        Median_Eggs_Produced=med_eggs,
+#                        Max_Eggs_Simulated=max(fecundity),
+#                        Min_Eggs_Simulated=min(fecundity),
+#                        Mean_Length=mn_lgth,
+#                        Median_Length=med_lgth,
+#                        Proportion_Length_1400plus=lgth_1400_plus)
+# write.csv(fecundity, "./baseline-parameters/fecundity_estimates_age_101.csv",
+#           row.names = FALSE)
+
 # MEAN FECUNDITY INCREASES LINEARLY WITH AGE AND IS CLOSE TO 100,000 BY AGE 60 
 # THIS MAY BE EXPECTED BASED ON THE MATH--CHECK!
 # DO WE EXPECT THIS IN REALITY?
