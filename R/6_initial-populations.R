@@ -441,31 +441,30 @@ rm(getinps)
 # params<- rbind.fill(params, eggs)
 # rm(eggs)
 
-params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
-e_params<- params[which(!is.na(params$eggs)), c("eggs", "age_id", "param_id")]
-library(parallel)
-numCores<- detectCores()
-cl<- makeCluster(numCores)
-clusterExport(cl, c("inps", "dat", "e_params", "init_pop", "leslie", 
-                    "project_pop"))
-ptm<-proc.time()
-eggs<- parLapply(cl, 1:nrow(e_params), function(x)
-{
-  inps2<- inps
-  inps2$eggs[params$age_id[x]]<- params$eggs[x]
-  test<- project_pop(inputs = inps2,
-                      retention_data = dat,
-                      gamma=0.5,
-                      adjustments = list(),
-                      years=200,
-                      reps=5000,
-                      param_id=params$param_id[x])
-  return(test)
-})
-tot<-(proc.time()-ptm)[3]/60
-tot
-stopCluster(cl)
-rm(cl, e_params)
+# e_params<- params[which(!is.na(params$eggs)), c("eggs", "age_id", "param_id")]
+# library(parallel)
+# numCores<- detectCores()
+# cl<- makeCluster(numCores)
+# clusterExport(cl, c("inps", "dat", "e_params", "init_pop", "leslie", 
+#                     "project_pop"))
+# ptm<-proc.time()
+# eggs<- parLapply(cl, 1:nrow(e_params), function(x)
+# {
+#   inps2<- inps
+#   inps2$eggs[e_params$age_id[x]]<- e_params$eggs[x]
+#   test<- project_pop(inputs = inps2,
+#                       retention_data = dat,
+#                       gamma=0.5,
+#                       adjustments = list(),
+#                       years=200,
+#                       reps=5000,
+#                       param_id=e_params$param_id[x])
+#   return(test)
+# })
+# tot<-(proc.time()-ptm)[3]/60
+# tot
+# stopCluster(cl)
+# rm(cl, e_params)
 
 # SEX RATIO
 # r<- data.frame(probF=c(0.95*inps$probF, 1.05*inps$probF),
@@ -540,6 +539,7 @@ rm(cl, e_params)
 # SAVE PARAMETER VALUES FOR SENSITIVITY-ELASTICITY ANALYSES
 # params<- params[order(params$param_id), c(2,1,3:ncol(params))]
 # write.csv(params, "./output/_stochastic/sens_elas_vals.csv")
+params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 
 ## EXTINCTION ANALYSES
 library(parallel)
@@ -547,7 +547,7 @@ numCores<- detectCores()
 cl<- makeCluster(numCores)
 clusterExport(cl, c("pseudo_extinct"))
 ptm<-proc.time()
-invisible(parLapply(cl, c(84:171,212,213), function(p)
+invisible(parLapply(cl, 388:561, function(p)
 {
   dat<- readRDS(paste0("./output/_stochastic/Ntot_1-", p, ".rds"))
   out<-pseudo_extinct(pop_data = dat, threshold = 50,
@@ -564,7 +564,7 @@ numCores<- detectCores()
 cl<- makeCluster(numCores)
 clusterExport(cl, c("frac_extinct"))
 ptm<-proc.time()
-explore_ext<- parLapply(cl, 1:19, function(p)
+explore_ext<- parLapply(cl, c(388:561), function(p)
 {
   dat<- readRDS(paste0("./output/_stochastic/Full_Data_1-", p, ".rds"))
   yr_test<- lapply(seq(75, 200, 25), function(y)
@@ -588,6 +588,11 @@ tot<-(proc.time()-ptm)[3]/60
 tot
 stopCluster(cl)
 rm(cl)
+ex<- read.csv("./output/_stochastic/extinction_results.csv")
+ext_test<- rbind(ex,ext_test)
+ext_test<- ext_test[order(ext_test$param_id),]
+write.csv(ext_test, "./output/_stochastic/extinction_results.csv",
+          row.names = FALSE)
 
 # out<- lapply(alts, function(y)
 # {
