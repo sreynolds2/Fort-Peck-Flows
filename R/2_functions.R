@@ -160,7 +160,14 @@ matrix_eigen_analysis<- function(inputs)
   A[1,] <- psi*gamma*eggs*sexratio*p_retained*phi0_MR
   Aminus<- A[1:(maxage-1), 1:(maxage-1)]
   Aplus<- rbind(A, c(rep(0, maxage-1), phi[maxage-1]))
-  Aplus<- cbind(Aplus, c(100916.3, rep(0, maxage)))
+  if(maxage==100)
+  {
+    eplus<- read.csv("./baseline-parameters/fecundity_estimates_age_101.csv") 
+    eplus<- eplus$Mean_Eggs_Produced 
+  }
+  Aplus<- cbind(Aplus, 
+                c(psi[maxage]*gamma*eplus*sexratio*p_retained*phi0_MR, 
+                  rep(0, maxage)))
   
   # EIGENANALYSIS 
   ea<- eigen.analysis(A)
@@ -188,7 +195,7 @@ matrix_eigen_analysis<- function(inputs)
   ea_minus<- eigen.analysis(Aminus)
   ea_plus<- eigen.analysis(Aplus)
   ea$sensitivities$max_age<- (ea_plus$lambda1-ea_minus$lambda1)/2
-  ea$sensitivities$prod<- sum(sens[1,]*psi*eggs*sexratio)
+  #ea$sensitivities$prod<- sum(sens[1,]*psi*eggs*sexratio)
   if(exists("mat", inputs) & exists("reproduction", inputs))
   {
     a_min<- inputs$mat$a_min
@@ -262,7 +269,7 @@ matrix_eigen_analysis<- function(inputs)
   ea$elasticities$phi0_MR<- ea$sensitivities$phi0_MR*phi0_MR/ea$lambda1
   ea$elasticities$phi0_LS<- ea$sensitivities$phi0_LS*0/ea$lambda1
   ea$elasticities$max_age<- ea$sensitivities$max_age*maxage/ea$lambda1
-  ea$elasticities$prod<- ea$sensitivities$prod*phi0_MR*gamma*p_retained/ea$lambda1
+  #ea$elasticities$prod<- ea$sensitivities$prod*phi0_MR*gamma*p_retained/ea$lambda1
   if(exists("mat", inputs) & exists("reproduction", inputs))
   {
     ea$elasticities$k_mat<- ea$sensitivities$k_mat*k/ea$lambda1

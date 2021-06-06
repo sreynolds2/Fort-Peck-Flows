@@ -143,9 +143,9 @@ project_pop<- function(inputs=NULL,
       }
       return(N_tot)
     })
-    write.csv(Nt, paste0("./output/_stochastic/Alt_", y, "_Ntot_",
-                         inps$environment$id, "-", inps$param_id, ".csv"), 
-              row.names = FALSE)
+    # write.csv(Nt, paste0("./output/_stochastic/Alt_", y, "_Ntot_",
+    #                      inps$environment$id, "-", inps$param_id, ".csv"), 
+    #           row.names = FALSE)
     return(Nt)
   })
   names(out)<- alts
@@ -564,7 +564,7 @@ numCores<- detectCores()
 cl<- makeCluster(numCores)
 clusterExport(cl, c("frac_extinct"))
 ptm<-proc.time()
-explore_ext<- parLapply(cl, c(388:561), function(p)
+explore_ext<- parLapply(cl, 1:567, function(p)
 {
   dat<- readRDS(paste0("./output/_stochastic/Full_Data_1-", p, ".rds"))
   yr_test<- lapply(seq(75, 200, 25), function(y)
@@ -588,11 +588,14 @@ tot<-(proc.time()-ptm)[3]/60
 tot
 stopCluster(cl)
 rm(cl)
-ex<- read.csv("./output/_stochastic/extinction_results.csv")
-ext_test<- rbind(ex,ext_test)
-ext_test<- ext_test[order(ext_test$param_id),]
+ext_test<- ext_test[order(ext_test$param_id,
+                          ext_test$years,
+                          ext_test$reps),]
 write.csv(ext_test, "./output/_stochastic/extinction_results.csv",
           row.names = FALSE)
+
+## SPAWNING ANALYSIS
+
 
 # out<- lapply(alts, function(y)
 # {
