@@ -268,7 +268,8 @@ project_pop<- function(inputs=NULL,
   })
   names(out)<- alts
   out$inputs<- inps
-  saveRDS(out, paste0("./output/_stochastic/Ntot_", inps$environment$id, 
+  saveRDS(out, paste0("./output/_stochastic/Ntot_", 
+                      inps$N0_type, "_", inps$environment$id, 
                       "-", inps$param_id, ".rds"))
   return(out)
 }
@@ -440,12 +441,12 @@ temp_freq<- read.csv("./output/_stochastic/Temperature_Frequency.csv")
 
 
 # SIMULATE ENVIRONMENT
-inps<- project_environ(inputs = inputs,
-                       temp_data = temps,
-                       transitions = trans,
-                       temp_freq_data = temp_freq,
-                       reps = 3000,
-                       id=2)
+# inps<- project_environ(inputs = inputs,
+#                        temp_data = temps,
+#                        transitions = trans,
+#                        temp_freq_data = temp_freq,
+#                        reps = 3000,
+#                        id=2)
 
 getinps<- readRDS("./output/_stochastic/Ntot_1-1.rds")
 inps<- inputs
@@ -454,25 +455,33 @@ rm(getinps)
 
 # SIMULATE POPULATION REPS
 ## BASELINE & AGE-0 SURVIVAL GIVEN RETENTION
-# phi0MR<- c(0.000075, 0.95*0.000075, 1.05*0.000075, 
-#            seq(0.0002, 0.002, 0.0002))
-# params<- data.frame(phi0_MR=phi0MR, param_id=1:length(phi0MR))
-# 
-# ptm<-proc.time()
-# phi0_test<- lapply(params$param_id[2:nrow(params)], function(x)
-# {
-#   test<- project_pop(inputs = inps,
-#                      retention_data = dat,
-#                      gamma=0.5,
-#                      adjustments = list(phi0_MR=params$phi0_MR[x]),
-#                      years=200,
-#                      reps=5000,
-#                      param_id=params$param_id[x])
-#   return(test)
-# })
-# tot<-(proc.time()-ptm)[3]/60
-# phi0_test$tot<- tot
-# tot
+phi0MR<- c(0.000075, 0.95*0.000075, 1.05*0.000075,
+           seq(0.0002, 0.002, 0.0002))
+params<- data.frame(phi0_MR=phi0MR, param_id=1:length(phi0MR))
+
+library(parallel)
+numCores<- detectCores()
+cl<- makeCluster(numCores)
+clusterEvalQ(cl, library(data.table))
+clusterExport(cl, c("inps", "dat", "params", "init_pop", "leslie", "project_pop"))
+ptm<-proc.time()
+phi0_test<- parLapply(cl,params$param_id[1:nrow(params)], function(x)
+{
+  test<- project_pop(inputs = inps,
+                     retention_data = dat,
+                     gamma=0.5,
+                     N0_type="2020_PSPAP",
+                     adjustments = list(phi0_MR=params$phi0_MR[x]),
+                     years=200,
+                     reps=5000,
+                     param_id=params$param_id[x])
+  return(test)
+})
+tot<-(proc.time()-ptm)[3]/60
+phi0_test$tot<- tot
+tot
+stopCluster(cl)
+rm(cl)
 
 # MAXIMUM AGE
 # params<- rbind.fill(params, data.frame(max_age=c(99, 101), 
