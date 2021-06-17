@@ -4,7 +4,6 @@ library(data.table)
 #library(tabulizer) -- NOT WORKING
 
 
-source("./R/0_default-parameters.r")
 # GENERATE INITIAL POPULATION
 init_pop<- function(inputs=NULL,
                     type=NULL) # "Uniform", "2020_Rotella" -- NOT READY 
@@ -99,7 +98,7 @@ init_pop<- function(inputs=NULL,
     est<- aggregate(freq~age, f_dat, sum)
     est$prop<- est$freq/sum(est$freq)
     est$N0<- round(inps$N_H*inps$sexratio_H*est$prop)
-    est<- merge(est, data.frame(age=1:100), all=TRUE)
+    est<- merge(est, data.frame(age=1:inps$max_age), all=TRUE)
     est<- est[order(est$age),]
     # NO STOCKING IN 2020; ALL 2018 STOCKING SPAWNED IN 2017
     # ALL 2019 STOCKINGS FROM 2019 SPAWNING WERE DRIFT STUDY FISH
@@ -108,7 +107,8 @@ init_pop<- function(inputs=NULL,
     est$N0[2]<- round(sum(stocked[which(stocked$year.stocked==2019 &
                                           as.numeric(format(stocked$spawn_date, "%Y"))==2018),]$numbers.stocked)*prod(inps$phi[1]))
     est[is.na(est)]<- 0
-    est[which(est$age %in% 68:100),]$N0<- rmultinom(1, ceiling(inps$N_W*inps$sexratio_W), rep(1/33, 33))
+    v<- inps$max_age-68+1
+    est[which(est$age %in% 68:inps$max_age),]$N0<- rmultinom(1, ceiling(inps$N_W*inps$sexratio_W), rep(1/v, v))
     inps$N0<- est$N0
   }
   # if(type=="2020_Rotella")
@@ -209,7 +209,6 @@ project_environ<- function(inputs=NULL,
 project_pop<- function(inputs=NULL,
                        retention_data=NULL,
                        gamma=0.5,
-                       N0_type="Uniform",
                        adjustments=NULL,
                        years=200,
                        reps=5000,
@@ -228,8 +227,7 @@ project_pop<- function(inputs=NULL,
     return(print("Environment data does not contain enough replicates for the given projection."))
   }
   # SAVE INPUTS
-  inps<- init_pop(inputs, N0_type)
-  inps<- leslie(inputs = inps, 
+  inps<- leslie(inputs = inputs, 
                 changes = adjustments)
   inps$yrs<- years
   inps$reps<- reps
@@ -453,6 +451,13 @@ inps<- inputs
 inps$environment<- getinps$inputs$environment
 rm(getinps)
 
+# SIMULATE INITIAL POPULATION
+# inps<- init_pop(inputs, N0_type)
+getinps<- readRDS("./output/_stochastic/Ntot_2020_PSPAP_1-1.rds")
+inps$N0<- getinps$inputs$N0
+inps$N0_type<- getinps$inputs$N0_type
+rm(getinps)
+
 # SIMULATE POPULATION REPS
 ## BASELINE & AGE-0 SURVIVAL GIVEN RETENTION
 phi0MR<- c(0.000075, 0.95*0.000075, 1.05*0.000075,
@@ -462,15 +467,13 @@ params<- data.frame(phi0_MR=phi0MR, param_id=1:length(phi0MR))
 library(parallel)
 numCores<- detectCores()
 cl<- makeCluster(numCores)
-clusterEvalQ(cl, library(data.table))
 clusterExport(cl, c("inps", "dat", "params", "init_pop", "leslie", "project_pop"))
 ptm<-proc.time()
-phi0_test<- parLapply(cl,params$param_id[1:nrow(params)], function(x)
+phi0_test<- parLapply(cl, 1:nrow(params), function(x)
 {
   test<- project_pop(inputs = inps,
                      retention_data = dat,
                      gamma=0.5,
-                     N0_type="2020_PSPAP",
                      adjustments = list(phi0_MR=params$phi0_MR[x]),
                      years=200,
                      reps=5000,
@@ -484,7 +487,7 @@ stopCluster(cl)
 rm(cl)
 
 # MAXIMUM AGE
-# params<- rbind.fill(params, data.frame(max_age=c(99, 101), 
+# params<- rbind.fill(params, data.frame(max_age=c(99, 101),
 #                                        param_id=1:2+max(params$param_id)))
 # 
 # inps2<- inps
@@ -506,7 +509,7 @@ rm(cl)
 # inps2$phi<- c(inps$phi, inps$phi[length(inps$phi)])
 # inps2$psi<- c(inps$psi, inps$psi[length(inps$psi)])
 # ## RUN EGG SIMULATION FOR 101 AND PULL NEW DATA
-# e101<- read.csv("./baseline-parameters/fecundity_estimates_age_101.csv") 
+# e101<- read.csv("./baseline-parameters/fecundity_estimates_age_101.csv")
 # e101<- e101$Mean_Eggs_Produced
 # inps2$eggs<- c(inps$eggs, e101)
 # 
@@ -582,7 +585,7 @@ rm(cl)
 # cl<- makeCluster(numCores)
 # clusterExport(cl, c("inps", "dat", "init_pop", "leslie", "project_pop"))
 # ptm<-proc.time()
-# invisible(parLapply(cl, 1:length(inps$psi),#c(31,50,69,87), 
+# invisible(parLapply(cl, 14:length(inps$psi),#c(31,50,69,87), 
 #                     function(x)
 # {
 #   inps2<- inps
@@ -621,39 +624,42 @@ rm(cl)
 # params<- rbind.fill(params, eggs)
 # rm(eggs)
 
-# e_params<- params[which(!is.na(params$eggs)), c("eggs", "age_id", "param_id")]
-# library(parallel)
-# numCores<- detectCores()
-# cl<- makeCluster(numCores)
-# clusterExport(cl, c("inps", "dat", "e_params", "init_pop", "leslie", 
-#                     "project_pop"))
-# ptm<-proc.time()
-# eggs<- parLapply(cl, 1:nrow(e_params), function(x)
-# {
-#   inps2<- inps
-#   inps2$eggs[e_params$age_id[x]]<- e_params$eggs[x]
-#   test<- project_pop(inputs = inps2,
-#                       retention_data = dat,
-#                       gamma=0.5,
-#                       adjustments = list(),
-#                       years=200,
-#                       reps=5000,
-#                       param_id=e_params$param_id[x])
-#   return(test)
-# })
-# tot<-(proc.time()-ptm)[3]/60
-# tot
-# stopCluster(cl)
-# rm(cl, e_params)
+e_params<- params[which(!is.na(params$eggs)), c("eggs", "age_id", "param_id")]
+library(parallel)
+numCores<- detectCores()
+cl<- makeCluster(numCores)
+clusterExport(cl, c("inps", "dat", "e_params", "init_pop", "leslie",
+                    "project_pop"))
+ptm<-proc.time()
+eggs<- parLapply(cl, 1:nrow(e_params), function(x)
+{
+  inps2<- inps
+  inps2$eggs[e_params$age_id[x]]<- e_params$eggs[x]
+  test<- project_pop(inputs = inps2,
+                      retention_data = dat,
+                      gamma=0.5,
+                      adjustments = list(),
+                      years=200,
+                      reps=5000,
+                      param_id=e_params$param_id[x])
+  return(test)
+})
+tot<-(proc.time()-ptm)[3]/60
+tot
+stopCluster(cl)
+rm(cl, e_params)
 
 # SEX RATIO
 # r<- data.frame(probF=c(0.95*inps$probF, 1.05*inps$probF),
 #                param_id=1:2+max(params$param_id))
 # params<- rbind.fill(params, r)
-# 
+
+# params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
+# r<- params[!is.na(params$probF),] 
+#   
 # library(parallel)
 # cl<- makeCluster(2)
-# clusterExport(cl, c("inps", "dat", "r", "init_pop", "leslie", 
+# clusterExport(cl, c("inps", "dat", "r", "init_pop", "leslie",
 #                     "project_pop"))
 # invisible(parLapply(cl, 1:2, function(x)
 # {
@@ -673,9 +679,11 @@ rm(cl)
 #                param_id=1:2+max(params$param_id))
 # params<- rbind.fill(params, g)
 # 
+# g<- params[!is.na(params$gamma),]
+# 
 # library(parallel)
 # cl<- makeCluster(2)
-# clusterExport(cl, c("inps", "dat", "g", "init_pop", "leslie", 
+# clusterExport(cl, c("inps", "dat", "g", "init_pop", "leslie",
 #                     "project_pop"))
 # invisible(parLapply(cl, 1:2, function(x)
 # {
@@ -694,7 +702,8 @@ rm(cl)
 # ret<- data.frame(retention=c("Dec. 5%", "Inc. 5%"),
 #                  param_id=1:2+max(params$param_id))
 # params<- rbind.fill(params, ret)
-
+# ret<- params[!is.na(params$retention),]
+# 
 # dec_dat<- dat
 # dec_dat$Retention<- 0.95*dec_dat$Retention
 # dec<- project_pop(inputs = inps,
