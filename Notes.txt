@@ -1,0 +1,26 @@
+# Stochastic Run Notes
+
+## VERSIONS OF project_pop
+ ~ project_pop ran init_pop within the function for each N0_type="Uniform" run
+ ~ Running init_pop for each "2020_PSPAP" run was very time consuming, plus each N0 would be slightly different.
+ ~ "2020_PSPAP" runs with different N0 are in a separate folder (not all sensitivity runs completed)  
+ ~ To avoid the added time and any effects of N0 on parameter sensitivity analyses, all "2020_PSPAP" sentivities were
+   computed using project_pop without init_pop within the function and N0 equal to that for the baseline run, with 2 
+   exceptions:
+	- for max_age=99:
+		*sum(N0) was held constant and those fish age=100 were redistributed randomly in param_id=14  
+		*the same N0 was used but with the age=100 fish absent (i.e., sum(N0) decreased) in param_id="14_alt"
+	- for max_age=101:
+		*sum(N0) was held constant with 0 fish added to the age=101 categorty in param_id=15
+		*a new init_pop was ran which kept sum(N0) constant but redistributed adults, allowing some fish to be 
+		 age=101 in param_id="15_alt" 
+
+## 2019 DRIFT STUDY AGE-0 SURVIVAL
+ ~ used 0.000075 for the overall age-0 survival (age-0 given retention * retention) of all drift study free-embryos
+ ~ Braaten's FSM give survival for 5dph as 68% (after initial drop) from ages 5 to 9 days and 1dph as 51% (after initial
+   drop from ages 1 to 4 days
+ ~ Braaten's FSM also gives survival (from 5dph) as 95.5% from ages 20 to 80 days
+ ~ There is still an uncertainty as to what survival is from 81 to 365 days
+ ~ Extending this last estimate to a year leads to less age-0 survival than using 0.000075; despite that this estimate may
+   be generally lower than what actually occurred
+ ~ Survival estimates from later recaps may help to fill in this gap and obtain better estimates by age  

@@ -460,41 +460,48 @@ rm(getinps)
 
 # SIMULATE POPULATION REPS
 ## BASELINE & AGE-0 SURVIVAL GIVEN RETENTION
-phi0MR<- c(0.000075, 0.95*0.000075, 1.05*0.000075,
-           seq(0.0002, 0.002, 0.0002))
-params<- data.frame(phi0_MR=phi0MR, param_id=1:length(phi0MR))
-
-library(parallel)
-numCores<- detectCores()
-cl<- makeCluster(numCores)
-clusterExport(cl, c("inps", "dat", "params", "init_pop", "leslie", "project_pop"))
-ptm<-proc.time()
-phi0_test<- parLapply(cl, 1:nrow(params), function(x)
-{
-  test<- project_pop(inputs = inps,
-                     retention_data = dat,
-                     gamma=0.5,
-                     adjustments = list(phi0_MR=params$phi0_MR[x]),
-                     years=200,
-                     reps=5000,
-                     param_id=params$param_id[x])
-  return(test)
-})
-tot<-(proc.time()-ptm)[3]/60
-phi0_test$tot<- tot
-tot
-stopCluster(cl)
-rm(cl)
+# phi0MR<- c(0.000075, 0.95*0.000075, 1.05*0.000075,
+#            seq(0.0002, 0.002, 0.0002))
+# params<- data.frame(phi0_MR=phi0MR, param_id=1:length(phi0MR))
+# 
+# library(parallel)
+# numCores<- detectCores()
+# cl<- makeCluster(numCores)
+# # clusterEvalQ(cl, library(data.table))
+# clusterExport(cl, c("inps", "dat", "params", #init_pop,
+#                     "leslie", "project_pop"))
+# ptm<-proc.time()
+# phi0_test<- parLapply(cl, 1:nrow(params), function(x)
+# {
+#   test<- project_pop(inputs = inps,
+#                      retention_data = dat,
+#                      gamma=0.5,
+#                      adjustments = list(phi0_MR=params$phi0_MR[x]),
+#                      years=200,
+#                      reps=5000,
+#                      param_id=params$param_id[x])
+#   return(test)
+# })
+# tot<-(proc.time()-ptm)[3]/60
+# phi0_test$tot<- tot
+# tot
+# stopCluster(cl)
+# rm(cl)
 
 # MAXIMUM AGE
 # params<- rbind.fill(params, data.frame(max_age=c(99, 101),
 #                                        param_id=1:2+max(params$param_id)))
-# 
+
 # inps2<- inps
 # inps2$max_age<- 99
 # inps2$phi<- inps$phi[1:(length(inps$phi)-1)]
 # inps2$psi<- inps$psi[1:(length(inps$psi)-1)]
 # inps2$eggs<- inps$eggs[1:(length(inps$eggs)-1)]
+# extra<- inps$N0[length(inps$N0)]
+# v<- inps2$max_age-68+1
+# ad<- rmultinom(1, extra, c(rep(0,67),rep(1/v,v)))
+# inps2$N0<- inps$N0[1:(length(inps$N0)-1)]+ad
+# rm(extra, v, ad)
 # 
 # test1<- project_pop(inputs = inps2,
 #                     retention_data = dat,
@@ -503,6 +510,14 @@ rm(cl)
 #                     years=200,
 #                     reps=5000,
 #                     param_id=14)
+# inps2$N0<- inps$N0[1:(length(inps$N0)-1)]
+# test1<- project_pop(inputs = inps2,
+#                     retention_data = dat,
+#                     gamma=0.5,
+#                     adjustments = list(),
+#                     years=200,
+#                     reps=5000,
+#                     param_id="14_alt")
 # 
 # inps2<- inps
 # inps2$max_age<- 101
@@ -512,6 +527,7 @@ rm(cl)
 # e101<- read.csv("./baseline-parameters/fecundity_estimates_age_101.csv")
 # e101<- e101$Mean_Eggs_Produced
 # inps2$eggs<- c(inps$eggs, e101)
+# inps2$N0<- c(inps$N0,0)
 # 
 # test2<- project_pop(inputs = inps2,
 #                     retention_data = dat,
@@ -538,7 +554,9 @@ rm(cl)
 # library(parallel)
 # numCores<- detectCores()
 # cl<- makeCluster(numCores)
-# clusterExport(cl, c("inps", "dat", "init_pop", "leslie", "project_pop"))
+# # clusterEvalQ(cl, library(data.table))
+# clusterExport(cl, c("inps", "dat", #"init_pop", 
+#                     "leslie", "project_pop"))
 # ptm<-proc.time()
 # phi<- parLapply(cl, 1:length(inps$phi), function(x)
 # {
@@ -580,36 +598,28 @@ rm(cl)
 # params<- rbind.fill(params, psi)
 # rm(psi)
 
+# psi_params<- params[which(!is.na(params$psi)), c("psi", "age_id", "param_id")]
 # library(parallel)
 # numCores<- detectCores()
 # cl<- makeCluster(numCores)
-# clusterExport(cl, c("inps", "dat", "init_pop", "leslie", "project_pop"))
-# ptm<-proc.time()
-# invisible(parLapply(cl, 14:length(inps$psi),#c(31,50,69,87), 
+# # clusterEvalQ(cl, library(data.table))
+# clusterExport(cl, c("inps", "dat", "psi_params", #"init_pop",
+#                     "leslie", "project_pop"))
+# invisible(parLapply(cl, 1:nrow(psi_params),
 #                     function(x)
 # {
-#   inps2<- inps
-#   inps2$psi[x]<- 0.95*inps$psi[x]
-#   test1<- project_pop(inputs = inps2,
-#                       retention_data = dat,
-#                       gamma=0.5,
-#                       adjustments = list(),
-#                       years=200,
-#                       reps=5000,
-#                       param_id=214+2*(x-14))
-#   inps2$psi[x]<- 1.05*inps$psi[x]
-#   test2<- project_pop(inputs = inps2,
-#                       retention_data = dat,
-#                       gamma=0.5,
-#                       adjustments = list(),
-#                       years=200,
-#                       reps=5000,
-#                       param_id=215+2*(x-14))
+#     inps2<- inps
+#     inps2$psi[psi_params$age_id[x]]<- psi_params$psi[x]
+#     test<- project_pop(inputs = inps2,
+#                        retention_data = dat,
+#                        gamma=0.5,
+#                        adjustments = list(),
+#                        years=200,
+#                        reps=5000,
+#                        param_id=psi_params$param_id[x])
 # }))
-# tot<-(proc.time()-ptm)[3]/60
-# tot
 # stopCluster(cl)
-# rm(cl)
+# rm(cl, psi_params)
 
 # EGGS
 # eggs<- lapply(inps$mat$a_min:inps$max_age, function(x)
@@ -624,30 +634,32 @@ rm(cl)
 # params<- rbind.fill(params, eggs)
 # rm(eggs)
 
-e_params<- params[which(!is.na(params$eggs)), c("eggs", "age_id", "param_id")]
-library(parallel)
-numCores<- detectCores()
-cl<- makeCluster(numCores)
-clusterExport(cl, c("inps", "dat", "e_params", "init_pop", "leslie",
-                    "project_pop"))
-ptm<-proc.time()
-eggs<- parLapply(cl, 1:nrow(e_params), function(x)
-{
-  inps2<- inps
-  inps2$eggs[e_params$age_id[x]]<- e_params$eggs[x]
-  test<- project_pop(inputs = inps2,
-                      retention_data = dat,
-                      gamma=0.5,
-                      adjustments = list(),
-                      years=200,
-                      reps=5000,
-                      param_id=e_params$param_id[x])
-  return(test)
-})
-tot<-(proc.time()-ptm)[3]/60
-tot
-stopCluster(cl)
-rm(cl, e_params)
+# e_params<- params[which(!is.na(params$eggs)), c("eggs", "age_id", "param_id")]
+# library(parallel)
+# numCores<- detectCores()
+# cl<- makeCluster(numCores)
+# # clusterEvalQ(cl, library(data.table))
+# clusterExport(cl, c("inps", "dat", "e_params", #"init_pop", 
+#                     "leslie", "project_pop"))
+# # ptm<-proc.time()
+# eggs<- parLapply(cl, 1:nrow(e_params), 
+#                  function(x)
+# {
+#   inps2<- inps
+#   inps2$eggs[e_params$age_id[x]]<- e_params$eggs[x]
+#   test<- project_pop(inputs = inps2,
+#                       retention_data = dat,
+#                       gamma=0.5,
+#                       adjustments = list(),
+#                       years=200,
+#                       reps=5000,
+#                       param_id=e_params$param_id[x])
+#   return(test)
+# })
+# # tot<-(proc.time()-ptm)[3]/60
+# # tot
+# stopCluster(cl)
+# rm(cl, e_params)
 
 # SEX RATIO
 # r<- data.frame(probF=c(0.95*inps$probF, 1.05*inps$probF),
@@ -655,12 +667,13 @@ rm(cl, e_params)
 # params<- rbind.fill(params, r)
 
 # params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
-# r<- params[!is.na(params$probF),] 
-#   
+# r<- params[!is.na(params$probF),]
+# 
 # library(parallel)
 # cl<- makeCluster(2)
-# clusterExport(cl, c("inps", "dat", "r", "init_pop", "leslie",
-#                     "project_pop"))
+# # clusterEvalQ(cl, library(data.table))
+# clusterExport(cl, c("inps", "dat", "r", #"init_pop", 
+#                     "leslie", "project_pop"))
 # invisible(parLapply(cl, 1:2, function(x)
 # {
 #   test<- project_pop(inputs = inps,
@@ -683,8 +696,9 @@ rm(cl, e_params)
 # 
 # library(parallel)
 # cl<- makeCluster(2)
-# clusterExport(cl, c("inps", "dat", "g", "init_pop", "leslie",
-#                     "project_pop"))
+# # clusterEvalQ(cl, library(data.table))
+# clusterExport(cl, c("inps", "dat", "g", #"init_pop", 
+#                     "leslie", "project_pop"))
 # invisible(parLapply(cl, 1:2, function(x)
 # {
 #   test<- project_pop(inputs = inps,
@@ -732,23 +746,75 @@ rm(cl, e_params)
 params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 
 ## EXTINCTION ANALYSES
-# library(parallel)
-# numCores<- detectCores()
-# cl<- makeCluster(numCores)
-# clusterExport(cl, c("pseudo_extinct"))
-# ptm<-proc.time()
-# invisible(parLapply(cl, 1:561, function(p)
-# {
-#   dat<- readRDS(paste0("./output/_stochastic/Ntot_1-", p, ".rds"))
-#   out<-pseudo_extinct(pop_data = dat, threshold = 50,
-#                       years=200, reps=5000)
-#   saveRDS(out, paste0("./output/_stochastic/Full_Data_1-", p, ".rds"))
-# }))
-# tot<-(proc.time()-ptm)[3]/60
-# tot
-# stopCluster(cl)
-# rm(cl)
-# 
+library(parallel)
+numCores<- detectCores()
+cl<- makeCluster(numCores)
+clusterExport(cl, c("pseudo_extinct"))
+ptm<-proc.time()
+invisible(parLapply(cl, 1:567, function(p)
+{
+  dat<- readRDS(paste0("./output/_stochastic/Ntot_2020_PSPAP_1-", p, ".rds"))
+  out<-pseudo_extinct(pop_data = dat, threshold = 50,
+                      years=200, reps=5000)
+  saveRDS(out, paste0("./output/_stochastic/Full_Data_2020_PSPAP_1-", p, ".rds"))
+}))
+tot<-(proc.time()-ptm)[3]/60
+tot
+stopCluster(cl)
+rm(cl)
+
+# TIME TO EXTINCTION
+## TEST
+dat<- readRDS("./output/_stochastic/Full_Data_0-1.rds")
+rep_test<- lapply(seq(1000, 8000, 1000), function(r)
+{
+  out<-time_extinct(ext_data = dat, threshold = 50,
+                    years=200, reps=r)
+  out$reps<- r
+  return(out)
+})
+rep_test<- do.call("rbind", rep_test)
+
+rep_diffE<- reshape2::dcast(rep_test, flow_scenario~reps, value.var="E_time")
+tmp<-lapply(1:nrow(rep_diffE), function(i)
+{
+  abs(diff(unlist(rep_diffE[i,2:9])))
+})
+tmp<- as.data.frame(do.call("rbind", tmp))
+rep_diffE<- cbind(data.frame(flow_scenario=rep_diffE[,1]), tmp)
+
+rep_diff80<- reshape2::dcast(rep_test, flow_scenario~reps, value.var="time_80")
+tmp<-lapply(1:nrow(rep_diff80), function(i)
+{
+  abs(diff(unlist(rep_diff80[i,2:9])))
+})
+tmp<- as.data.frame(do.call("rbind", tmp))
+rep_diff80<- cbind(data.frame(flow_scenario=rep_diff80[,1]), tmp)
+
+
+## FULL ERUN
+library(parallel)
+numCores<- detectCores()
+cl<- makeCluster(numCores)
+clusterExport(cl, c("time_extinct"))
+ptm<-proc.time()
+ext<- parLapply(cl, 1:567, function(p)
+{
+  dat<- readRDS(paste0("./output/_stochastic/Full_Data_1-", p, ".rds"))
+  out<-time_extinct(ext_data = dat, threshold = 50,
+                      years=200, reps=5000)
+  return(out)
+})
+ext<- do.call("rbind", ext)
+tot<-(proc.time()-ptm)[3]/60
+tot
+stopCluster(cl)
+rm(cl)
+write.csv(ext, "./output/_stochatic/extinction_time_data_Uniform.rds",
+          row.names = FALSE)
+
+
+# FRACTION EXTINCT
 # library(parallel)
 # numCores<- detectCores()
 # cl<- makeCluster(numCores)
@@ -785,134 +851,134 @@ params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 #           row.names = FALSE)
 
 ## COMPARE YEAR AND REP DATA
-ext<- read.csv("./output/_stochastic/extinction_results.csv",
-               stringsAsFactors = FALSE)
-bline<- ext[ext$param_id==1,]
-alts<- unique(bline$flow_scenario)
-yrs<- unique(bline$years)
-### YEAR TEST
-#### ALL RUNS EXTINCT BY 100 YEARS FOR BASELINE AGE-0 SURVIVAL 
-tmp<- ext[ext$years>=100 & !(ext$param_id%in%2:13),]
-unique(tmp$frac_extinct)
-#### AFTER 75 YEARS VALUES HAVEN'T CONVERGED WITH 5000 REPS
-frac_diff<-sapply(alts, function(x)
-{
-  tmp<- bline[bline$years==75 & bline$flow_scenario==x,]
-  out<- min(abs(diff(tmp$frac_extinct)))
-  return(out)
-})
-max(frac_diff)
-#### RUN FINER YEAR MESH
-library(parallel)
-numCores<- detectCores()
-cl<- makeCluster(numCores)
-clusterExport(cl, c("frac_extinct"))
-explore_ext<- parLapply(cl, 1:567, function(p)
-{
-  dat<- readRDS(paste0("./output/_stochastic/Full_Data_1-", p, ".rds"))
-  yr_test<- lapply(seq(80, 95, 5), function(y)
-  {
-    rep_no_test<- lapply(seq(1000, 5000, 1000), function(r)
-    {
-      out<- frac_extinct(ext_data = dat, threshold = 50,
-                         years=y, reps=r)
-      out$reps<- r
-      return(out)
-    })
-    rep_no_test<- do.call("rbind", rep_no_test)
-    rep_no_test$years<- y
-    return(rep_no_test)
-  })
-  yr_test<- do.call("rbind", yr_test)
-  return(yr_test)
-})
-explore_ext<- do.call("rbind", explore_ext)
-stopCluster(cl)
-rm(cl)
-ext<- rbind(ext, explore_ext)
-ext<- ext[order(ext$param_id,
-                ext$years,
-                ext$reps),]
-write.csv(ext, "./output/_stochastic/extinction_results.csv",
-          row.names = FALSE)
-
-#### RETEST
-bline<- ext[ext$param_id==1,]
-alts<- unique(bline$flow_scenario)
-yrs<- unique(bline$years)
-
-frac_diff<-sapply(seq(75, 95, 5), function(y)
-{
-  outt<- sapply(alts, function(x)
-  {
-    tmp<- bline[bline$years==y & bline$flow_scenario==x,]
-    out<- min(abs(diff(tmp$frac_extinct)))
-    return(out)
-  })
-  return(max(outt))
-})
-frac_diff
-
-frac_range<-sapply(seq(75, 95, 5), function(y)
-{
-  tmp<- bline[bline$years==y & bline$reps==5000,]
-  out<- max(tmp$frac_extinct)-min(tmp$frac_extinct)
-  return(out)
-})
-frac_range
-
-## EXTRA SIMULATIONS
-dat1<- readRDS("./output/_stochastic/Ntot_1-1.rds")
-dat2<- readRDS("./output/_stochastic/Ntot_2-1.rds")
-dat1$`1`<- cbind(dat1$`1`, dat2$`1`)
-dat1$`1a`<- cbind(dat1$`1a`, dat2$`1a`)
-dat1$`1b`<- cbind(dat1$`1b`, dat2$`1b`)
-dat1$`2`<- cbind(dat1$`2`, dat2$`2`)
-dat1$`2a`<- cbind(dat1$`2a`, dat2$`2a`)
-dat1$`2b`<- cbind(dat1$`2b`, dat2$`2b`)
-dat1$NoAct<- cbind(dat1$NoAct, dat2$NoAct)
-dat1$inputs$environment$environ_paths<- 
-  cbind(dat1$inputs$environment$environ_paths, dat2$inputs$environment$environ_paths)
-dat1$inputs$environment$notes<- "Environment paths 1 and 2 combined."
-dat1$inputs$reps<- dat1$inputs$reps + dat2$inputs$reps
-saveRDS(dat1, "./output/_stochastic/Ntot_0-1.rds")
-rm(dat2)
-out<-pseudo_extinct(pop_data = dat1, threshold = 50,
-                    years=200, reps=8000)
-saveRDS(out, "./output/_stochastic/Full_Data_0-1.rds")
-
-dat<- out
-rm(dat1, out)
-yr_test<- lapply(c(seq(75, 100, 5), seq(125, 200, 25)), function(y)
-{
-  rep_no_test<- lapply(seq(1000, 8000, 1000), function(r)
-  {
-    out<- frac_extinct(ext_data = dat, threshold = 50,
-                       years=y, reps=r)
-    out$reps<- r
-    return(out)
-  })
-  rep_no_test<- do.call("rbind", rep_no_test)
-  rep_no_test$years<- y
-  return(rep_no_test)
-})
-yr_test<- do.call("rbind", yr_test)
-ext<- read.csv("./output/_stochastic/extinction_results.csv",
-               stringsAsFactors = FALSE)
-ext<- ext[which(ext$param_id!=1),]
-ext<- rbind(ext, yr_test)
-ext<- ext[order(ext$param_id,
-                ext$years,
-                ext$reps),]
-write.csv(ext, "./output/_stochastic/extinction_results.csv",
-          row.names = FALSE)
-
-bline<- ext[ext$param_id==1,]
-alts<- unique(bline$flow_scenario)
-yrs<- unique(bline$years)
-
-tmp<- bline[bline$years==yrs[1] & bline$flow_scenario==alts[1],]
-plot(tmp$reps, tmp$frac_extinct)
+# ext<- read.csv("./output/_stochastic/extinction_results.csv",
+#                stringsAsFactors = FALSE)
+# bline<- ext[ext$param_id==1,]
+# alts<- unique(bline$flow_scenario)
+# yrs<- unique(bline$years)
+# ### YEAR TEST
+# #### ALL RUNS EXTINCT BY 100 YEARS FOR BASELINE AGE-0 SURVIVAL 
+# tmp<- ext[ext$years>=100 & !(ext$param_id%in%2:13),]
+# unique(tmp$frac_extinct)
+# #### AFTER 75 YEARS VALUES HAVEN'T CONVERGED WITH 5000 REPS
+# frac_diff<-sapply(alts, function(x)
+# {
+#   tmp<- bline[bline$years==75 & bline$flow_scenario==x,]
+#   out<- min(abs(diff(tmp$frac_extinct)))
+#   return(out)
+# })
+# max(frac_diff)
+# #### RUN FINER YEAR MESH
+# library(parallel)
+# numCores<- detectCores()
+# cl<- makeCluster(numCores)
+# clusterExport(cl, c("frac_extinct"))
+# explore_ext<- parLapply(cl, 1:567, function(p)
+# {
+#   dat<- readRDS(paste0("./output/_stochastic/Full_Data_1-", p, ".rds"))
+#   yr_test<- lapply(seq(80, 95, 5), function(y)
+#   {
+#     rep_no_test<- lapply(seq(1000, 5000, 1000), function(r)
+#     {
+#       out<- frac_extinct(ext_data = dat, threshold = 50,
+#                          years=y, reps=r)
+#       out$reps<- r
+#       return(out)
+#     })
+#     rep_no_test<- do.call("rbind", rep_no_test)
+#     rep_no_test$years<- y
+#     return(rep_no_test)
+#   })
+#   yr_test<- do.call("rbind", yr_test)
+#   return(yr_test)
+# })
+# explore_ext<- do.call("rbind", explore_ext)
+# stopCluster(cl)
+# rm(cl)
+# ext<- rbind(ext, explore_ext)
+# ext<- ext[order(ext$param_id,
+#                 ext$years,
+#                 ext$reps),]
+# write.csv(ext, "./output/_stochastic/extinction_results.csv",
+#           row.names = FALSE)
+# 
+# #### RETEST
+# bline<- ext[ext$param_id==1,]
+# alts<- unique(bline$flow_scenario)
+# yrs<- unique(bline$years)
+# 
+# frac_diff<-sapply(seq(75, 95, 5), function(y)
+# {
+#   outt<- sapply(alts, function(x)
+#   {
+#     tmp<- bline[bline$years==y & bline$flow_scenario==x,]
+#     out<- min(abs(diff(tmp$frac_extinct)))
+#     return(out)
+#   })
+#   return(max(outt))
+# })
+# frac_diff
+# 
+# frac_range<-sapply(seq(75, 95, 5), function(y)
+# {
+#   tmp<- bline[bline$years==y & bline$reps==5000,]
+#   out<- max(tmp$frac_extinct)-min(tmp$frac_extinct)
+#   return(out)
+# })
+# frac_range
+# 
+# ## EXTRA SIMULATIONS
+# dat1<- readRDS("./output/_stochastic/Ntot_1-1.rds")
+# dat2<- readRDS("./output/_stochastic/Ntot_2-1.rds")
+# dat1$`1`<- cbind(dat1$`1`, dat2$`1`)
+# dat1$`1a`<- cbind(dat1$`1a`, dat2$`1a`)
+# dat1$`1b`<- cbind(dat1$`1b`, dat2$`1b`)
+# dat1$`2`<- cbind(dat1$`2`, dat2$`2`)
+# dat1$`2a`<- cbind(dat1$`2a`, dat2$`2a`)
+# dat1$`2b`<- cbind(dat1$`2b`, dat2$`2b`)
+# dat1$NoAct<- cbind(dat1$NoAct, dat2$NoAct)
+# dat1$inputs$environment$environ_paths<- 
+#   cbind(dat1$inputs$environment$environ_paths, dat2$inputs$environment$environ_paths)
+# dat1$inputs$environment$notes<- "Environment paths 1 and 2 combined."
+# dat1$inputs$reps<- dat1$inputs$reps + dat2$inputs$reps
+# saveRDS(dat1, "./output/_stochastic/Ntot_0-1.rds")
+# rm(dat2)
+# out<-pseudo_extinct(pop_data = dat1, threshold = 50,
+#                     years=200, reps=8000)
+# saveRDS(out, "./output/_stochastic/Full_Data_0-1.rds")
+# 
+# dat<- out
+# rm(dat1, out)
+# yr_test<- lapply(c(seq(75, 100, 5), seq(125, 200, 25)), function(y)
+# {
+#   rep_no_test<- lapply(seq(1000, 8000, 1000), function(r)
+#   {
+#     out<- frac_extinct(ext_data = dat, threshold = 50,
+#                        years=y, reps=r)
+#     out$reps<- r
+#     return(out)
+#   })
+#   rep_no_test<- do.call("rbind", rep_no_test)
+#   rep_no_test$years<- y
+#   return(rep_no_test)
+# })
+# yr_test<- do.call("rbind", yr_test)
+# ext<- read.csv("./output/_stochastic/extinction_results.csv",
+#                stringsAsFactors = FALSE)
+# ext<- ext[which(ext$param_id!=1),]
+# ext<- rbind(ext, yr_test)
+# ext<- ext[order(ext$param_id,
+#                 ext$years,
+#                 ext$reps),]
+# write.csv(ext, "./output/_stochastic/extinction_results.csv",
+#           row.names = FALSE)
+# 
+# bline<- ext[ext$param_id==1,]
+# alts<- unique(bline$flow_scenario)
+# yrs<- unique(bline$years)
+# 
+# tmp<- bline[bline$years==yrs[1] & bline$flow_scenario==alts[1],]
+# plot(tmp$reps, tmp$frac_extinct)
 
 
 ## COMPUTE SENSITIVITIES AND ELASTICITIES
