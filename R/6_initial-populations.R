@@ -746,25 +746,31 @@ rm(getinps)
 params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 
 ## EXTINCTION ANALYSES
-library(parallel)
-numCores<- detectCores()
-cl<- makeCluster(numCores)
-clusterExport(cl, c("pseudo_extinct"))
-ptm<-proc.time()
-invisible(parLapply(cl, 1:567, function(p)
-{
-  dat<- readRDS(paste0("./output/_stochastic/Ntot_2020_PSPAP_1-", p, ".rds"))
-  out<-pseudo_extinct(pop_data = dat, threshold = 50,
-                      years=200, reps=5000)
-  saveRDS(out, paste0("./output/_stochastic/Full_Data_2020_PSPAP_1-", p, ".rds"))
-}))
-tot<-(proc.time()-ptm)[3]/60
-tot
-stopCluster(cl)
-rm(cl)
+# library(parallel)
+# numCores<- detectCores()
+# cl<- makeCluster(numCores)
+# clusterExport(cl, c("pseudo_extinct"))
+# ptm<-proc.time()
+# invisible(parLapply(cl, 1:567, function(p)
+# {
+#   dat<- readRDS(paste0("./output/_stochastic/Ntot_2020_PSPAP_1-", p, ".rds"))
+#   out<-pseudo_extinct(pop_data = dat, threshold = 50,
+#                       years=200, reps=5000)
+#   saveRDS(out, paste0("./output/_stochastic/Full_Data_2020_PSPAP_1-", p, ".rds"))
+# }))
+# tot<-(proc.time()-ptm)[3]/60
+# tot
+# stopCluster(cl)
+# rm(cl)
+# 
+# datt<- readRDS("./output/_stochastic/Ntot_2020_PSPAP_1-15_alt.rds")
+# out<-pseudo_extinct(pop_data = datt, threshold = 50,
+#                     years=200, reps=5000)
+# saveRDS(out, "./output/_stochastic/Full_Data_2020_PSPAP_1-15_alt.rds")
 
 # TIME TO EXTINCTION
 ## TEST
+### UNIFORM
 dat<- readRDS("./output/_stochastic/Full_Data_0-1.rds")
 rep_test<- lapply(seq(1000, 8000, 1000), function(r)
 {
@@ -790,9 +796,35 @@ tmp<-lapply(1:nrow(rep_diff80), function(i)
 })
 tmp<- as.data.frame(do.call("rbind", tmp))
 rep_diff80<- cbind(data.frame(flow_scenario=rep_diff80[,1]), tmp)
+### 2020_PSPAP
+dat<- readRDS("./output/_stochastic/Full_Data_2020_PSPAP_1-1.rds")
+rep_test<- lapply(seq(1000, 5000, 1000), function(r)
+{
+  out<-time_extinct(ext_data = dat, threshold = 50,
+                    years=200, reps=r)
+  out$reps<- r
+  return(out)
+})
+rep_test<- do.call("rbind", rep_test)
 
+rep_diffE<- reshape2::dcast(rep_test, flow_scenario~reps, value.var="E_time")
+tmp<-lapply(1:nrow(rep_diffE), function(i)
+{
+  abs(diff(unlist(rep_diffE[i,2:6])))
+})
+tmp<- as.data.frame(do.call("rbind", tmp))
+rep_diffE<- cbind(data.frame(flow_scenario=rep_diffE[,1]), tmp)
 
-## FULL ERUN
+rep_diff80<- reshape2::dcast(rep_test, flow_scenario~reps, value.var="time_80")
+tmp<-lapply(1:nrow(rep_diff80), function(i)
+{
+  abs(diff(unlist(rep_diff80[i,2:6])))
+})
+tmp<- as.data.frame(do.call("rbind", tmp))
+rep_diff80<- cbind(data.frame(flow_scenario=rep_diff80[,1]), tmp)
+
+## FULL RUN
+### UNIFORM
 library(parallel)
 numCores<- detectCores()
 cl<- makeCluster(numCores)
@@ -810,9 +842,37 @@ tot<-(proc.time()-ptm)[3]/60
 tot
 stopCluster(cl)
 rm(cl)
-write.csv(ext, "./output/_stochatic/extinction_time_data_Uniform.rds",
+write.csv(ext, "./output/_stochastic/extinction_time_data_Uniform.csv",
           row.names = FALSE)
 
+### 2020_PSPAP
+library(parallel)
+numCores<- detectCores()
+cl<- makeCluster(numCores)
+clusterExport(cl, c("time_extinct"))
+ptm<-proc.time()
+ext<- parLapply(cl, 1:567, function(p)
+{
+  dat<- readRDS(paste0("./output/_stochastic/Full_Data_2020_PSPAP_1-", p, ".rds"))
+  out<-time_extinct(ext_data = dat, threshold = 50,
+                    years=200, reps=5000)
+  return(out)
+})
+ext<- do.call("rbind", ext)
+tot<-(proc.time()-ptm)[3]/60
+tot
+stopCluster(cl)
+rm(cl)
+dat14<- readRDS("./output/_stochastic/Full_Data_2020_PSPAP_1-14_alt.rds")
+tmp<-time_extinct(ext_data = dat14, threshold = 50,
+                  years=200, reps=5000)
+ext<- rbind(ext, tmp)
+dat15<- readRDS("./output/_stochastic/Full_Data_2020_PSPAP_1-15_alt.rds")
+tmp<-time_extinct(ext_data = dat15, threshold = 50,
+                  years=200, reps=5000)
+ext<- rbind(ext, tmp)
+write.csv(ext, "./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
+          row.names = FALSE)
 
 # FRACTION EXTINCT
 # library(parallel)
