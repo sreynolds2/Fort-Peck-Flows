@@ -874,6 +874,79 @@ ext<- rbind(ext, tmp)
 write.csv(ext, "./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
           row.names = FALSE)
 
+# BASE COMPARISON
+## UNIFORM
+uni<- read.csv("./output/_stochastic/extinction_time_data_Uniform.csv",
+               stringsAsFactors = FALSE)
+tmp<- uni[uni$param_id==1,]
+barplot(tmp$E_time[c(7,2,1,3,5,4,6)], 
+        names.arg = tmp$flow_scenario[c(7,2,1,3,5,4,6)],
+        xlab="Management Alternative", 
+        ylab="Expected Time to Psuedoextinction (Years)")
+plot(1:7, tmp$E_time[c(7,2,1,3,5,4,6)],
+     xaxt="n", xlab="Management Alternative", 
+     ylab="Expected Time to Psuedoextinction (Years)", pch=19)
+axis(1, 1:7, tmp$flow_scenario[c(7,2,1,3,5,4,6)])
+
+## 2020 PSPAP
+pap<- read.csv("./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
+               stringsAsFactors = FALSE)
+tmp<- uni[pap$param_id==1,]
+barplot(tmp$E_time[c(7,2,1,3,5,4,6)], 
+        names.arg = tmp$flow_scenario[c(7,2,1,3,5,4,6)],
+        xlab="Management Alternative", 
+        ylab="Expected Time to Psuedoextinction (Years)")
+plot(1:7, tmp$E_time[c(7,2,1,3,5,4,6)],
+     xaxt="n", xlab="Management Alternative", 
+     ylab="Expected Time to Psuedoextinction (Years)", pch=19)
+axis(1, 1:7, tmp$flow_scenario[c(7,2,1,3,5,4,6)])
+
+
+# SENSITIVITIES & ELASTICITIES
+params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
+params[params$param_id==1,c("max_age", "probF", "gamma")]<- c(100, 0.5, 0.5)
+alts<- unique(uni$flow_scenario)
+sens<- lapply(alts, function(y)
+{
+  E_base<- uni[which(uni$param_id==1 & 
+                      uni$flow_scenario==y),]$E_time
+  p_sens<- lapply(2:265, function(p)
+  { 
+    E_comp<- uni[which(uni$param_id==p & 
+                        uni$flow_scenario==y),]$E_time
+    tmp<- params[which(params$param_id==p),]
+    findP<- setdiff(names(tmp)[which(!is.na(tmp))],
+                    c("param_id", "age_id"))
+    if(findP %in% c("phi0_MR", "max_age", "probF", "gamma"))
+    {
+      j<- setdiff(which(!is.na(tmp)),
+                  match(c("param_id", "age_id"), names(tmp)))
+      s<- (E_comp-E_base)/(tmp[,j]-params[which(params$param_id==1),j])
+      e<- s*params[which(params$param_id==1),j]/E_base
+    }
+    if(findP=="phi")
+    {
+      s<- (E_comp-E_base)/(tmp$phi-inputs$phi[tmp$age_id])
+      e<- s*inputs$phi[tmp$age_id]/E_base
+    }
+    if(findP=="psi")
+    {
+      s<- (E_comp-E_base)/(tmp$psi-inputs$psi[tmp$age_id])
+      e<- s*inputs$psi[tmp$age_id]/E_base
+    }
+    if(findP=="eggs")
+    {
+      s<- (E_comp-E_base)/(tmp$eggs-inputs$eggs[tmp$age_id])
+      e<- s*inputs$eggs[tmp$age_id]/E_base
+    }
+    return(data.frame(sens=s, elas=e, param_id=p))  
+  })
+  p_sens<- do.call("rbind", p_sens)
+  p_sens$flow_scenario<- y
+  return(p_sens)
+})
+sens<- do.call("rbind", sens)
+
 # FRACTION EXTINCT
 # library(parallel)
 # numCores<- detectCores()
