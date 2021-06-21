@@ -769,151 +769,152 @@ params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 # saveRDS(out, "./output/_stochastic/Full_Data_2020_PSPAP_1-15_alt.rds")
 
 # TIME TO EXTINCTION
-## TEST
-### UNIFORM
-dat<- readRDS("./output/_stochastic/Full_Data_0-1.rds")
-rep_test<- lapply(seq(1000, 8000, 1000), function(r)
-{
-  out<-time_extinct(ext_data = dat, threshold = 50,
-                    years=200, reps=r)
-  out$reps<- r
-  return(out)
-})
-rep_test<- do.call("rbind", rep_test)
-
-rep_diffE<- reshape2::dcast(rep_test, flow_scenario~reps, value.var="E_time")
-tmp<-lapply(1:nrow(rep_diffE), function(i)
-{
-  abs(diff(unlist(rep_diffE[i,2:9])))
-})
-tmp<- as.data.frame(do.call("rbind", tmp))
-rep_diffE<- cbind(data.frame(flow_scenario=rep_diffE[,1]), tmp)
-
-rep_diff80<- reshape2::dcast(rep_test, flow_scenario~reps, value.var="time_80")
-tmp<-lapply(1:nrow(rep_diff80), function(i)
-{
-  abs(diff(unlist(rep_diff80[i,2:9])))
-})
-tmp<- as.data.frame(do.call("rbind", tmp))
-rep_diff80<- cbind(data.frame(flow_scenario=rep_diff80[,1]), tmp)
-### 2020_PSPAP
-dat<- readRDS("./output/_stochastic/Full_Data_2020_PSPAP_1-1.rds")
-rep_test<- lapply(seq(1000, 5000, 1000), function(r)
-{
-  out<-time_extinct(ext_data = dat, threshold = 50,
-                    years=200, reps=r)
-  out$reps<- r
-  return(out)
-})
-rep_test<- do.call("rbind", rep_test)
-
-rep_diffE<- reshape2::dcast(rep_test, flow_scenario~reps, value.var="E_time")
-tmp<-lapply(1:nrow(rep_diffE), function(i)
-{
-  abs(diff(unlist(rep_diffE[i,2:6])))
-})
-tmp<- as.data.frame(do.call("rbind", tmp))
-rep_diffE<- cbind(data.frame(flow_scenario=rep_diffE[,1]), tmp)
-
-rep_diff80<- reshape2::dcast(rep_test, flow_scenario~reps, value.var="time_80")
-tmp<-lapply(1:nrow(rep_diff80), function(i)
-{
-  abs(diff(unlist(rep_diff80[i,2:6])))
-})
-tmp<- as.data.frame(do.call("rbind", tmp))
-rep_diff80<- cbind(data.frame(flow_scenario=rep_diff80[,1]), tmp)
-
-## FULL RUN
-### UNIFORM
-library(parallel)
-numCores<- detectCores()
-cl<- makeCluster(numCores)
-clusterExport(cl, c("time_extinct"))
-ptm<-proc.time()
-ext<- parLapply(cl, 1:567, function(p)
-{
-  dat<- readRDS(paste0("./output/_stochastic/Full_Data_1-", p, ".rds"))
-  out<-time_extinct(ext_data = dat, threshold = 50,
-                      years=200, reps=5000)
-  return(out)
-})
-ext<- do.call("rbind", ext)
-tot<-(proc.time()-ptm)[3]/60
-tot
-stopCluster(cl)
-rm(cl)
-write.csv(ext, "./output/_stochastic/extinction_time_data_Uniform.csv",
-          row.names = FALSE)
-
-### 2020_PSPAP
-library(parallel)
-numCores<- detectCores()
-cl<- makeCluster(numCores)
-clusterExport(cl, c("time_extinct"))
-ptm<-proc.time()
-ext<- parLapply(cl, 1:567, function(p)
-{
-  dat<- readRDS(paste0("./output/_stochastic/Full_Data_2020_PSPAP_1-", p, ".rds"))
-  out<-time_extinct(ext_data = dat, threshold = 50,
-                    years=200, reps=5000)
-  return(out)
-})
-ext<- do.call("rbind", ext)
-tot<-(proc.time()-ptm)[3]/60
-tot
-stopCluster(cl)
-rm(cl)
-dat14<- readRDS("./output/_stochastic/Full_Data_2020_PSPAP_1-14_alt.rds")
-tmp<-time_extinct(ext_data = dat14, threshold = 50,
-                  years=200, reps=5000)
-ext<- rbind(ext, tmp)
-dat15<- readRDS("./output/_stochastic/Full_Data_2020_PSPAP_1-15_alt.rds")
-tmp<-time_extinct(ext_data = dat15, threshold = 50,
-                  years=200, reps=5000)
-ext<- rbind(ext, tmp)
-write.csv(ext, "./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
-          row.names = FALSE)
-
-# BASE COMPARISON
-## UNIFORM
-uni<- read.csv("./output/_stochastic/extinction_time_data_Uniform.csv",
-               stringsAsFactors = FALSE)
-tmp<- uni[uni$param_id==1,]
-barplot(tmp$E_time[c(7,2,1,3,5,4,6)], 
-        names.arg = tmp$flow_scenario[c(7,2,1,3,5,4,6)],
-        xlab="Management Alternative", 
-        ylab="Expected Time to Psuedoextinction (Years)")
-plot(1:7, tmp$E_time[c(7,2,1,3,5,4,6)],
-     xaxt="n", xlab="Management Alternative", 
-     ylab="Expected Time to Psuedoextinction (Years)", pch=19)
-axis(1, 1:7, tmp$flow_scenario[c(7,2,1,3,5,4,6)])
-
-## 2020 PSPAP
-pap<- read.csv("./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
-               stringsAsFactors = FALSE)
-tmp<- uni[pap$param_id==1,]
-barplot(tmp$E_time[c(7,2,1,3,5,4,6)], 
-        names.arg = tmp$flow_scenario[c(7,2,1,3,5,4,6)],
-        xlab="Management Alternative", 
-        ylab="Expected Time to Psuedoextinction (Years)")
-plot(1:7, tmp$E_time[c(7,2,1,3,5,4,6)],
-     xaxt="n", xlab="Management Alternative", 
-     ylab="Expected Time to Psuedoextinction (Years)", pch=19)
-axis(1, 1:7, tmp$flow_scenario[c(7,2,1,3,5,4,6)])
-
-
+# ## TEST
+# ### UNIFORM
+# dat<- readRDS("./output/_stochastic/Full_Data_0-1.rds")
+# rep_test<- lapply(seq(1000, 8000, 1000), function(r)
+# {
+#   out<-time_extinct(ext_data = dat, threshold = 50,
+#                     years=200, reps=r)
+#   out$reps<- r
+#   return(out)
+# })
+# rep_test<- do.call("rbind", rep_test)
+# 
+# rep_diffE<- reshape2::dcast(rep_test, flow_scenario~reps, value.var="E_time")
+# tmp<-lapply(1:nrow(rep_diffE), function(i)
+# {
+#   abs(diff(unlist(rep_diffE[i,2:9])))
+# })
+# tmp<- as.data.frame(do.call("rbind", tmp))
+# rep_diffE<- cbind(data.frame(flow_scenario=rep_diffE[,1]), tmp)
+# 
+# rep_diff80<- reshape2::dcast(rep_test, flow_scenario~reps, value.var="time_80")
+# tmp<-lapply(1:nrow(rep_diff80), function(i)
+# {
+#   abs(diff(unlist(rep_diff80[i,2:9])))
+# })
+# tmp<- as.data.frame(do.call("rbind", tmp))
+# rep_diff80<- cbind(data.frame(flow_scenario=rep_diff80[,1]), tmp)
+# ### 2020_PSPAP
+# dat<- readRDS("./output/_stochastic/Full_Data_2020_PSPAP_1-1.rds")
+# rep_test<- lapply(seq(1000, 5000, 1000), function(r)
+# {
+#   out<-time_extinct(ext_data = dat, threshold = 50,
+#                     years=200, reps=r)
+#   out$reps<- r
+#   return(out)
+# })
+# rep_test<- do.call("rbind", rep_test)
+# 
+# rep_diffE<- reshape2::dcast(rep_test, flow_scenario~reps, value.var="E_time")
+# tmp<-lapply(1:nrow(rep_diffE), function(i)
+# {
+#   abs(diff(unlist(rep_diffE[i,2:6])))
+# })
+# tmp<- as.data.frame(do.call("rbind", tmp))
+# rep_diffE<- cbind(data.frame(flow_scenario=rep_diffE[,1]), tmp)
+# 
+# rep_diff80<- reshape2::dcast(rep_test, flow_scenario~reps, value.var="time_80")
+# tmp<-lapply(1:nrow(rep_diff80), function(i)
+# {
+#   abs(diff(unlist(rep_diff80[i,2:6])))
+# })
+# tmp<- as.data.frame(do.call("rbind", tmp))
+# rep_diff80<- cbind(data.frame(flow_scenario=rep_diff80[,1]), tmp)
+# 
+# ## FULL RUN
+# ### UNIFORM
+# library(parallel)
+# numCores<- detectCores()
+# cl<- makeCluster(numCores)
+# clusterExport(cl, c("time_extinct"))
+# ptm<-proc.time()
+# ext<- parLapply(cl, 1:567, function(p)
+# {
+#   dat<- readRDS(paste0("./output/_stochastic/Full_Data_1-", p, ".rds"))
+#   out<-time_extinct(ext_data = dat, threshold = 50,
+#                       years=200, reps=5000)
+#   return(out)
+# })
+# ext<- do.call("rbind", ext)
+# tot<-(proc.time()-ptm)[3]/60
+# tot
+# stopCluster(cl)
+# rm(cl)
+# write.csv(ext, "./output/_stochastic/extinction_time_data_Uniform.csv",
+#           row.names = FALSE)
+# 
+# ### 2020_PSPAP
+# library(parallel)
+# numCores<- detectCores()
+# cl<- makeCluster(numCores)
+# clusterExport(cl, c("time_extinct"))
+# ptm<-proc.time()
+# ext<- parLapply(cl, 1:567, function(p)
+# {
+#   dat<- readRDS(paste0("./output/_stochastic/Full_Data_2020_PSPAP_1-", p, ".rds"))
+#   out<-time_extinct(ext_data = dat, threshold = 50,
+#                     years=200, reps=5000)
+#   return(out)
+# })
+# ext<- do.call("rbind", ext)
+# tot<-(proc.time()-ptm)[3]/60
+# tot
+# stopCluster(cl)
+# rm(cl)
+# dat14<- readRDS("./output/_stochastic/Full_Data_2020_PSPAP_1-14_alt.rds")
+# tmp<-time_extinct(ext_data = dat14, threshold = 50,
+#                   years=200, reps=5000)
+# ext<- rbind(ext, tmp)
+# dat15<- readRDS("./output/_stochastic/Full_Data_2020_PSPAP_1-15_alt.rds")
+# tmp<-time_extinct(ext_data = dat15, threshold = 50,
+#                   years=200, reps=5000)
+# ext<- rbind(ext, tmp)
+# write.csv(ext, "./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
+#           row.names = FALSE)
+# 
+# # BASE COMPARISON
+# ## UNIFORM
+# uni<- read.csv("./output/_stochastic/extinction_time_data_Uniform.csv",
+#                stringsAsFactors = FALSE)
+# tmp<- uni[uni$param_id==1,]
+# barplot(tmp$E_time[c(7,2,1,3,5,4,6)],
+#         names.arg = tmp$flow_scenario[c(7,2,1,3,5,4,6)],
+#         xlab="Management Alternative",
+#         ylab="Expected Time to Psuedoextinction (Years)")
+# plot(1:7, tmp$E_time[c(7,2,1,3,5,4,6)],
+#      xaxt="n", xlab="Management Alternative",
+#      ylab="Expected Time to Psuedoextinction (Years)", pch=19)
+# axis(1, 1:7, tmp$flow_scenario[c(7,2,1,3,5,4,6)])
+# 
+# ## 2020 PSPAP
+# pap<- read.csv("./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
+#                stringsAsFactors = FALSE)
+# tmp<- uni[pap$param_id==1,]
+# barplot(tmp$E_time[c(7,2,1,3,5,4,6)],
+#         names.arg = tmp$flow_scenario[c(7,2,1,3,5,4,6)],
+#         xlab="Management Alternative",
+#         ylab="Expected Time to Psuedoextinction (Years)")
+# plot(1:7, tmp$E_time[c(7,2,1,3,5,4,6)],
+#      xaxt="n", xlab="Management Alternative",
+#      ylab="Expected Time to Psuedoextinction (Years)", pch=19)
+# axis(1, 1:7, tmp$flow_scenario[c(7,2,1,3,5,4,6)])
+# 
+#
 # SENSITIVITIES & ELASTICITIES
 params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 params[params$param_id==1,c("max_age", "probF", "gamma")]<- c(100, 0.5, 0.5)
+source("./R/0_default-parameters.r")
 alts<- unique(uni$flow_scenario)
 ## UNIFORM
 sens<- lapply(alts, function(y)
 {
-  E_base<- uni[which(uni$param_id==1 & 
+  E_base<- uni[which(uni$param_id==1 &
                       uni$flow_scenario==y),]$E_time
-  p_sens<- lapply(2:265, function(p)
-  { 
-    E_comp<- uni[which(uni$param_id==p & 
+  p_sens<- lapply(2:567, function(x)
+  {
+    E_comp<- uni[which(uni$param_id==p &
                         uni$flow_scenario==y),]$E_time
     tmp<- params[which(params$param_id==p),]
     findP<- setdiff(names(tmp)[which(!is.na(tmp))],
@@ -940,14 +941,19 @@ sens<- lapply(alts, function(y)
       s<- (E_comp-E_base)/(tmp$eggs-inputs$eggs[tmp$age_id])
       e<- s*inputs$eggs[tmp$age_id]/E_base
     }
-    return(data.frame(sens=s, elas=e, param_id=p))  
+    if(findP=="retention"))
+    {
+      s<- NA
+      e<- abs(E_comp-E_base)/(E_base*0.05)
+    }
+    return(data.frame(sens=s, elas=e, param_id=p))
   })
   p_sens<- do.call("rbind", p_sens)
   p_sens$flow_scenario<- y
   p_sens<- p_sens[order(abs(p_sens$sens), decreasing = TRUE),]
   return(p_sens)
 })
-saveRDS(sens, "./output/_stochastic/sens_elas_output_list_uniform.csv")
+saveRDS(sens, "./output/_stochastic/sens_elas_output_list_uniform.rds")
 sens<- do.call("rbind", sens)
 write.csv(sens, "./output/_stochastic/sens_elas_uniform.csv",
           row.names = FALSE)
@@ -955,11 +961,11 @@ write.csv(sens, "./output/_stochastic/sens_elas_uniform.csv",
 ## 2020_PSPAP
 sensP<- lapply(alts, function(y)
 {
-  E_base<- pap[which(pap$param_id==1 & 
+  E_base<- pap[which(pap$param_id==1 &
                        pap$flow_scenario==y),]$E_time
-  p_sens<- lapply(2:265, function(p)
-  { 
-    E_comp<- pap[which(pap$param_id==p & 
+  p_sens<- lapply(2:567, function(p)
+  {
+    E_comp<- pap[which(pap$param_id==p &
                          pap$flow_scenario==y),]$E_time
     tmp<- params[which(params$param_id==p),]
     findP<- setdiff(names(tmp)[which(!is.na(tmp))],
@@ -986,17 +992,35 @@ sensP<- lapply(alts, function(y)
       s<- (E_comp-E_base)/(tmp$eggs-inputs$eggs[tmp$age_id])
       e<- s*inputs$eggs[tmp$age_id]/E_base
     }
-    return(data.frame(sens=s, elas=e, param_id=p))  
+    return(data.frame(sens=s, elas=e, param_id=p))
   })
   p_sens<- do.call("rbind", p_sens)
   p_sens$flow_scenario<- y
   p_sens<- p_sens[order(abs(p_sens$sens), decreasing = TRUE),]
   return(p_sens)
 })
-saveRDS(sensP, "./output/_stochastic/sens_elas_output_list_2020_pspap.csv")
+saveRDS(sensP, "./output/_stochastic/sens_elas_output_list_2020_pspap.rds")
 sensP<- do.call("rbind", sensP)
 write.csv(sensP, "./output/_stochastic/sens_elas_2020_pspap.csv",
           row.names = FALSE)
+
+# PULL TOP SENSITIVITIES FOR EACH ALTERNATIVE
+sensU<-readRDS("./output/_stochastic/sens_elas_output_list_uniform.rds")
+lapply(1:7, function(y)
+{
+  tmp<- sensU[[y]]
+  tmp<- subset(tmp, !(param_id %in% 4:13))
+  tmp$param<- NA 
+  tmp$age<- NA
+  for(i in 1:nrow(tmp))
+  {
+    id<- tmp$param_id[i]
+    tmp$param[i]<- setdiff(names(params)[which(!is.na(params[params$param_id==id,]))],
+                           c("param_id", "age_id"))
+    tmp$age[i]<- params[params$param_id==id,]$age_id
+  }
+  
+})
 
 # RANK SENSITIVITIES
 
