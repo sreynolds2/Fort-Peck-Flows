@@ -443,10 +443,12 @@ temp_freq<- read.csv("./output/_stochastic/Temperature_Frequency.csv")
 #                        temp_data = temps,
 #                        transitions = trans,
 #                        temp_freq_data = temp_freq,
-#                        reps = 3000,
-#                        id=2)
+#                        years=500,
+#                        reps = 8000,
+#                        w_init = w,
+#                        id="0_extend")
 
-getinps<- readRDS("./output/_stochastic/Ntot_1-1.rds")
+getinps<- readRDS("./output/_stochastic/Ntot_2-1.rds")
 inps<- inputs
 inps$environment<- getinps$inputs$environment
 rm(getinps)
@@ -460,33 +462,33 @@ rm(getinps)
 
 # SIMULATE POPULATION REPS
 ## BASELINE & AGE-0 SURVIVAL GIVEN RETENTION
-# phi0MR<- c(0.000075, 0.95*0.000075, 1.05*0.000075,
-#            seq(0.0002, 0.002, 0.0002))
-# params<- data.frame(phi0_MR=phi0MR, param_id=1:length(phi0MR))
-# 
-# library(parallel)
-# numCores<- detectCores()
-# cl<- makeCluster(numCores)
-# # clusterEvalQ(cl, library(data.table))
-# clusterExport(cl, c("inps", "dat", "params", #init_pop,
-#                     "leslie", "project_pop"))
-# ptm<-proc.time()
-# phi0_test<- parLapply(cl, 1:nrow(params), function(x)
-# {
-#   test<- project_pop(inputs = inps,
-#                      retention_data = dat,
-#                      gamma=0.5,
-#                      adjustments = list(phi0_MR=params$phi0_MR[x]),
-#                      years=200,
-#                      reps=5000,
-#                      param_id=params$param_id[x])
-#   return(test)
-# })
-# tot<-(proc.time()-ptm)[3]/60
-# phi0_test$tot<- tot
-# tot
-# stopCluster(cl)
-# rm(cl)
+phi0MR<- c(0.000075, 0.95*0.000075, 1.05*0.000075,
+           seq(0.0002, 0.002, 0.0002))
+params<- data.frame(phi0_MR=phi0MR, param_id=1:length(phi0MR))
+
+library(parallel)
+numCores<- detectCores()
+cl<- makeCluster(numCores)
+# clusterEvalQ(cl, library(data.table))
+clusterExport(cl, c("inps", "dat", "params", #init_pop,
+                    "leslie", "project_pop"))
+ptm<-proc.time()
+phi0_test<- parLapply(cl, 1:nrow(params), function(x)
+{
+  test<- project_pop(inputs = inps,
+                     retention_data = dat,
+                     gamma=0.5,
+                     adjustments = list(phi0_MR=params$phi0_MR[x]),
+                     years=200,
+                     reps=3000,
+                     param_id=params$param_id[x])
+  return(test)
+})
+tot<-(proc.time()-ptm)[3]/60
+phi0_test$tot<- tot
+tot
+stopCluster(cl)
+rm(cl)
 
 # MAXIMUM AGE
 # params<- rbind.fill(params, data.frame(max_age=c(99, 101),
@@ -876,8 +878,8 @@ params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 # 
 # # BASE COMPARISON
 # ## UNIFORM
-# uni<- read.csv("./output/_stochastic/extinction_time_data_Uniform.csv",
-#                stringsAsFactors = FALSE)
+uni<- read.csv("./output/_stochastic/extinction_time_data_Uniform.csv",
+               stringsAsFactors = FALSE)
 # tmp<- uni[uni$param_id==1,]
 # barplot(tmp$E_time[c(7,2,1,3,5,4,6)],
 #         names.arg = tmp$flow_scenario[c(7,2,1,3,5,4,6)],
@@ -889,8 +891,8 @@ params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 # axis(1, 1:7, tmp$flow_scenario[c(7,2,1,3,5,4,6)])
 # 
 # ## 2020 PSPAP
-# pap<- read.csv("./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
-#                stringsAsFactors = FALSE)
+pap<- read.csv("./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
+               stringsAsFactors = FALSE)
 # tmp<- uni[pap$param_id==1,]
 # barplot(tmp$E_time[c(7,2,1,3,5,4,6)],
 #         names.arg = tmp$flow_scenario[c(7,2,1,3,5,4,6)],
@@ -907,122 +909,393 @@ params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 params[params$param_id==1,c("max_age", "probF", "gamma")]<- c(100, 0.5, 0.5)
 source("./R/0_default-parameters.r")
 alts<- unique(uni$flow_scenario)
-## UNIFORM
-sens<- lapply(alts, function(y)
-{
-  E_base<- uni[which(uni$param_id==1 &
-                      uni$flow_scenario==y),]$E_time
-  p_sens<- lapply(2:567, function(x)
-  {
-    E_comp<- uni[which(uni$param_id==p &
-                        uni$flow_scenario==y),]$E_time
-    tmp<- params[which(params$param_id==p),]
-    findP<- setdiff(names(tmp)[which(!is.na(tmp))],
-                    c("param_id", "age_id"))
-    if(findP %in% c("phi0_MR", "max_age", "probF", "gamma"))
-    {
-      j<- setdiff(which(!is.na(tmp)),
-                  match(c("param_id", "age_id"), names(tmp)))
-      s<- (E_comp-E_base)/(tmp[,j]-params[which(params$param_id==1),j])
-      e<- s*params[which(params$param_id==1),j]/E_base
-    }
-    if(findP=="phi")
-    {
-      s<- (E_comp-E_base)/(tmp$phi-inputs$phi[tmp$age_id])
-      e<- s*inputs$phi[tmp$age_id]/E_base
-    }
-    if(findP=="psi")
-    {
-      s<- (E_comp-E_base)/(tmp$psi-inputs$psi[tmp$age_id])
-      e<- s*inputs$psi[tmp$age_id]/E_base
-    }
-    if(findP=="eggs")
-    {
-      s<- (E_comp-E_base)/(tmp$eggs-inputs$eggs[tmp$age_id])
-      e<- s*inputs$eggs[tmp$age_id]/E_base
-    }
-    if(findP=="retention"))
-    {
-      s<- NA
-      e<- abs(E_comp-E_base)/(E_base*0.05)
-    }
-    return(data.frame(sens=s, elas=e, param_id=p))
-  })
-  p_sens<- do.call("rbind", p_sens)
-  p_sens$flow_scenario<- y
-  p_sens<- p_sens[order(abs(p_sens$sens), decreasing = TRUE),]
-  return(p_sens)
-})
-saveRDS(sens, "./output/_stochastic/sens_elas_output_list_uniform.rds")
-sens<- do.call("rbind", sens)
-write.csv(sens, "./output/_stochastic/sens_elas_uniform.csv",
-          row.names = FALSE)
-
-## 2020_PSPAP
-sensP<- lapply(alts, function(y)
-{
-  E_base<- pap[which(pap$param_id==1 &
-                       pap$flow_scenario==y),]$E_time
-  p_sens<- lapply(2:567, function(p)
-  {
-    E_comp<- pap[which(pap$param_id==p &
-                         pap$flow_scenario==y),]$E_time
-    tmp<- params[which(params$param_id==p),]
-    findP<- setdiff(names(tmp)[which(!is.na(tmp))],
-                    c("param_id", "age_id"))
-    if(findP %in% c("phi0_MR", "max_age", "probF", "gamma"))
-    {
-      j<- setdiff(which(!is.na(tmp)),
-                  match(c("param_id", "age_id"), names(tmp)))
-      s<- (E_comp-E_base)/(tmp[,j]-params[which(params$param_id==1),j])
-      e<- s*params[which(params$param_id==1),j]/E_base
-    }
-    if(findP=="phi")
-    {
-      s<- (E_comp-E_base)/(tmp$phi-inputs$phi[tmp$age_id])
-      e<- s*inputs$phi[tmp$age_id]/E_base
-    }
-    if(findP=="psi")
-    {
-      s<- (E_comp-E_base)/(tmp$psi-inputs$psi[tmp$age_id])
-      e<- s*inputs$psi[tmp$age_id]/E_base
-    }
-    if(findP=="eggs")
-    {
-      s<- (E_comp-E_base)/(tmp$eggs-inputs$eggs[tmp$age_id])
-      e<- s*inputs$eggs[tmp$age_id]/E_base
-    }
-    return(data.frame(sens=s, elas=e, param_id=p))
-  })
-  p_sens<- do.call("rbind", p_sens)
-  p_sens$flow_scenario<- y
-  p_sens<- p_sens[order(abs(p_sens$sens), decreasing = TRUE),]
-  return(p_sens)
-})
-saveRDS(sensP, "./output/_stochastic/sens_elas_output_list_2020_pspap.rds")
-sensP<- do.call("rbind", sensP)
-write.csv(sensP, "./output/_stochastic/sens_elas_2020_pspap.csv",
-          row.names = FALSE)
+# ## UNIFORM
+# sens<- lapply(alts, function(y)
+# {
+#   E_base<- uni[which(uni$param_id==1 &
+#                       uni$flow_scenario==y),]$E_time
+#   p_sens<- lapply(2:567, function(p)
+#   {
+#     E_comp<- uni[which(uni$param_id==p &
+#                         uni$flow_scenario==y),]$E_time
+#     tmp<- params[which(params$param_id==p),]
+#     findP<- setdiff(names(tmp)[which(!is.na(tmp))],
+#                     c("param_id", "age_id"))
+#     if(findP %in% c("phi0_MR", "max_age", "probF", "gamma"))
+#     {
+#       j<- setdiff(which(!is.na(tmp)),
+#                   match(c("param_id", "age_id"), names(tmp)))
+#       s<- (E_comp-E_base)/(tmp[,j]-params[which(params$param_id==1),j])
+#       e<- s*params[which(params$param_id==1),j]/E_base
+#     }
+#     if(findP=="phi")
+#     {
+#       s<- (E_comp-E_base)/(tmp$phi-inputs$phi[tmp$age_id])
+#       e<- s*inputs$phi[tmp$age_id]/E_base
+#     }
+#     if(findP=="psi")
+#     {
+#       s<- (E_comp-E_base)/(tmp$psi-inputs$psi[tmp$age_id])
+#       e<- s*inputs$psi[tmp$age_id]/E_base
+#     }
+#     if(findP=="eggs")
+#     {
+#       s<- (E_comp-E_base)/(tmp$eggs-inputs$eggs[tmp$age_id])
+#       e<- s*inputs$eggs[tmp$age_id]/E_base
+#     }
+#     if(findP=="retention")
+#     {
+#       s<- NA
+#       e<- abs(E_comp-E_base)/(E_base*0.05)
+#     }
+#     return(data.frame(sens=s, elas=e, param_id=p))
+#   })
+#   p_sens<- do.call("rbind", p_sens)
+#   p_sens$flow_scenario<- y
+#   p_sens<- p_sens[order(abs(p_sens$sens), decreasing = TRUE),]
+#   return(p_sens)
+# })
+# saveRDS(sens, "./output/_stochastic/sens_elas_output_list_uniform.rds")
+# sens<- do.call("rbind", sens)
+# write.csv(sens, "./output/_stochastic/sens_elas_uniform.csv",
+#           row.names = FALSE)
+#
+# ## 2020_PSPAP
+# sensP<- lapply(alts, function(y)
+# {
+#   E_base<- pap[which(pap$param_id==1 &
+#                        pap$flow_scenario==y),]$E_time
+#   p_sens<- lapply(2:567, function(p)
+#   {
+#     E_comp<- pap[which(pap$param_id==p &
+#                          pap$flow_scenario==y),]$E_time
+#     tmp<- params[which(params$param_id==p),]
+#     findP<- setdiff(names(tmp)[which(!is.na(tmp))],
+#                     c("param_id", "age_id"))
+#     if(findP %in% c("phi0_MR", "max_age", "probF", "gamma"))
+#     {
+#       j<- setdiff(which(!is.na(tmp)),
+#                   match(c("param_id", "age_id"), names(tmp)))
+#       s<- (E_comp-E_base)/(tmp[,j]-params[which(params$param_id==1),j])
+#       e<- s*params[which(params$param_id==1),j]/E_base
+#     }
+#     if(findP=="phi")
+#     {
+#       s<- (E_comp-E_base)/(tmp$phi-inputs$phi[tmp$age_id])
+#       e<- s*inputs$phi[tmp$age_id]/E_base
+#     }
+#     if(findP=="psi")
+#     {
+#       s<- (E_comp-E_base)/(tmp$psi-inputs$psi[tmp$age_id])
+#       e<- s*inputs$psi[tmp$age_id]/E_base
+#     }
+#     if(findP=="eggs")
+#     {
+#       s<- (E_comp-E_base)/(tmp$eggs-inputs$eggs[tmp$age_id])
+#       e<- s*inputs$eggs[tmp$age_id]/E_base
+#     }
+#     if(findP=="retention")
+#     {
+#       s<- NA
+#       e<- abs(E_comp-E_base)/(E_base*0.05)
+#     }
+#     return(data.frame(sens=s, elas=e, param_id=p))
+#   })
+#   p_sens<- do.call("rbind", p_sens)
+#   p_sens$flow_scenario<- y
+#   p_sens<- p_sens[order(abs(p_sens$sens), decreasing = TRUE),]
+#   return(p_sens)
+# })
+# saveRDS(sensP, "./output/_stochastic/sens_elas_output_list_2020_pspap.rds")
+# sensP<- do.call("rbind", sensP)
+# write.csv(sensP, "./output/_stochastic/sens_elas_2020_pspap.csv",
+#           row.names = FALSE)
 
 # PULL TOP SENSITIVITIES FOR EACH ALTERNATIVE
-sensU<-readRDS("./output/_stochastic/sens_elas_output_list_uniform.rds")
-lapply(1:7, function(y)
+# ## UNIFORM
+# sensU<-readRDS("./output/_stochastic/sens_elas_output_list_uniform.rds")
+# sens_full<- lapply(1:7, function(y)
+# {
+#   tmp<- sensU[[y]]
+#   tmp<- subset(tmp, !(param_id %in% 4:13))
+#   tmp$param<- NA 
+#   tmp$age<- NA
+#   for(i in 1:nrow(tmp))
+#   {
+#     id<- tmp$param_id[i]
+#     tmp$param[i]<- setdiff(names(params)[which(!is.na(params[params$param_id==id,]))],
+#                            c("param_id", "age_id"))
+#     tmp$age[i]<- params[params$param_id==id,]$age_id
+#   }
+#   return(tmp[,c(1,3:6)])
+# })
+# 
+# indx<- c(1,7:283)
+# sens_avg<- lapply(1:7, function(y)
+# {
+#   tmp<- sens_full[[y]]
+#   out<- lapply(indx, function(x)
+#   {
+#     tmp2<- tmp[which(tmp$param_id %in% (2*x):(2*x+1)),]
+#     return(data.frame(flow_scenario=tmp2[1,]$flow_scenario,
+#                       sens=mean(tmp2$sens),
+#                       param=tmp2[1,]$param,
+#                       age=tmp2[1,]$age))
+#   })
+#   out<- do.call("rbind", out)
+#   out<- out[order(out$sens, decreasing = TRUE),]
+#   return(out)
+# })
+# saveRDS(sens_full, "./output/_stochastic/sensitivities_uniform.rds")
+# saveRDS(sens_avg, "./output/_stochastic/average_sensitivities_uniform.rds")
+
+sens_avg<- readRDS("./output/_stochastic/average_sensitivities_uniform.rds")
+par(mfrow=c(3,3),
+    oma=c(1,1,0,0),
+    mar=c(2,4,4,2))
+invisible(lapply(1:7, function(y)
 {
-  tmp<- sensU[[y]]
-  tmp<- subset(tmp, !(param_id %in% 4:13))
-  tmp$param<- NA 
-  tmp$age<- NA
-  for(i in 1:nrow(tmp))
+  tmp<- sens_avg[[y]]
+  nms<- ifelse(is.na(tmp$age), tmp$param, 
+               paste0(tmp$param, "-", tmp$age))
+  barplot(tmp$sens[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
+  legend("topright", paste("Alternative", tmp$flow_scenario[1]),
+         bty="n")
+}))
+mtext("Sensitivity", 1, outer=TRUE, padj=-1)
+# 
+# ## 2020 PSPAP
+# sensP<-readRDS("./output/_stochastic/sens_elas_output_list_2020_pspap.rds")
+# sens_fullP<- lapply(1:7, function(y)
+# {
+#   tmp<- sensP[[y]]
+#   tmp<- subset(tmp, !(param_id %in% 4:13))
+#   tmp$param<- NA 
+#   tmp$age<- NA
+#   for(i in 1:nrow(tmp))
+#   {
+#     id<- tmp$param_id[i]
+#     tmp$param[i]<- setdiff(names(params)[which(!is.na(params[params$param_id==id,]))],
+#                            c("param_id", "age_id"))
+#     tmp$age[i]<- params[params$param_id==id,]$age_id
+#   }
+#   return(tmp[,c(1,3:6)])
+# })
+# 
+# indx<- c(1,7:283)
+# sens_avgP<- lapply(1:7, function(y)
+# {
+#   tmp<- sens_fullP[[y]]
+#   out<- lapply(indx, function(x)
+#   {
+#     tmp2<- tmp[which(tmp$param_id %in% (2*x):(2*x+1)),]
+#     return(data.frame(flow_scenario=tmp2[1,]$flow_scenario,
+#                       sens=mean(tmp2$sens),
+#                       param=tmp2[1,]$param,
+#                       age=tmp2[1,]$age))
+#   })
+#   out<- do.call("rbind", out)
+#   out<- out[order(out$sens, decreasing = TRUE),]
+#   return(out)
+# })
+# saveRDS(sens_fullP, "./output/_stochastic/sensitivities_2020_pspap.rds")
+# saveRDS(sens_avgP, "./output/_stochastic/average_sensitivities_2020_pspap.rds")
+
+sens_avgP<- readRDS("./output/_stochastic/average_sensitivities_2020_pspap.rds")
+par(mfrow=c(3,3),
+    oma=c(1,1,0,0),
+    mar=c(2,4,4,2))
+invisible(lapply(1:7, function(y)
+{
+  tmp<- sens_avgP[[y]]
+  nms<- ifelse(is.na(tmp$age), tmp$param, 
+               paste0(tmp$param, "-", tmp$age))
+  barplot(tmp$sens[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
+  legend("topright", paste("Alternative", tmp$flow_scenario[1]),
+         bty="n")
+}))
+mtext("Sensitivity", 1, outer=TRUE, padj=-1)
+
+# ELASTICITIES
+# ## UNIFORM
+# elasU<-readRDS("./output/_stochastic/sens_elas_output_list_uniform.rds")
+# elas_full<- lapply(1:7, function(y)
+# {
+#   tmp<- elasU[[y]]
+#   tmp<- subset(tmp, !(param_id %in% 4:13))
+#   tmp$param<- NA
+#   tmp$age<- NA
+#   for(i in 1:nrow(tmp))
+#   {
+#     id<- tmp$param_id[i]
+#     tmp$param[i]<- setdiff(names(params)[which(!is.na(params[params$param_id==id,]))],
+#                            c("param_id", "age_id"))
+#     tmp$age[i]<- params[params$param_id==id,]$age_id
+#   }
+#   tmp<- tmp[order(abs(tmp$elas), decreasing = TRUE),]
+#   return(tmp[,2:6])
+# })
+# indx<- c(1,7:283)
+# elas_avg<- lapply(1:7, function(y)
+# {
+#   tmp<- elas_full[[y]]
+#   out<- lapply(indx, function(x)
+#   {
+#     tmp2<- tmp[which(tmp$param_id %in% (2*x):(2*x+1)),]
+#     return(data.frame(flow_scenario=tmp2[1,]$flow_scenario,
+#                       elas=mean(tmp2$elas),
+#                       param=tmp2[1,]$param,
+#                       age=tmp2[1,]$age))
+#   })
+#   out<- do.call("rbind", out)
+#   out<- out[order(out$elas, decreasing = TRUE),]
+#   return(out)
+# })
+# saveRDS(elas_full, "./output/_stochastic/elasticities_uniform.rds")
+# saveRDS(elas_avg, "./output/_stochastic/average_elasticities_uniform.rds")
+
+elas_avg<- readRDS("./output/_stochastic/average_elasticities_uniform.rds")
+par(mfrow=c(3,3),
+    oma=c(1,1,0,0),
+    mar=c(2,4,4,2))
+invisible(lapply(1:7, function(y)
+{
+  tmp<- elas_avg[[y]]
+  nms<- ifelse(is.na(tmp$age), tmp$param, 
+               paste0(tmp$param, "-", tmp$age))
+  barplot(tmp$elas[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
+  legend("topright", paste("Alternative", tmp$flow_scenario[1]),
+         bty="n")
+}))
+mtext("Elasticity", 1, outer=TRUE, padj=-1)
+
+par(mfrow=c(2,2),
+    oma=c(1,1,0,0),
+    mar=c(2,4,4,2))
+invisible(lapply(c(1:3,7), function(y)
+{
+  tmp<- elas_avg[[y]]
+  indx<- which(tmp$param=="phi0_MR")+4
+  nms<- ifelse(is.na(tmp$age), tmp$param, 
+               paste0(tmp$param, "-", tmp$age))
+  barplot(tmp$elas[1:indx],
+          names.arg = c(nms[1], rep("",indx-6), nms[indx-4], rep("", 4)), 
+          las=1, horiz = TRUE, xlim=c(0,0.35))
+  legend("topright", paste("Alternative", tmp$flow_scenario[1]),
+         bty="n")
+}))
+
+
+# ## 2020 PSPAP
+# elasP<-readRDS("./output/_stochastic/sens_elas_output_list_2020_pspap.rds")
+# elas_fullP<- lapply(1:7, function(y)
+# {
+#   tmp<- elasP[[y]]
+#   tmp<- subset(tmp, !(param_id %in% 4:13))
+#   tmp$param<- NA
+#   tmp$age<- NA
+#   for(i in 1:nrow(tmp))
+#   {
+#     id<- tmp$param_id[i]
+#     tmp$param[i]<- setdiff(names(params)[which(!is.na(params[params$param_id==id,]))],
+#                            c("param_id", "age_id"))
+#     tmp$age[i]<- params[params$param_id==id,]$age_id
+#   }
+#   tmp<- tmp[order(abs(tmp$elas), decreasing = TRUE),]
+#   return(tmp[,2:6])
+# })
+# indx<- c(1,7:283)
+# elas_avgP<- lapply(1:7, function(y)
+# {
+#   tmp<- elas_fullP[[y]]
+#   out<- lapply(indx, function(x)
+#   {
+#     tmp2<- tmp[which(tmp$param_id %in% (2*x):(2*x+1)),]
+#     return(data.frame(flow_scenario=tmp2[1,]$flow_scenario,
+#                       elas=mean(tmp2$elas),
+#                       param=tmp2[1,]$param,
+#                       age=tmp2[1,]$age))
+#   })
+#   out<- do.call("rbind", out)
+#   out<- out[order(out$elas, decreasing = TRUE),]
+#   return(out)
+# })
+# saveRDS(elas_fullP, "./output/_stochastic/elasticities_2020_pspap.rds")
+# saveRDS(elas_avgP, "./output/_stochastic/average_elasticities_2020_pspap.rds")
+
+elas_avgP<- readRDS("./output/_stochastic/average_elasticities_2020_pspap.rds")
+par(mfrow=c(3,3),
+    oma=c(1,1,0,0),
+    mar=c(2,4,4,2))
+invisible(lapply(1:7, function(y)
+{
+  tmp<- elas_avgP[[y]]
+  nms<- ifelse(is.na(tmp$age), tmp$param, 
+               paste0(tmp$param, "-", tmp$age))
+  barplot(tmp$elas[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
+  legend("topright", paste("Alternative", tmp$flow_scenario[1]),
+         bty="n")
+}))
+mtext("Elasticity", 1, outer=TRUE, padj=-1)
+
+par(mfrow=c(2,2),
+    oma=c(1,1,0,0),
+    mar=c(2,4,4,2))
+invisible(lapply(#c(1:3,7), 
+  4:7,
+  function(y)
   {
-    id<- tmp$param_id[i]
-    tmp$param[i]<- setdiff(names(params)[which(!is.na(params[params$param_id==id,]))],
-                           c("param_id", "age_id"))
-    tmp$age[i]<- params[params$param_id==id,]$age_id
-  }
-  
-})
+    tmp<- elas_avgP[[y]]
+    indx<- which(tmp$param=="phi0_MR")+4
+    nms<- ifelse(is.na(tmp$age), tmp$param, 
+                 paste0(tmp$param, "-", tmp$age))
+    barplot(tmp$elas[1:indx], 
+            las=1, horiz = TRUE, xlim=c(0,0.35))
+    legend("topright", paste("Alternative", tmp$flow_scenario[1]),
+           bty="n")
+  }))
 
 # RANK SENSITIVITIES
+## UNIFORM
+### PARAMS
+ranks<- lapply(c(1:3,14:567), function(i)
+{
+  tmp<- uni[which(uni$param_id==i),]
+  out<- tmp[order(tmp$E_time, decreasing=TRUE),]$flow_scenario
+  return(out)
+})
+test<- sapply(1:7, function(y)
+{
+  all(sapply(ranks, "[[", y)==ranks[[1]][y])
+})
+all(test)
+## RANK ORDER DOES NOT CHANGE WITH PARAM CHANGES
+ranks[[1]]
+### AGE-0 SURVIVAL
+
+### ADULT SURVIVAL???/MAXIMUM AGE
+
+
+## 2020_PSPAP
+### PARAMS
+ranksP<- lapply(c(1:3,14:567), function(i)
+{
+  tmp<- pap[which(pap$param_id==i),]
+  out<- tmp[order(tmp$E_time, decreasing=TRUE),]$flow_scenario
+  return(out)
+})
+testP<- sapply(1:7, function(y)
+{
+  all(sapply(ranksP, "[[", y)==ranksP[[1]][y])
+})
+all(testP)
+## RANK ORDER DOES NOT CHANGE WITH PARAM CHANGES
+ranksP[[1]]
+all(ranksP[[1]]==ranks[[1]])
+### AGE-0 SURVIVAL
+
+### ADULT SURVIVAL???/MAXIMUM AGE
+
 
 # FRACTION EXTINCT
 # library(parallel)
