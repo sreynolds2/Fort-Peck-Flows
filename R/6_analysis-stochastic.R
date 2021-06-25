@@ -66,6 +66,7 @@ inps$N0<- getinps$inputs$N0
 inps$N0_type<- getinps$inputs$N0_type
 rm(getinps)
 
+inps<- readRDS("inputs.rds")
 # SIMULATE POPULATION REPS
 ## BASELINE & AGE-0 SURVIVAL GIVEN RETENTION
 phi0MR<- c(0.000075, 0.95*0.000075, 1.05*0.000075,
@@ -79,7 +80,8 @@ cl<- makeCluster(numCores)
 clusterExport(cl, c("inps", "dat", "params", #init_pop,
                     "leslie", "project_pop"))
 ptm<-proc.time()
-phi0_test<- parLapply(cl, 1:nrow(params), function(x)
+phi0_test<- parLapply(cl, 13:6,#1:nrow(params), 
+                      function(x)
 {
   test<- project_pop(inputs = inps,
                      retention_data = dat,
@@ -484,8 +486,8 @@ params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 # 
 # # BASE COMPARISON
 # ## UNIFORM
-uni<- read.csv("./output/_stochastic/extinction_time_data_Uniform.csv",
-               stringsAsFactors = FALSE)
+# uni<- read.csv("./output/_stochastic/extinction_time_data_Uniform.csv",
+#                stringsAsFactors = FALSE)
 # tmp<- uni[uni$param_id==1,]
 # barplot(tmp$E_time[c(7,2,1,3,5,4,6)],
 #         names.arg = tmp$flow_scenario[c(7,2,1,3,5,4,6)],
@@ -497,9 +499,9 @@ uni<- read.csv("./output/_stochastic/extinction_time_data_Uniform.csv",
 # axis(1, 1:7, tmp$flow_scenario[c(7,2,1,3,5,4,6)])
 # 
 # ## 2020 PSPAP
-pap<- read.csv("./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
-               stringsAsFactors = FALSE)
-# tmp<- uni[pap$param_id==1,]
+# pap<- read.csv("./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
+#                stringsAsFactors = FALSE)
+# tmp<- pap[pap$param_id==1,]
 # barplot(tmp$E_time[c(7,2,1,3,5,4,6)],
 #         names.arg = tmp$flow_scenario[c(7,2,1,3,5,4,6)],
 #         xlab="Management Alternative",
@@ -511,10 +513,10 @@ pap<- read.csv("./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
 # 
 #
 # SENSITIVITIES & ELASTICITIES
-params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
-params[params$param_id==1,c("max_age", "probF", "gamma")]<- c(100, 0.5, 0.5)
-source("./R/0_default-parameters.r")
-alts<- unique(uni$flow_scenario)
+# params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
+# params[params$param_id==1,c("max_age", "probF", "gamma")]<- c(100, 0.5, 0.5)
+# source("./R/0_default-parameters.r")
+# alts<- unique(uni$flow_scenario)
 # ## UNIFORM
 # sens<- lapply(alts, function(y)
 # {
@@ -654,22 +656,7 @@ alts<- unique(uni$flow_scenario)
 # })
 # saveRDS(sens_full, "./output/_stochastic/sensitivities_uniform.rds")
 # saveRDS(sens_avg, "./output/_stochastic/average_sensitivities_uniform.rds")
-
-sens_avg<- readRDS("./output/_stochastic/average_sensitivities_uniform.rds")
-par(mfrow=c(3,3),
-    oma=c(1,1,0,0),
-    mar=c(2,4,4,2))
-invisible(lapply(1:7, function(y)
-{
-  tmp<- sens_avg[[y]]
-  nms<- ifelse(is.na(tmp$age), tmp$param, 
-               paste0(tmp$param, "-", tmp$age))
-  barplot(tmp$sens[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
-  legend("topright", paste("Alternative", tmp$flow_scenario[1]),
-         bty="n")
-}))
-mtext("Sensitivity", 1, outer=TRUE, padj=-1)
-# 
+#
 # ## 2020 PSPAP
 # sensP<-readRDS("./output/_stochastic/sens_elas_output_list_2020_pspap.rds")
 # sens_fullP<- lapply(1:7, function(y)
@@ -706,21 +693,21 @@ mtext("Sensitivity", 1, outer=TRUE, padj=-1)
 # })
 # saveRDS(sens_fullP, "./output/_stochastic/sensitivities_2020_pspap.rds")
 # saveRDS(sens_avgP, "./output/_stochastic/average_sensitivities_2020_pspap.rds")
-
-sens_avgP<- readRDS("./output/_stochastic/average_sensitivities_2020_pspap.rds")
-par(mfrow=c(3,3),
-    oma=c(1,1,0,0),
-    mar=c(2,4,4,2))
-invisible(lapply(1:7, function(y)
-{
-  tmp<- sens_avgP[[y]]
-  nms<- ifelse(is.na(tmp$age), tmp$param, 
-               paste0(tmp$param, "-", tmp$age))
-  barplot(tmp$sens[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
-  legend("topright", paste("Alternative", tmp$flow_scenario[1]),
-         bty="n")
-}))
-mtext("Sensitivity", 1, outer=TRUE, padj=-1)
+# 
+# sens_avgP<- readRDS("./output/_stochastic/average_sensitivities_2020_pspap.rds")
+# par(mfrow=c(3,3),
+#     oma=c(1,1,0,0),
+#     mar=c(2,4,4,2))
+# invisible(lapply(1:7, function(y)
+# {
+#   tmp<- sens_avgP[[y]]
+#   nms<- ifelse(is.na(tmp$age), tmp$param, 
+#                paste0(tmp$param, "-", tmp$age))
+#   barplot(tmp$sens[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
+#   legend("topright", paste("Alternative", tmp$flow_scenario[1]),
+#          bty="n")
+# }))
+# mtext("Sensitivity", 1, outer=TRUE, padj=-1)
 
 # ELASTICITIES
 # ## UNIFORM
@@ -760,38 +747,6 @@ mtext("Sensitivity", 1, outer=TRUE, padj=-1)
 # saveRDS(elas_full, "./output/_stochastic/elasticities_uniform.rds")
 # saveRDS(elas_avg, "./output/_stochastic/average_elasticities_uniform.rds")
 
-elas_avg<- readRDS("./output/_stochastic/average_elasticities_uniform.rds")
-par(mfrow=c(3,3),
-    oma=c(1,1,0,0),
-    mar=c(2,4,4,2))
-invisible(lapply(1:7, function(y)
-{
-  tmp<- elas_avg[[y]]
-  nms<- ifelse(is.na(tmp$age), tmp$param, 
-               paste0(tmp$param, "-", tmp$age))
-  barplot(tmp$elas[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
-  legend("topright", paste("Alternative", tmp$flow_scenario[1]),
-         bty="n")
-}))
-mtext("Elasticity", 1, outer=TRUE, padj=-1)
-
-par(mfrow=c(2,2),
-    oma=c(1,1,0,0),
-    mar=c(2,4,4,2))
-invisible(lapply(c(1:3,7), function(y)
-{
-  tmp<- elas_avg[[y]]
-  indx<- which(tmp$param=="phi0_MR")+4
-  nms<- ifelse(is.na(tmp$age), tmp$param, 
-               paste0(tmp$param, "-", tmp$age))
-  barplot(tmp$elas[1:indx],
-          names.arg = c(nms[1], rep("",indx-6), nms[indx-4], rep("", 4)), 
-          las=1, horiz = TRUE, xlim=c(0,0.35))
-  legend("topright", paste("Alternative", tmp$flow_scenario[1]),
-         bty="n")
-}))
-
-
 # ## 2020 PSPAP
 # elasP<-readRDS("./output/_stochastic/sens_elas_output_list_2020_pspap.rds")
 # elas_fullP<- lapply(1:7, function(y)
@@ -828,38 +783,6 @@ invisible(lapply(c(1:3,7), function(y)
 # })
 # saveRDS(elas_fullP, "./output/_stochastic/elasticities_2020_pspap.rds")
 # saveRDS(elas_avgP, "./output/_stochastic/average_elasticities_2020_pspap.rds")
-
-elas_avgP<- readRDS("./output/_stochastic/average_elasticities_2020_pspap.rds")
-par(mfrow=c(3,3),
-    oma=c(1,1,0,0),
-    mar=c(2,4,4,2))
-invisible(lapply(1:7, function(y)
-{
-  tmp<- elas_avgP[[y]]
-  nms<- ifelse(is.na(tmp$age), tmp$param, 
-               paste0(tmp$param, "-", tmp$age))
-  barplot(tmp$elas[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
-  legend("topright", paste("Alternative", tmp$flow_scenario[1]),
-         bty="n")
-}))
-mtext("Elasticity", 1, outer=TRUE, padj=-1)
-
-par(mfrow=c(2,2),
-    oma=c(1,1,0,0),
-    mar=c(2,4,4,2))
-invisible(lapply(#c(1:3,7), 
-                 4:7,
-                 function(y)
-{
-  tmp<- elas_avgP[[y]]
-  indx<- which(tmp$param=="phi0_MR")+4
-  nms<- ifelse(is.na(tmp$age), tmp$param, 
-               paste0(tmp$param, "-", tmp$age))
-  barplot(tmp$elas[1:indx], 
-          las=1, horiz = TRUE, xlim=c(0,0.35))
-  legend("topright", paste("Alternative", tmp$flow_scenario[1]),
-         bty="n")
-}))
 
 # RANK SENSITIVITIES
 ## UNIFORM
