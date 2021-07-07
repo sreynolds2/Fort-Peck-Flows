@@ -54,7 +54,7 @@ temp_freq<- read.csv("./output/_stochastic/Temperature_Frequency.csv")
 #                        w_init = w,
 #                        id="0_extend")
 
-getinps<- readRDS("./output/_stochastic/Ntot_2-1.rds")
+getinps<- readRDS("./output/_stochastic/Ntot_1-1.rds")
 inps<- inputs
 inps$environment<- getinps$inputs$environment
 rm(getinps)
@@ -66,6 +66,8 @@ inps$N0<- getinps$inputs$N0
 inps$N0_type<- getinps$inputs$N0_type
 rm(getinps)
 
+## ENVIRONMENT 0 PATHS, 1000 YEARS AND 8000 REPS FOR
+## AGE-0 SURVIVAL ANALYSIS
 inps<- readRDS("inputs.rds")
 # SIMULATE POPULATION REPS
 ## BASELINE & AGE-0 SURVIVAL GIVEN RETENTION
@@ -80,15 +82,15 @@ cl<- makeCluster(numCores)
 clusterExport(cl, c("inps", "dat", "params", #init_pop,
                     "leslie", "project_pop"))
 ptm<-proc.time()
-phi0_test<- parLapply(cl, 13:6,#1:nrow(params), 
+phi0_test<- parLapply(cl, c(3,6,7,10,13),#1:nrow(params),
                       function(x)
 {
   test<- project_pop(inputs = inps,
                      retention_data = dat,
                      gamma=0.5,
                      adjustments = list(phi0_MR=params$phi0_MR[x]),
-                     years=200,
-                     reps=3000,
+                     years=1000,
+                     reps=8000,
                      param_id=params$param_id[x])
   return(test)
 })
@@ -378,6 +380,22 @@ params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 #                     years=200, reps=5000)
 # saveRDS(out, "./output/_stochastic/Full_Data_2020_PSPAP_1-15_alt.rds")
 
+### AGE-0 SURVIVAL ANALYSIS
+# library(parallel)
+# numCores<- detectCores()
+# cl<- makeCluster(numCores)
+# clusterExport(cl, c("pseudo_extinct"))
+# invisible(parLapply(cl, 1:13, function(p)
+# {
+#   dat<- readRDS(paste0("./output/_stochastic/Ntot_2020_PSPAP_0-", p, ".rds"))
+#   out<-pseudo_extinct(pop_data = dat, threshold = 50,
+#                       years=1000, reps=8000)
+#   saveRDS(out, paste0("./output/_stochastic/Full_Data_2020_PSPAP_0-", p, ".rds"))
+# }))
+# stopCluster(cl)
+# rm(cl)
+
+
 # TIME TO EXTINCTION
 # ## TEST
 # ### UNIFORM
@@ -483,6 +501,24 @@ params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 # ext<- rbind(ext, tmp)
 # write.csv(ext, "./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
 #           row.names = FALSE)
+
+# ### 2020_PSPAP AGE-0 SURVIVAL ANALYSIS
+library(parallel)
+numCores<- detectCores()
+cl<- makeCluster(numCores)
+clusterExport(cl, c("time_extinct"))
+ext<- parLapply(cl, 1:13, function(p)
+{
+  dat<- readRDS(paste0("./output/_stochastic/Full_Data_2020_PSPAP_0-", p, ".rds"))
+  out<-time_extinct(ext_data = dat, threshold = 50,
+                    years=1000, reps=8000)
+  return(out)
+})
+stopCluster(cl)
+rm(cl)
+ext<- do.call("rbind", ext)
+write.csv(ext, "./output/_stochastic/age-0_extinction_time_2020_PSPAP.csv",
+          row.names = FALSE)
 # 
 # # BASE COMPARISON
 # ## UNIFORM

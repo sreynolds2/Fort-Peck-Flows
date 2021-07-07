@@ -55,6 +55,21 @@ ggplot(vdatP, aes(x=flow_scenario, y=extinction_yr)) +
   ylim(0,100)
 
 
+vdat$N0_type<- "Uniform"
+vdatP$N0_type<- "PSPAP"
+vdat<- rbind(vdat, vdatP)
+
+ggplot(vdat, aes(x=flow_scenario, y=extinction_yr, fill=N0_type)) + 
+  geom_violin(position="dodge", width=1) +
+  #geom_boxplot(width=1, color="grey", alpha=0.2) +
+  theme(
+    legend.position="none",
+    plot.title = element_text(size=12)
+  ) +
+  xlab("Management Alternative") + 
+  ylab("Time to Pseudoextinction") +
+  ylim(0,100)
+
 ## SENSITIVITIES
 params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
 params[params$param_id==1,c("max_age", "probF", "gamma")]<- c(100, 0.5, 0.5)
@@ -259,11 +274,12 @@ mtext("Elasticity", 1, outer=TRUE, padj=1)
 ## RANK ORDER ROBUSTNESS
 ### UNIFORM
 ### 2020 PSPAP
-pap<- read.csv("./output/_stochastic/extinction_time_data_2020_PSPAP.csv",
+#### EXPECTED TIME TO EXTINCTION
+pap<- read.csv("./output/_stochastic/age-0_extinction_time_2020_PSPAP.csv",
                stringsAsFactors = FALSE)
 params<- read.csv("./output/_stochastic/sens_elas_vals.csv")
-tmp<- pap[pap$param_id %in% 1:13,]
-tmp$phi0_MR<- sapply(tmp$param_id, function(i){params[which(params$param_id==i),]$phi0_MR})
+pap$phi0_MR<- sapply(pap$param_id, function(i){params[which(params$param_id==i),]$phi0_MR})
+tmp<- pap[pap$param_id %in% 1:11,]
 alts<- c("NoAct", "1a", "1", "1b", "2a", "2", "2b")
 cls<- c("red", rep("black", 3), rep("gray", 3))
 typ<- c(1, 3, 1, 2, 3, 1, 2)
@@ -274,7 +290,7 @@ par(mfrow=c(1,1))
 plot(tmp2$phi0_MR, tmp2$E_time,
      xlab="Age-0 Survival Given Retention",
      ylab="Expected Time to Psuedoextinction (Years)", type="b",
-     pch=19, lty=typ[1], col=cls[1], ylim=c(0, 125))
+     pch=19, lty=typ[1], col=cls[1], ylim=c(0, 300))
 invisible(lapply(2:7, function(y)
 {
   tmp2<- subset(tmp, flow_scenario==alts[y])
@@ -282,5 +298,26 @@ invisible(lapply(2:7, function(y)
   points(tmp2$phi0_MR, tmp2$E_time, type="b",
          pch=19, lty=typ[y], col=cls[y])
 }))
-legend("bottomright", alts, lty=typ, col=cls, bty="n")
+legend("topleft", alts, lty=typ, col=cls, bty="n")
+
+#### TIME TO 80%
+tmp2<- subset(pap, flow_scenario==alts[1])
+tmp2<- tmp2[order(tmp2$phi0_MR),]
+par(mfrow=c(1,1))
+plot(tmp2$phi0_MR, tmp2$time_80,
+     xlab="Age-0 Survival Given Retention",
+     ylab="Time to 80% of Psuedoextinct Replicates (Years)", type="b",
+     pch=19, lty=typ[1], col=cls[1], ylim=c(0, 600))
+invisible(lapply(2:7, function(y)
+{
+  tmp2<- subset(pap, flow_scenario==alts[y])
+  tmp2<- tmp2[order(tmp2$phi0_MR),]
+  points(tmp2$phi0_MR, tmp2$time_80, type="b",
+         pch=19, lty=typ[y], col=cls[y])
+}))
+legend("topleft", alts, lty=typ, col=cls, bty="n")
+
+legend("topleft", alts[c(4,7,6,3,5,2,1)], 
+       lty=typ[c(4,7,6,3,5,2,1)], col=cls[c(4,7,6,3,5,2,1)], 
+       bty="n")
 
