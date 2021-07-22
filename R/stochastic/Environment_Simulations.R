@@ -165,7 +165,7 @@ trans_comp<- function(temp_dat=NULL,
   return(out)
 }
 
-test<- trans_comp(temps, 1975)
+test<- trans_comp(temps, 1990)
 test
 par(mfrow=c(2,1))
 barplot(test$Temp_Summary$Frequency_Pre_1975, 

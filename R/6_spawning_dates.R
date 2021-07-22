@@ -1,5 +1,3 @@
-setwd("./GitHub/Fort-Peck-Flows")
-
 source("./R/1_global.r")
 
 # # LOAD FLOW DATA
