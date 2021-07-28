@@ -1,5 +1,5 @@
 source("./r/1_global_DSM.R")
-source("./r/2_functions_DSM.R")
+source("./r/2_functions_EIS.R")
 
 if(fullrun_EIS)
 {

@@ -217,3 +217,20 @@ inps$p_retained<- dat[dat$Year==1983 & dat$Flow_Scenario=="1",]$Retention
 inps$phi0_MR<- 0.000842
 ea<- matrix_eigen_analysis(inps)
 ea$lambda1
+
+
+#NEED TO PULL UDAT FROM PDSG-growth
+plot(udat$known[,1], udat$known[,2], xlab="Age", xlim=c(0,100), 
+     ylab="Fork Length (mm)", ylim=c(0, 2000))
+x<- seq(0,100,0.25)
+points(x, Linf*(1-exp(-k*(x-t0))), type="l", col="gray", lwd=2)
+points(x, Linf*(1-exp(-k*(x-t0)))+2*sigma*x^delta, type="l", 
+       col="gray", lwd=1, lty=2)
+points(x, Linf*(1-exp(-k*(x-t0)))-2*sigma*x^delta, type="l", 
+       col="gray", lwd=1, lty=2)
+mtext("Age", 1, padj=3)
+
+plot(udat$known[,1], udat$known[,2], xlab="Age", xlim=c(0,25), 
+     ylab="Fork Length (mm)")
+x<- 0:25
+points(x, Linf*(1-exp(-k*(x-t0))), type="l", col="gray", lwd=2)

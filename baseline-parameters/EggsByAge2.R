@@ -129,5 +129,8 @@ age<- 1:100
 fl<- Linf*(1-exp(-k*(age-t0)))
 fl_normalized<- (fl - mean_fl)/sd_fl
 eggs<- exp(intrcpt + slp*fl_normalized)
-points(age, eggs/1000, col="green")
+points(age, eggs/1000, col="blue")
 # MEAN OF MEAN IS APPROXIMATELY MEDIAN OF DISTRIBUTION
+mtext("Age",1, padj=3)
+legend("topleft", c("Mean", "Value at Expected Length at Age"), 
+       pch=c(19,1), col=c("black", "blue"), bty="n", cex=1.25)

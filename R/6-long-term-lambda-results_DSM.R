@@ -43,12 +43,24 @@ spn[which(spn$Year==1976),]$Standard<- "1976-06-14" #NEEDS CHANGING EVENTUALLY
 spn[which(spn$Year==1997),]$Standard<- "1997-06-25" #NEEDS CHANGING EVENTUALLY
 spn[which(spn$Year==1997 & spn$Flow_Scenario %in% c("1b", "2a")),]$Standard<- "1997-06-30" #NEEDS CHANGING EVENTUALLY
 
+#spn$Date<- as.character(format(spn$Standard, "%d-%b"))
+#tbl<- dcast(spn, Year+Weather_Pattern~Flow_Scenario, value.var ="Date")
+#tbl[is.na(tbl)]<- ""
+#tbl<- tbl[,c(1,3:9,2)]
+#write.csv(tbl, "./output/Standard_Dates_DSM_EIS_table.csv")
+
 tmp<- merge(spn, dat, by.x=c("Year", "Flow_Scenario", "Standard"), 
             by.y=c("Year", "Alt", "Spawn_Date"), all.x=TRUE)
 tmp[which(tmp$Year==1997 & tmp$Flow_Scenario=="1b"), 5:10]<- #APPROXIMATE BASED ON SIMILAR FLOWS AND SAME HATCH DATE
   tmp[which(tmp$Year==1997 & tmp$Flow_Scenario=="2a"),5:10] #NEEDS CHANGING EVENTUALLY
 write.csv(tmp, "./output/long-term_lambda_Standard_by_Year_DSM_no_zeros_new.csv",
           row.names = FALSE)
+
+# tbl2<- dcast(tmp, Year+Weather_Pattern~Flow_Scenario, value.var ="Retention")
+# tbl2[is.na(tbl2)]<- ""
+# tbl2<- tbl2[,c(1,3:9,2)]
+# write.csv(tbl2, "./output/Standard_Retentions_DSM_EIS_table.csv")
+
 
 tbl_LTL<- expand.grid(Year=1930:2012, Flow_Scenario=unique(DSM_full$Alt))
 tbl_LTL<- merge(tbl_LTL, tmp, by=c("Year", "Flow_Scenario"), all=TRUE)
