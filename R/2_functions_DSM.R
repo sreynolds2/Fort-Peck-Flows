@@ -28,8 +28,9 @@ compute_retention<- function(data=NULL,
   {
     print(return("Initial time step might not be included."))
   }
-  ### REMOVE INITIAL TIME STEP
-  dat<- dat[,-c(6:8)]
+  # ### REMOVE INITIAL TIME STEP
+  # dat<- dat[,-c(6:8)]
+  # COMMENTED OUT FOR FINAL EIS BUT NOT PREVIOUSLY
   ### REMOVE EXTRA ROWS
   if(nrow(dat)==565 & dat[nrow(dat),5]==0){dat<- dat[1:(nrow(dat)-1),]}
   indx<- which(dat[,5]==0 | is.na(dat[,5]))
@@ -54,12 +55,15 @@ compute_retention<- function(data=NULL,
   
   ## DEVELOPMENTAL TREATMENT OF ANOXIC ZONE
   ### CHECK ANOXIC ZONE VALUE
+  AZ<- 459
   if(!grepl("1528.05", dat[459, 4]) | !grepl("1527.4", dat[459, 4]))
   {
-    print(return("Anoxic zone row is inconsistent."))
+    #print(return("Anoxic zone row is inconsistent."))
+    #Override for EIS Alt2 7/5/97 (464), 6/25/11 (460), 7/2/11 (460), and 6/21/12 (455)
+    AZ<- which(grepl("1528.05", dat[,4]) & grepl("1527.4", dat[,4]))
   }
   ### LAST ROW OF DATA TO INCLUDE FOR DEVELOPMENT
-  M<- ifelse(anoxic_incl, nrow(dat), 459)
+  M<- ifelse(anoxic_incl, nrow(dat), AZ)#459)
   
   ## COMPUTE RETENTION
   ### NEW
@@ -72,7 +76,7 @@ compute_retention<- function(data=NULL,
     PCTU<- cumsum(PITU)
     ret<- sapply(1:n, function(i)
     {
-      sum(dat[1:459,3*i+5])/sum(dat[,3*i+5])
+      sum(dat[1:AZ,3*i+5])/sum(dat[,3*i+5])
     })
     indx<- min(which(PCTU>1))
     out<- (ret[indx]*(1-PCTU[indx-1])+ret[indx-1]*(PCTU[indx]-1))/(PCTU[indx]-PCTU[indx-1])
@@ -87,7 +91,7 @@ compute_retention<- function(data=NULL,
     CTU<- cumsum(ITU)
     ret<- sapply(1:n, function(i)
     {
-      sum(dat[1:459,3*i+5])/sum(dat[,3*i+5])
+      sum(dat[1:AZ,3*i+5])/sum(dat[,3*i+5])
     })
     indx<- min(which(CTU>200))
     out<- (ret[indx-1]*(CTU[indx]-200) + ret[indx]*(200-CTU[indx-1]))/(CTU[indx]-CTU[indx-1])
