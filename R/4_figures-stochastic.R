@@ -329,6 +329,71 @@ invisible(lapply(c(7,4:6), function(y)
 }))
 mtext("Elasticity", 1, outer=TRUE, padj=1)
 
+#ALT 1b
+## PSPAP SENSITIVITY
+par(mfrow=c(2,2),
+    oma=c(3,2,0,0),
+    mar=c(2,4,4,2))
+tmp<- sens_avgP[[3]]
+nms<- ifelse(is.na(tmp$age), tmp$param, 
+             paste0(tmp$param, "-", tmp$age))
+barplot(tmp$sens[1:5],names.arg = nms[1:5], las=1, horiz = TRUE,
+        main="2020 PSPAP")
+mtext("Sensitivity", 1, padj=3)
+## UNIFORM SENSITIVITY
+tmp<- sens_avg[[3]]
+nms<- ifelse(is.na(tmp$age), tmp$param, 
+             paste0(tmp$param, "-", tmp$age))
+barplot(tmp$sens[1:5],names.arg = nms[1:5], las=1, horiz = TRUE,
+        main="Uniform")
+mtext("Sensitivity", 1, padj=3)
+## PSPAP ELASTICITY
+tmp<- elas_avgP[[3]]
+nms<- ifelse(is.na(tmp$age), tmp$param, 
+             paste0(tmp$param, "-", tmp$age))
+barplot(tmp$elas[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
+mtext("Elasticity", 1, padj=3)
+## UNIFORM ELASTICITY
+tmp<- elas_avg[[3]]
+nms<- ifelse(is.na(tmp$age), tmp$param, 
+             paste0(tmp$param, "-", tmp$age))
+barplot(tmp$elas[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
+mtext("Elasticity", 1, padj=3)
+#mtext(paste("Alternative", tmp$flow_scenario[3]),3, outer=TRUE)
+
+#NO ACTION ALTERNATIVE
+## PSPAP SENSITIVITY
+par(mfrow=c(2,2),
+    oma=c(3,2,0,0),
+    mar=c(2,4,4,2))
+tmp<- sens_avgP[[7]]
+nms<- ifelse(is.na(tmp$age), tmp$param, 
+             paste0(tmp$param, "-", tmp$age))
+barplot(tmp$sens[1:5],names.arg = nms[1:5], las=1, horiz = TRUE,
+        main="2020 PSPAP")
+mtext("Sensitivity", 1, padj=3)
+## UNIFORM SENSITIVITY
+tmp<- sens_avg[[7]]
+nms<- ifelse(is.na(tmp$age), tmp$param, 
+             paste0(tmp$param, "-", tmp$age))
+barplot(tmp$sens[1:5],names.arg = nms[1:5], las=1, horiz = TRUE,
+        main="Uniform")
+mtext("Sensitivity", 1, padj=3)
+## PSPAP ELASTICITY
+tmp<- elas_avgP[[7]]
+nms<- ifelse(is.na(tmp$age), tmp$param, 
+             paste0(tmp$param, "-", tmp$age))
+barplot(tmp$elas[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
+mtext("Elasticity", 1, padj=3)
+## UNIFORM ELASTICITY
+tmp<- elas_avg[[7]]
+nms<- ifelse(is.na(tmp$age), tmp$param, 
+             paste0(tmp$param, "-", tmp$age))
+barplot(tmp$elas[1:5],names.arg = nms[1:5], las=1, horiz = TRUE)
+mtext("Elasticity", 1, padj=3)
+#mtext(paste("Alternative", tmp$flow_scenario[3]),3, outer=TRUE)
+
+
 ## RANK ORDER ROBUSTNESS
 ### UNIFORM
 ### 2020 PSPAP
