@@ -1,3 +1,11 @@
+# THIS SCRIPT PRODUCES AVERAGE AGE-SPECIFIC FECUNDITY VALUES USING
+# THE UPDATED PROCESS USED FOR AND DESCRIBED IN THE FORT PECK FEIS
+
+# THIS SCRIPT WAS USED TO PRODUCE THE FOLLOWING FILES
+##  baseline-parameters/fecundity_estimates_by_age_100_new.csv
+##  baseline-parameters/fecundity_estimates_by_age_101.csv
+##  dat/fecundity_estimates_by_age.csv (which is the same as the 
+##      first file on this list)
 
 library(truncnorm)
 library(lme4)

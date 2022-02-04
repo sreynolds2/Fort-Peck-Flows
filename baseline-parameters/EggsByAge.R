@@ -1,3 +1,13 @@
+# THIS SCRIPT PRODUCES AVERAGE AGE-SPECIFIC FECUNDITY VALUES USING
+# THE ORIGINAL PROCESS (PROCESS USED IN FORT PECK DEIS) DESCRIBED IN 
+# REYNOLDS AND COLVIN 2020. THIS PROCESS WAS UPDATED FOR THE FEIS
+# (SEE baseline-parameters/EggsByAge2.R)
+
+# THIS SCRIPT WAS USED TO PRODUCE THE FOLLOWING FILES
+##  baseline-parameters/fecundity_estimates_by_age.csv
+##  baseline-parameters/fecundity_estimates_by_age_original.csv
+##  baseline-parameters/fecundity_estimates_by_age_comparison.csv
+##  baseline-parameters/fecundity_estimates_by_age_100.csv
 
 library(truncnorm)
 library(lme4)

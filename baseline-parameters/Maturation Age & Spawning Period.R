@@ -1,4 +1,7 @@
 
+# THIS SCRIPT EXPLORES DIFFERENT MATURATION AGE AND SPAWNING PERIOD
+# OUTCOMES AND THEIR IMPACTS ON THE PROPORTION OF REPRODUCTIVELY-READY 
+# FISH
 
 #######################################
 #                                     #
@@ -216,6 +219,12 @@ p_dat<- data.frame(Years=1:a_max,
 # write.csv(p_dat, "./baseline-parameters/reproductive_period_probs.csv",
 #           row.names = FALSE)
 
+
+#######################################################
+#                                                     #
+# Proportion of Females Reproductively Ready to Spawn #
+#                                                     #
+#######################################################
 dat$psi_i<- dat$m_i
 start<-min(which(dat$m_i!=0))
 for(i in (start+1):a_max)
