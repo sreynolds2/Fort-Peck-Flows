@@ -5,7 +5,7 @@
 *rds
 
 # Large output files
-# output/_populations
+output/_populations
 output/_projections
 output/_ranks
 output/_eigenanalyses
