@@ -411,8 +411,9 @@ tmp2<- subset(tmp, flow_scenario==alts[1])
 tmp2<- tmp2[order(tmp2$phi0_MR),]
 par(mfrow=c(1,1))
 plot(tmp2$phi0_MR, tmp2$E_time,
-     xlab="Age-0 Survival Given Retention",
-     ylab="Expected Time to Quasiextinction (Years)", type="b",
+     xlab="",#"Age-0 Survival Given Retention",
+     ylab="",#"Expected Time to Quasiextinction (Years)", 
+     type="b",
      pch=19, lty=typ[1], col=cls[1], ylim=c(0, 300))
 invisible(lapply(2:7, function(y)
 {
@@ -421,12 +422,13 @@ invisible(lapply(2:7, function(y)
   points(tmp2$phi0_MR, tmp2$E_time, type="b",
          pch=19, lty=typ[y], col=cls[y])
 }))
-legend("topleft", alts, lty=typ, col=cls, bty="n", cex=1.5)
+# legend("topleft", alts, lty=typ, col=cls, bty="n", cex=1.5)
 
 legend("topleft", alts[c(4,7,6,3,5,2,1)], 
        lty=typ[c(4,7,6,3,5,2,1)], col=cls[c(4,7,6,3,5,2,1)], 
        bty="n", cex=1.5)
-mtext("Age-0 Survival Given Retention", 1, cex=1.5, padj=3)
+mtext("Age-0 Survival of Fish Retained above Lake Sakakawea", 1, cex=1.5, padj=3)
+mtext("Expected Time to Quasiextinction (Years)", 2, las=0, cex=1.5, padj=-3)
 
 #### TIME TO 80%
 tmp2<- subset(pap, flow_scenario==alts[1])
@@ -449,4 +451,5 @@ legend("topleft", alts[c(4,7,6,3,5,2,1)],
        lty=typ[c(4,7,6,3,5,2,1)], col=cls[c(4,7,6,3,5,2,1)], 
        bty="n",cex=1.5)
 mtext("Age-0 Survival Given Retention", 1, cex=1.5, padj=3)
+
 
